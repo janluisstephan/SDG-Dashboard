@@ -5,7 +5,7 @@ import os
 
 # Daten laden
 data_path = 'Data/SDR2024-data.xlsx'
-sdg_images_path = 'Data/sdg_images/'
+sdg_images_path = 'assets/'
 
 sdg_data = pd.read_excel(data_path, sheet_name='Full Database', engine='openpyxl')
 color_data = pd.read_excel(data_path, sheet_name='Overview', engine='openpyxl')
@@ -133,3 +133,15 @@ st.markdown(
     - **↓:** Decreasing
     """
 )
+
+# SDG-Knöpfe
+st.write("### Select SDG via Icons")
+sdg_buttons = st.columns(len(sdg_labels))
+
+for i, label in enumerate(sdg_labels):
+    with sdg_buttons[i]:
+        if st.button(label):
+            sdg_index = i
+            current_sdg = color_columns[sdg_index]
+            current_trend = trend_columns[sdg_index]
+            st.experimental_rerun()
