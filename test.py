@@ -59,14 +59,6 @@ current_trend = trend_columns[initial_sdg_index]
 st.title("Sustainable Development Goals Dashboard")
 st.subheader("Select an SDG to view country performance and trends.")
 
-# SDG-Auswahl
-sdg_option = st.selectbox("Select an SDG", sdg_labels)
-sdg_index = sdg_labels.index(sdg_option)
-
-# Update current SDG and Trend
-current_sdg = color_columns[sdg_index]
-current_trend = trend_columns[sdg_index]
-
 # Update the map based on the current SDG
 filtered_data = color_data[["Country", current_sdg]].dropna()
 filtered_data.rename(columns={current_sdg: "Color"}, inplace=True)
@@ -134,14 +126,19 @@ st.markdown(
     """
 )
 
-# SDG-Knöpfe
+# SDG-Knöpfe mit Icons
 st.write("### Select SDG via Icons")
-sdg_buttons = st.columns(len(sdg_labels))
+sdg_icons = st.columns(len(sdg_labels))
 
 for i, label in enumerate(sdg_labels):
-    with sdg_buttons[i]:
-        if st.button(label):
-            sdg_index = i
-            current_sdg = color_columns[sdg_index]
-            current_trend = trend_columns[sdg_index]
+    icon_path = os.path.join(sdg_images_path, f"{i + 1}.png")
+    with sdg_icons[i]:
+        if st.button(
+            "",
+            help=label,
+            key=f"sdg_button_{i}"
+        ):
+            current_sdg = color_columns[i]
+            current_trend = trend_columns[i]
             st.experimental_rerun()
+        st.image(icon_path, use_column_width=True)
