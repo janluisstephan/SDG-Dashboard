@@ -20,7 +20,7 @@ st.sidebar.write("### Available Sheets")
 st.sidebar.write(data.sheet_names)
 
 # Ensure the correct sheet name is used
-sheet_name = "Global View"  # Adjust if necessary
+sheet_name = "Overview"  # Adjusted based on available sheets
 if sheet_name not in data.sheet_names:
     st.error(f"Sheet '{sheet_name}' not found. Available sheets: {data.sheet_names}")
 else:
