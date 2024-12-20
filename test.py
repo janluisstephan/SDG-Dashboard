@@ -3,6 +3,9 @@ import pandas as pd
 import plotly.express as px
 from pathlib import Path
 
+# Set up the Streamlit app (must be the first Streamlit command)
+st.set_page_config(page_title="Sustainable Development Goals Dashboard", layout="wide")
+
 # File paths
 DATA_PATH = 'Data/SDR2024-data.xlsx'
 ASSETS_PATH = Path('assets')
@@ -37,8 +40,6 @@ else:
             st.error("No suitable numeric column found for visualization.")
 
     if color_column:
-        # Set up the Streamlit app
-        st.set_page_config(page_title="Sustainable Development Goals Dashboard", layout="wide")
         st.title("🌍 Sustainable Development Goals Dashboard")
 
         # Debugging: Show a sample of the data
