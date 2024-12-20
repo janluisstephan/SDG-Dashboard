@@ -22,45 +22,55 @@ if sheet_name not in data.sheet_names:
 else:
     map_data = pd.read_excel(DATA_PATH, sheet_name=sheet_name)
 
-# Set up the Streamlit app
-st.set_page_config(page_title="Sustainable Development Goals Dashboard", layout="wide")
-st.title("🌍 Sustainable Development Goals Dashboard")
+    # Ensure the necessary columns are present
+    required_columns = ["Country", "SDG Progress"]
+    missing_columns = [col for col in required_columns if col not in map_data.columns]
+    if missing_columns:
+        st.error(f"The following required columns are missing: {missing_columns}")
+    else:
+        # Check for null values in critical columns
+        if map_data[required_columns].isnull().any().any():
+            st.warning("Warning: There are missing values in the critical columns. Please check the dataset.")
 
-# Debugging: Check available sheet names
-st.sidebar.write("### Available Sheets")
-st.sidebar.write(data.sheet_names)
+        # Set up the Streamlit app
+        st.set_page_config(page_title="Sustainable Development Goals Dashboard", layout="wide")
+        st.title("🌍 Sustainable Development Goals Dashboard")
 
-# World map visualization
-st.write("## Global View")
-fig = px.choropleth(
-    map_data,
-    locations="Country",
-    locationmode="country names",
-    color="SDG Progress",
-    hover_name="Country",
-    color_continuous_scale=px.colors.sequential.Viridis,
-    title="Global SDG Progress"
-)
-st.plotly_chart(fig, use_container_width=True)
+        # Debugging: Show a sample of the data
+        st.sidebar.write("### Data Preview")
+        st.sidebar.write(map_data.head())
 
-# SDG-specific visualizations
-st.write("## Explore Individual SDGs")
-sdg_options = [f"SDG {i}" for i in range(1, 18)]
-selected_sdg = st.selectbox("Select an SDG to view details:", sdg_options)
+        # World map visualization
+        st.write("## Global View")
+        fig = px.choropleth(
+            map_data,
+            locations="Country",
+            locationmode="country names",
+            color="SDG Progress",
+            hover_name="Country",
+            color_continuous_scale=px.colors.sequential.Viridis,
+            title="Global SDG Progress"
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
-if selected_sdg in map_data.columns:
-    fig_sdg = px.choropleth(
-        map_data,
-        locations="Country",
-        locationmode="country names",
-        color=selected_sdg,
-        hover_name="Country",
-        color_continuous_scale=px.colors.sequential.Plasma,
-        title=f"Progress on {selected_sdg}"
-    )
-    st.plotly_chart(fig_sdg, use_container_width=True)
-else:
-    st.write("No data available for the selected SDG.")
+        # SDG-specific visualizations
+        st.write("## Explore Individual SDGs")
+        sdg_options = [col for col in map_data.columns if col.startswith("SDG")]
+        selected_sdg = st.selectbox("Select an SDG to view details:", sdg_options)
+
+        if selected_sdg in map_data.columns:
+            fig_sdg = px.choropleth(
+                map_data,
+                locations="Country",
+                locationmode="country names",
+                color=selected_sdg,
+                hover_name="Country",
+                color_continuous_scale=px.colors.sequential.Plasma,
+                title=f"Progress on {selected_sdg}"
+            )
+            st.plotly_chart(fig_sdg, use_container_width=True)
+        else:
+            st.write("No data available for the selected SDG.")
 
 # Explanation
 st.sidebar.title("Legend")
