@@ -1,144 +1,70 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import os
+from pathlib import Path
 
-# Daten laden
-data_path = 'Data/SDR2024-data.xlsx'
-sdg_images_path = 'assets/'
+# File paths
+DATA_PATH = 'Data/SDR2024-data.xlsx'
+ASSETS_PATH = Path('assets')
 
-sdg_data = pd.read_excel(data_path, sheet_name='Full Database', engine='openpyxl')
-color_data = pd.read_excel(data_path, sheet_name='Overview', engine='openpyxl')
+# Load data
+def load_data():
+    # Load the dataset into a DataFrame
+    data = pd.read_excel(DATA_PATH, sheet_name=None)  # Load all sheets
+    return data
 
-# SDG-Spalten identifizieren
-sdg_columns = [col for col in sdg_data.columns if "Goal" in col and "Score" in col]
-color_columns = [col for col in color_data.columns if col.startswith("SDG")]
+data = load_data()
 
-# Dynamische Identifikation der Trendspalten
-trend_columns = [
-    color_data.columns[color_data.columns.get_loc(col) + 1] if color_data.columns.get_loc(col) + 1 < len(color_data.columns) else None
-    for col in color_columns
-]
+# Set up the Streamlit app
+st.set_page_config(page_title="Sustainable Development Goals Dashboard", layout="wide")
+st.title("🌍 Sustainable Development Goals Dashboard")
 
-# SDG-Labels vorbereiten
-sdg_labels = [
-    "No Poverty",
-    "Zero Hunger",
-    "Good Health and Well-being",
-    "Quality Education",
-    "Gender Equality",
-    "Clean Water and Sanitation",
-    "Affordable and Clean Energy",
-    "Decent Work and Economic Growth",
-    "Industry, Innovation and Infrastructure",
-    "Reduced Inequalities",
-    "Sustainable Cities and Communities",
-    "Responsible Consumption and Production",
-    "Climate Action",
-    "Life Below Water",
-    "Life on Land",
-    "Peace, Justice and Strong Institutions",
-    "Partnerships for the Goals"
-]
+# Helper function to load image
+@st.cache
+def load_image(image_name):
+    image_path = ASSETS_PATH / image_name
+    return str(image_path)
 
-# Farbcodierungen und Bedeutungen
-color_mapping = {
-    "green": "#2ca02c",
-    "yellow": "#ffdd57",
-    "orange": "#ffa500",
-    "red": "#d62728",
-    "grey": "#808080"
-}
+# Select country to view details
+country_list = list(data['Dashboard']['Country'].unique())
+selected_country = st.selectbox("Select a country to see the trend:", country_list)
 
-# Initial States
-initial_sdg_index = 0
-current_sdg = color_columns[initial_sdg_index]
-current_trend = trend_columns[initial_sdg_index]
+# Display country-specific trends
+country_data = data['Dashboard'][data['Dashboard']['Country'] == selected_country]
+st.write(f"### Trends for {selected_country}")
 
-# Streamlit Layout
-st.title("Sustainable Development Goals Dashboard")
-st.subheader("Select an SDG to view country performance and trends.")
+for sdg in range(1, 18):
+    # Load SDG icon
+    icon_path = load_image(f"{sdg}.png")
 
-# Update the map based on the current SDG
-filtered_data = color_data[["Country", current_sdg]].dropna()
-filtered_data.rename(columns={current_sdg: "Color"}, inplace=True)
+    # Extract data for the SDG
+    sdg_data = country_data[country_data['SDG'] == f"SDG {sdg}"]
 
+    # Display SDG icon and trend data
+    st.image(icon_path, width=50)
+    st.write(f"**SDG {sdg}:** {sdg_data['Trend'].values[0] if not sdg_data.empty else 'No data'}")
+
+# World map visualization
+st.write("## Global View")
+map_data = data['Global View']  # Assuming sheet contains global data
 fig = px.choropleth(
-    filtered_data,
+    map_data,
     locations="Country",
     locationmode="country names",
-    color="Color",
+    color="SDG Progress",
     hover_name="Country",
-    title="",
-    color_discrete_map=color_mapping
+    color_continuous_scale=px.colors.sequential.Viridis,
+    title="Global SDG Progress"
 )
-
-fig.update_traces(marker_line_width=0)
-fig.update_layout(
-    margin={"r": 0, "t": 0, "l": 0, "b": 0},
-    paper_bgcolor="#f9f9f9",
-    plot_bgcolor="#f9f9f9",
-    showlegend=False
-)
-
 st.plotly_chart(fig, use_container_width=True)
 
-# Trendanzeige bei Länder-Auswahl
-st.write("### Country Trends")
-selected_country = st.selectbox("Select a country to see the trend", filtered_data["Country"].unique())
+# Explanation
+st.sidebar.title("Legend")
+st.sidebar.write("- **Goal Achievement:** Green\n- **Challenges remain:** Yellow\n- **Significant challenges:** Orange\n- **Major challenges:** Red\n- **Insufficient data:** Grey")
 
-if selected_country:
-    trend_value = color_data.loc[color_data["Country"] == selected_country, current_trend].values
-    if trend_value.size > 0:
-        trend_symbol = trend_value[0]
-        trend_description = {
-            '↑': 'On track or maintaining achievement',
-            '↓': 'Decreasing',
-            '➚': 'Moderately Increasing',
-            '→': 'Stagnating'
-        }.get(trend_symbol, 'No trend available')
-        st.write(f"**Country:** {selected_country}")
-        st.write(f"**Trend:** {trend_symbol} - {trend_description}")
-    else:
-        st.write("No trend data available for the selected country.")
-
-# Legende der Farbcodierungen
-st.write("### Legend")
-st.write("**Color Codes:**")
-st.markdown(
-    """ 
-    - <span style='color:#2ca02c;'>**Green:** Goal Achievement</span>
-    - <span style='color:#ffdd57;'>**Yellow:** Challenges remain</span>
-    - <span style='color:#ffa500;'>**Orange:** Significant challenges</span>
-    - <span style='color:#d62728;'>**Red:** Major challenges</span>
-    - <span style='color:#808080;'>**Grey:** Insufficient data
-    """,
-    unsafe_allow_html=True
-)
-
-st.write("**Trend Explanation:**")
-st.markdown(
-    """ 
-    - **↑:** On track or maintaining achievement
-    - **➚:** Moderately Increasing
-    - **→:** Stagnating
-    - **↓:** Decreasing
-    """
-)
-
-# SDG-Knöpfe mit Icons
-st.write("### Select SDG via Icons")
-sdg_icons = st.columns(len(sdg_labels))
-
-for i, label in enumerate(sdg_labels):
-    icon_path = os.path.join(sdg_images_path, f"{i + 1}.png")
-    with sdg_icons[i]:
-        if st.button(
-            "",
-            help=label,
-            key=f"sdg_button_{i}"
-        ):
-            current_sdg = color_columns[i]
-            current_trend = trend_columns[i]
-            st.experimental_rerun()
-        st.image(icon_path, use_column_width=True)
+# Add an upload option for future expansion
+st.sidebar.write("### Upload new data")
+uploaded_file = st.sidebar.file_uploader("Upload Excel file", type=["xlsx"])
+if uploaded_file:
+    data = pd.read_excel(uploaded_file, sheet_name=None)
+    st.sidebar.success("Data updated successfully!")
