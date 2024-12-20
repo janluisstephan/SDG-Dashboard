@@ -43,6 +43,25 @@ else:
     )
     st.plotly_chart(fig, use_container_width=True)
 
+    # SDG-specific visualizations
+    st.write("## Explore Individual SDGs")
+    sdg_options = [f"SDG {i}" for i in range(1, 18)]
+    selected_sdg = st.selectbox("Select an SDG to view details:", sdg_options)
+
+    if selected_sdg in map_data.columns:
+        fig_sdg = px.choropleth(
+            map_data,
+            locations="Country",
+            locationmode="country names",
+            color=selected_sdg,
+            hover_name="Country",
+            color_continuous_scale=px.colors.sequential.Plasma,
+            title=f"Progress on {selected_sdg}"
+        )
+        st.plotly_chart(fig_sdg, use_container_width=True)
+    else:
+        st.write("No data available for the selected SDG.")
+
     # Explanation
     st.sidebar.title("Legend")
     st.sidebar.write("- **Goal Achievement:** Green\n- **Challenges remain:** Yellow\n- **Significant challenges:** Orange\n- **Major challenges:** Red\n- **Insufficient data:** Grey")
