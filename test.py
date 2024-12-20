@@ -22,16 +22,21 @@ if sheet_name not in data.sheet_names:
 else:
     map_data = pd.read_excel(DATA_PATH, sheet_name=sheet_name)
 
-    # Ensure the necessary columns are present
-    required_columns = ["Country", "SDG Progress"]
-    missing_columns = [col for col in required_columns if col not in map_data.columns]
-    if missing_columns:
-        st.error(f"The following required columns are missing: {missing_columns}")
-    else:
-        # Check for null values in critical columns
-        if map_data[required_columns].isnull().any().any():
-            st.warning("Warning: There are missing values in the critical columns. Please check the dataset.")
+    # Identify possible columns for visualization
+    st.sidebar.write("### Available Columns")
+    st.sidebar.write(map_data.columns.tolist())
 
+    # Set default column for color or fallback to first numeric column
+    color_column = "SDG Progress" if "SDG Progress" in map_data.columns else None
+    if not color_column:
+        numeric_columns = map_data.select_dtypes(include=['number']).columns
+        if not numeric_columns.empty:
+            color_column = numeric_columns[0]
+            st.warning(f"Defaulting to first numeric column: {color_column}")
+        else:
+            st.error("No suitable numeric column found for visualization.")
+
+    if color_column:
         # Set up the Streamlit app
         st.set_page_config(page_title="Sustainable Development Goals Dashboard", layout="wide")
         st.title("🌍 Sustainable Development Goals Dashboard")
@@ -46,7 +51,7 @@ else:
             map_data,
             locations="Country",
             locationmode="country names",
-            color="SDG Progress",
+            color=color_column,
             hover_name="Country",
             color_continuous_scale=px.colors.sequential.Viridis,
             title="Global SDG Progress"
