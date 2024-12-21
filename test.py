@@ -39,36 +39,15 @@ def update_sdg(selected_sdg):
 # Kartenanzeige (Dummy-Beispiel)
 st.header(f"Selected SDG: {st.session_state['selected_sdg']}")
 
-# HTML-Schaltflächen mit JavaScript
-html_code = """
-<div style="display: flex; flex-wrap: wrap; justify-content: center;">
-"""
+# SDG-Schaltflächen mit Bildern
+st.write("### Select an SDG:")
+col1, col2, col3, col4 = st.columns(4)
 
 for idx, label in enumerate(sdg_labels):
-    image_path = f"{sdg_images_path}/{idx + 1}.png"
-    html_code += f"""
-    <div style="text-align: center; margin: 10px;">
-        <img src="{image_path}" alt="{label}" style="width: 100px; cursor: pointer;" onclick="updateSDG('{label}')">
-        <p style="color: black;">{label}</p>
-    </div>
-    """
-
-html_code += """
-</div>
-<script>
-    function updateSDG(selectedSDG) {{
-        const streamlitCustomEvent = new Event("streamlit_event");
-        streamlitCustomEvent.data = {{ "sdg": selectedSDG }};
-        document.dispatchEvent(streamlitCustomEvent);
-    }}
-</script>
-"""
-
-st.markdown(html_code, unsafe_allow_html=True)
-
-# JavaScript-Ereignis-Listener registrieren
-selected_sdg = st.session_state["selected_sdg"]
-selected_sdg_js = st.text_input("Current SDG (JavaScript Event):", value=selected_sdg, key="sdg_js")
-
-if selected_sdg_js != st.session_state["selected_sdg"]:
-    update_sdg(selected_sdg_js)
+    image_path = os.path.join(sdg_images_path, f"{idx + 1}.png")
+    col = [col1, col2, col3, col4][idx % 4]
+    with col:
+        if os.path.exists(image_path):
+            if st.button(label, key=f"button_{idx}"):
+                update_sdg(label)
+            st.image(image_path, caption=label, use_column_width=True)
