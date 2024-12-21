@@ -69,7 +69,7 @@ def prepare_all_figures():
     for idx, sdg in enumerate(color_columns):
         if idx >= len(sdg_labels):
             break
-        filtered_data = color_data["Country", sdg].dropna()
+        filtered_data = color_data[["Country", sdg]].dropna()
         filtered_data.rename(columns={sdg: "Color"}, inplace=True)
 
         fig = px.choropleth(
@@ -115,7 +115,6 @@ if valid_sdg_labels:
                 key=f"sdg_button_{idx}",
                 help=sdg_labels[idx]
             ):
-                st.image(f"{sdg_images_path}{idx + 1}.png", use_column_width=True)
                 st.session_state["selected_sdg"] = sdg_labels[idx]
                 st.experimental_set_query_params(selected_sdg=sdg_labels[idx])
 else:
