@@ -41,13 +41,32 @@ st.header(f"Selected SDG: {st.session_state['selected_sdg']}")
 
 # SDG-Schaltflächen mit Bildern
 st.write("### Select an SDG:")
-col1, col2, col3, col4 = st.columns(4)
+
+html_buttons = """
+<div style="display: flex; flex-wrap: wrap; justify-content: center;">
+"""
 
 for idx, label in enumerate(sdg_labels):
     image_path = os.path.join(sdg_images_path, f"{idx + 1}.png")
-    col = [col1, col2, col3, col4][idx % 4]
-    with col:
-        if os.path.exists(image_path):
-            if st.button(label, key=f"button_{idx}"):
-                update_sdg(label)
-            st.image(image_path, caption=label, use_column_width=True)
+    if os.path.exists(image_path):
+        button_html = f"""
+        <div style='text-align: center; margin: 10px;'>
+            <form action="" method="get">
+                <button type="submit" name="sdg" value="{label}" style="border: none; background: none; cursor: pointer;">
+                    <img src="{image_path}" alt="{label}" style="width: 100px; height: auto;">
+                </button>
+            </form>
+            <p style='color: black;'>{label}</p>
+        </div>
+        """
+        html_buttons += button_html
+
+html_buttons += "</div>"
+
+st.markdown(html_buttons, unsafe_allow_html=True)
+
+# SDG-Auswahl aktualisieren
+query_params = st.experimental_get_query_params()
+if "sdg" in query_params:
+    selected_sdg = query_params["sdg"][0]
+    update_sdg(selected_sdg)
