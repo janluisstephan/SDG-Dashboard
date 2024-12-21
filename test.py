@@ -98,9 +98,20 @@ def prepare_all_figures():
 
 all_figures, valid_sdg_labels = prepare_all_figures()
 
-# SDG-Auswahl
+# Aktuelle SDG-Auswahl (Standard: erstes SDG)
 if valid_sdg_labels:
-    selected_sdg_label = st.selectbox("Select an SDG to view:", valid_sdg_labels)
+    selected_sdg_label = st.session_state.get("selected_sdg", valid_sdg_labels[0])
+
+    # Karte anzeigen
     st.plotly_chart(all_figures[selected_sdg_label], use_container_width=True, config={"displayModeBar": False})
+
+    # SDG-Schaltflächen
+    st.write("### Select an SDG:")
+    cols = st.columns(len(valid_sdg_labels))
+    for idx, col in enumerate(cols):
+        with col:
+            if st.button(sdg_labels[idx]):
+                st.session_state["selected_sdg"] = sdg_labels[idx]
+                st.experimental_rerun()
 else:
     st.error("No valid SDG data available to display.")
