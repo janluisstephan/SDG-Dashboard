@@ -115,6 +115,6 @@ if valid_sdg_labels:
         with col:
             if st.button(sdg_labels[idx], key=f"sdg_button_{idx}"):
                 st.session_state["selected_sdg"] = sdg_labels[idx]
-                st.experimental_rerun()
+                st.experimental_set_query_params(selected_sdg=sdg_labels[idx])
 else:
     st.error("No valid SDG data available to display.")
