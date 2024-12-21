@@ -43,23 +43,38 @@ else:
 
         # SDG-specific visualizations
         sdg_options = [col for col in map_data.columns if col.startswith("SDG")]
-        selected_sdg = st.selectbox("Select an SDG to view on the map:", sdg_options)
+        selected_sdg = st.selectbox("Select an SDG to view on the map:", sdg_options, format_func=lambda x: x.split(": ")[1])
 
         if selected_sdg in map_data.columns:
             # Map data preparation
             map_data["Category"] = map_data[selected_sdg].map(sdg_color_mapping)
 
             # World map visualization for selected SDG
-            st.write(f"## Progress on {selected_sdg}")
+            st.write(f"## {selected_sdg.split(': ')[1]}")
             fig_sdg = px.choropleth(
                 map_data,
                 locations="Country",
                 locationmode="country names",
-                color="Category",
+                color=selected_sdg,
                 hover_name="Country",
                 color_discrete_map=sdg_color_mapping,
-                title=f"Progress on {selected_sdg}"
+                title=f"{selected_sdg.split(': ')[1]}"
             )
             st.plotly_chart(fig_sdg, use_container_width=True)
-        else:
-            st.write("No data available for the selected SDG.")
+
+        # Display SDG legend
+        st.write("### Legend")
+        st.markdown(
+            """
+            - **Green:** Goal Achievement  
+            - **Yellow:** Challenges remain  
+            - **Orange:** Significant challenges  
+            - **Red:** Major challenges  
+            - **Grey:** Insufficient data  
+            """
+        )
+
+        # Display SDG icons
+        st.write("### Explore Other SDGs")
+        st.image([str(ASSETS_PATH / f"{i}.png") for i in range(1, 18)], width=50)
+
