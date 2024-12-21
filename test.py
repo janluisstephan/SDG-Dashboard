@@ -58,13 +58,6 @@ color_mapping = {
     "red": "#d62728",
     "grey": "#808080"
 }
-color_meanings = {
-    "green": "Goal Achievement",
-    "yellow": "Challenges remain",
-    "orange": "Significant challenges",
-    "red": "Major challenges",
-    "grey": "Insufficient data"
-}
 
 st.title("🌍 Sustainable Development Goals Dashboard")
 
@@ -111,26 +104,3 @@ if valid_sdg_labels:
     st.plotly_chart(all_figures[selected_sdg_label], use_container_width=True, config={"displayModeBar": False})
 else:
     st.error("No valid SDG data available to display.")
-
-# Legende
-st.write("### Legend")
-st.markdown(
-    """
-    - **Green:** Goal Achievement  
-    - **Yellow:** Challenges remain  
-    - **Orange:** Significant challenges  
-    - **Red:** Major challenges  
-    - **Grey:** Insufficient data  
-    """
-)
-
-# Trends
-st.write("### Trend Explanation")
-st.markdown(
-    """
-    - **↑ On track or maintaining achievement**  
-    - **➚ Moderately Increasing**  
-    - **→ Stagnating**  
-    - **↓ Decreasing**  
-    """
-)
