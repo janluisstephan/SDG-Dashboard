@@ -111,7 +111,7 @@ if valid_sdg_labels:
     for idx, col in enumerate(cols):
         with col:
             if st.button(
-                label="",
+                label=f"![{sdg_labels[idx]}](./{sdg_images_path}{idx + 1}.png)",
                 key=f"sdg_button_{idx}",
                 help=sdg_labels[idx]
             ):
