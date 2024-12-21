@@ -112,9 +112,8 @@ if valid_sdg_labels:
         with col:
             image_path = os.path.join(sdg_images_path, f"{idx + 1}.png")
             if os.path.exists(image_path):
-                if col.button(label="", key=f"sdg_button_{idx}"):
+                if st.button(label="", key=f"sdg_button_{idx}"):
                     st.session_state["selected_sdg"] = sdg_labels[idx]
-    st.experimental_rerun()
-    st.image(image_path, caption=sdg_labels[idx], width=80)
+                st.image(image_path, caption=sdg_labels[idx], width=80)
 else:
     st.error("No valid SDG data available to display.")
