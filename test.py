@@ -67,30 +67,32 @@ color_meanings = {
 st.set_page_config(page_title="Sustainable Development Goals Dashboard", layout="wide")
 st.title("🌍 Sustainable Development Goals Dashboard")
 
-# SDG-Auswahl
-selected_sdg_index = st.selectbox("Select an SDG to view:", range(len(sdg_labels)), format_func=lambda x: sdg_labels[x])
-current_sdg = color_columns[selected_sdg_index]
-
-# Karte vorbereiten und cachen
+# Alle Karten vorbereiten und cachen
 @st.cache_data
-def generate_figure(selected_sdg, color_mapping):
-    filtered_data = color_data[["Country", selected_sdg]].dropna()
-    filtered_data.rename(columns={selected_sdg: "Color"}, inplace=True)
+def prepare_all_figures():
+    figures = {}
+    for idx, sdg in enumerate(color_columns):
+        filtered_data = color_data[["Country", sdg]].dropna()
+        filtered_data.rename(columns={sdg: "Color"}, inplace=True)
 
-    fig = px.choropleth(
-        filtered_data,
-        locations="Country",
-        locationmode="country names",
-        color="Color",
-        hover_name="Country",
-        title=f"{sdg_labels[selected_sdg_index]}",
-        color_discrete_map=color_mapping
-    )
-    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0}, paper_bgcolor="#f9f9f9", plot_bgcolor="#f9f9f9")
-    return fig
+        fig = px.choropleth(
+            filtered_data,
+            locations="Country",
+            locationmode="country names",
+            color="Color",
+            hover_name="Country",
+            title=f"{sdg_labels[idx]}",
+            color_discrete_map=color_mapping
+        )
+        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0}, paper_bgcolor="#f9f9f9", plot_bgcolor="#f9f9f9")
+        figures[sdg_labels[idx]] = fig
+    return figures
 
-fig = generate_figure(current_sdg, color_mapping)
-st.plotly_chart(fig, use_container_width=True)
+all_figures = prepare_all_figures()
+
+# SDG-Auswahl
+selected_sdg_label = st.selectbox("Select an SDG to view:", sdg_labels)
+st.plotly_chart(all_figures[selected_sdg_label], use_container_width=True)
 
 # Legende
 st.write("### Legend")
