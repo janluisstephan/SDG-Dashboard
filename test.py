@@ -27,11 +27,11 @@ else:
 
     # Define SDG color mapping based on legend
     sdg_color_mapping = {
-        "Goal Achievement": "#4CAF50",  # Green
-        "Challenges remain": "#FFEB3B",  # Yellow
-        "Significant challenges": "#FF9800",  # Orange
-        "Major challenges": "#F44336",  # Red
-        "Insufficient data": "#9E9E9E"   # Grey
+        "Goal Achievement": "#2ca02c",  # Green
+        "Challenges remain": "#ffdd57",  # Yellow
+        "Significant challenges": "#ffa500",  # Orange
+        "Major challenges": "#d62728",  # Red
+        "Insufficient data": "#808080"   # Grey
     }
 
     # Ensure required columns
