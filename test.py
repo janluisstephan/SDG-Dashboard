@@ -25,17 +25,20 @@ if sheet_name not in data.sheet_names:
 else:
     map_data = pd.read_excel(DATA_PATH, sheet_name=sheet_name)
 
-    # Set default column for color or fallback to first numeric column
-    color_column = "SDG Progress" if "SDG Progress" in map_data.columns else None
-    if not color_column:
-        numeric_columns = map_data.select_dtypes(include=['number']).columns
-        if not numeric_columns.empty:
-            color_column = numeric_columns[0]
-            st.warning(f"Defaulting to first numeric column: {color_column}")
-        else:
-            st.error("No suitable numeric column found for visualization.")
+    # Define SDG color mapping based on legend
+    sdg_color_mapping = {
+        "Goal Achievement": "#31a354",  # Green
+        "Challenges remain": "#fecc5c",  # Yellow
+        "Significant challenges": "#fd8d3c",  # Orange
+        "Major challenges": "#e31a1c",  # Red
+        "Insufficient data": "#969696"   # Grey
+    }
 
-    if color_column:
+    # Ensure required columns
+    required_columns = ["Country"] + [col for col in map_data.columns if col.startswith("SDG")]
+    if not all(col in map_data.columns for col in required_columns):
+        st.error("Required columns for the dashboard are missing.")
+    else:
         st.title("🌍 Sustainable Development Goals Dashboard")
 
         # SDG-specific visualizations
@@ -43,15 +46,18 @@ else:
         selected_sdg = st.selectbox("Select an SDG to view on the map:", sdg_options)
 
         if selected_sdg in map_data.columns:
+            # Map data preparation
+            map_data["Category"] = map_data[selected_sdg].map(sdg_color_mapping)
+
             # World map visualization for selected SDG
             st.write(f"## Progress on {selected_sdg}")
             fig_sdg = px.choropleth(
                 map_data,
                 locations="Country",
                 locationmode="country names",
-                color=selected_sdg,
+                color="Category",
                 hover_name="Country",
-                color_continuous_scale=["#e31a1c", "#fd8d3c", "#fecc5c", "#31a354"], # Custom SDG colors
+                color_discrete_map=sdg_color_mapping,
                 title=f"Progress on {selected_sdg}"
             )
             st.plotly_chart(fig_sdg, use_container_width=True)
