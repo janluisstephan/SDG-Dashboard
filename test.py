@@ -100,6 +100,9 @@ if valid_sdg_labels:
     if "selected_sdg" not in st.session_state:
         st.session_state["selected_sdg"] = valid_sdg_labels[0]
 
+    def update_sdg(label):
+        st.session_state["selected_sdg"] = label
+
     selected_sdg_label = st.session_state["selected_sdg"]
 
     # Karte anzeigen
@@ -112,8 +115,8 @@ if valid_sdg_labels:
         with col:
             image_path = os.path.join(sdg_images_path, f"{idx + 1}.png")
             if os.path.exists(image_path):
-                if st.button(label="", key=f"sdg_button_{idx}"):
-                    st.session_state["selected_sdg"] = sdg_labels[idx]
+                if st.button(label="", key=f"sdg_button_{idx}", on_click=update_sdg, args=(sdg_labels[idx],)):
+                    pass
                 st.image(image_path, caption=sdg_labels[idx], width=80)
 else:
     st.error("No valid SDG data available to display.")
