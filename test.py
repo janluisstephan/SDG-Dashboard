@@ -69,7 +69,7 @@ def prepare_all_figures():
     for idx, sdg in enumerate(color_columns):
         if idx >= len(sdg_labels):
             break
-        filtered_data = color_data[["Country", sdg]].dropna()
+        filtered_data = color_data["Country", sdg].dropna()
         filtered_data.rename(columns={sdg: "Color"}, inplace=True)
 
         fig = px.choropleth(
@@ -91,9 +91,6 @@ def prepare_all_figures():
         figures[sdg_labels[idx]] = fig
         valid_labels.append(sdg_labels[idx])
 
-    # Debugging-Ausgabe
-    print("Valid Labels:", valid_labels)
-    print("Figure Keys:", list(figures.keys()))
     return figures, valid_labels
 
 all_figures, valid_sdg_labels = prepare_all_figures()
@@ -108,12 +105,17 @@ if valid_sdg_labels:
     # Karte anzeigen
     st.plotly_chart(all_figures[selected_sdg_label], use_container_width=True, config={"displayModeBar": False})
 
-    # SDG-Schaltflächen
+    # SDG-Schaltflächen mit Bildern
     st.write("### Select an SDG:")
     cols = st.columns(len(valid_sdg_labels))
     for idx, col in enumerate(cols):
         with col:
-            if st.button(sdg_labels[idx], key=f"sdg_button_{idx}"):
+            if st.button(
+                label="",
+                key=f"sdg_button_{idx}",
+                help=sdg_labels[idx]
+            ):
+                st.image(f"{sdg_images_path}{idx + 1}.png", use_column_width=True)
                 st.session_state["selected_sdg"] = sdg_labels[idx]
                 st.experimental_set_query_params(selected_sdg=sdg_labels[idx])
 else:
