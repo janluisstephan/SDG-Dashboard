@@ -3,6 +3,9 @@ import pandas as pd
 import plotly.express as px
 import os
 
+# Streamlit-Anwendung konfigurieren (muss der erste Befehl sein)
+st.set_page_config(page_title="Sustainable Development Goals Dashboard", layout="wide")
+
 # Daten laden
 data_path = 'Data/SDR2024-data.xlsx'
 sdg_images_path = 'assets/'
@@ -63,8 +66,6 @@ color_meanings = {
     "grey": "Insufficient data"
 }
 
-# Streamlit-Anwendung erstellen
-st.set_page_config(page_title="Sustainable Development Goals Dashboard", layout="wide")
 st.title("🌍 Sustainable Development Goals Dashboard")
 
 # Alle Karten vorbereiten und cachen
