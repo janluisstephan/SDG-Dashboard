@@ -3,33 +3,10 @@ import pandas as pd
 import plotly.express as px
 import os
 
-# Streamlit-Anwendung konfigurieren (muss der erste Befehl sein)
-st.set_page_config(page_title="Sustainable Development Goals Dashboard", layout="wide")
+# Streamlit-Konfiguration
+st.set_page_config(page_title="SDG Dashboard", layout="wide")
 
-# Daten laden
-data_path = 'Data/SDR2024-data.xlsx'
-sdg_images_path = 'assets/'
-
-# Daten cachen, um Ladezeiten zu reduzieren
-@st.cache_data
-def load_data():
-    sdg_data = pd.read_excel(data_path, sheet_name='Full Database', engine='openpyxl')
-    color_data = pd.read_excel(data_path, sheet_name='Overview', engine='openpyxl')
-    return sdg_data, color_data
-
-sdg_data, color_data = load_data()
-
-# SDG-Spalten identifizieren
-sdg_columns = [col for col in sdg_data.columns if "Goal" in col and "Score" in col]
-color_columns = [col for col in color_data.columns if col.startswith("SDG")]
-
-# Dynamische Identifikation der Trendspalten
-trend_columns = [
-    color_data.columns[color_data.columns.get_loc(col) + 1] if color_data.columns.get_loc(col) + 1 < len(color_data.columns) else None
-    for col in color_columns
-]
-
-# SDG-Labels vorbereiten (nur gültige Labels berücksichtigen)
+# Beispiel-Daten
 sdg_labels = [
     "No Poverty",
     "Zero Hunger",
@@ -50,88 +27,48 @@ sdg_labels = [
     "Partnerships for the Goals"
 ]
 
-# Farbcodierungen und Bedeutungen
-color_mapping = {
-    "green": "#2ca02c",
-    "yellow": "#ffdd57",
-    "orange": "#ffa500",
-    "red": "#d62728",
-    "grey": "#808080"
-}
+sdg_images_path = 'assets'
 
-st.title("🌍 Sustainable Development Goals Dashboard")
+# Session State initialisieren
+if "selected_sdg" not in st.session_state:
+    st.session_state["selected_sdg"] = sdg_labels[0]
 
-# Alle Karten vorbereiten und cachen
-@st.cache_data
-def prepare_all_figures():
-    figures = {}
-    valid_labels = []
-    for idx, sdg in enumerate(color_columns):
-        if idx >= len(sdg_labels):
-            break
-        filtered_data = color_data[["Country", sdg]].dropna()
-        filtered_data.rename(columns={sdg: "Color"}, inplace=True)
+def update_sdg(selected_sdg):
+    st.session_state["selected_sdg"] = selected_sdg
 
-        fig = px.choropleth(
-            filtered_data,
-            locations="Country",
-            locationmode="country names",
-            color="Color",
-            hover_name="Country",
-            title=f"{sdg_labels[idx]}",
-            color_discrete_map=color_mapping
-        )
-        fig.update_layout(
-            margin={"r": 0, "t": 0, "l": 0, "b": 0},
-            paper_bgcolor="#f9f9f9",
-            plot_bgcolor="#f9f9f9",
-            dragmode=False,  # Deaktiviert das Ziehen der Karte
-            showlegend=False  # Deaktiviert die Legende
-        )
-        figures[sdg_labels[idx]] = fig
-        valid_labels.append(sdg_labels[idx])
+# Kartenanzeige (Dummy-Beispiel)
+st.header(f"Selected SDG: {st.session_state['selected_sdg']}")
 
-    return figures, valid_labels
+# HTML-Schaltflächen mit JavaScript
+html_code = """
+<div style="display: flex; flex-wrap: wrap; justify-content: center;">
+"""
 
-all_figures, valid_sdg_labels = prepare_all_figures()
-
-# Aktuelle SDG-Auswahl (Standard: erstes SDG)
-if valid_sdg_labels:
-    if "selected_sdg" not in st.session_state:
-        st.session_state["selected_sdg"] = valid_sdg_labels[0]
-
-    def update_sdg(label):
-        st.session_state["selected_sdg"] = label
-
-    selected_sdg_label = st.session_state["selected_sdg"]
-
-    # Karte anzeigen
-    st.plotly_chart(all_figures[selected_sdg_label], use_container_width=True, config={"displayModeBar": False})
-
-    # SDG-Schaltflächen mit HTML und Bildern
-    st.write("### Select an SDG:")
-    html_buttons = """
-    <div style='display: flex; flex-wrap: wrap; justify-content: center;'>
+for idx, label in enumerate(sdg_labels):
+    image_path = f"{sdg_images_path}/{idx + 1}.png"
+    html_code += f"""
+    <div style="text-align: center; margin: 10px;">
+        <img src="{image_path}" alt="{label}" style="width: 100px; cursor: pointer;" onclick="updateSDG('{label}')">
+        <p style="color: black;">{label}</p>
+    </div>
     """
-    for idx, label in enumerate(valid_sdg_labels):
-        image_path = os.path.join(sdg_images_path, f"{idx + 1}.png")
-        if os.path.exists(image_path):
-            html_buttons += f"""
-            <div style='text-align: center; margin: 10px;'>
-                <form action="" method="get">
-                    <button type="submit" name="sdg" value="{label}" style="border: none; background: none; cursor: pointer;">
-                        <img src="{image_path}" alt="{label}" style="width: 100px; height: auto;">
-                    </button>
-                </form>
-                <p style='color: white;'>{label}</p>
-            </div>
-            """
-    html_buttons += "</div>"
 
-    st.markdown(html_buttons, unsafe_allow_html=True)
+html_code += """
+</div>
+<script>
+    function updateSDG(selectedSDG) {{
+        const streamlitCustomEvent = new Event("streamlit_event");
+        streamlitCustomEvent.data = {{ "sdg": selectedSDG }};
+        document.dispatchEvent(streamlitCustomEvent);
+    }}
+</script>
+"""
 
-    if st.experimental_get_query_params().get("sdg"):
-        selected_sdg_label = st.experimental_get_query_params().get("sdg")[0]
-        update_sdg(selected_sdg_label)
-else:
-    st.error("No valid SDG data available to display.")
+st.markdown(html_code, unsafe_allow_html=True)
+
+# JavaScript-Ereignis-Listener registrieren
+selected_sdg = st.session_state["selected_sdg"]
+selected_sdg_js = st.text_input("Current SDG (JavaScript Event):", value=selected_sdg, key="sdg_js")
+
+if selected_sdg_js != st.session_state["selected_sdg"]:
+    update_sdg(selected_sdg_js)
