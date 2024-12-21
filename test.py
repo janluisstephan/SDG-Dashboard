@@ -110,27 +110,12 @@ if valid_sdg_labels:
 
     # SDG-Schaltflächen mit HTML und Bildern
     st.write("### Select an SDG:")
-    html_buttons = """<div style='display: flex; flex-wrap: wrap; gap: 10px;'>"""
-
     for idx, label in enumerate(valid_sdg_labels):
         image_path = os.path.join(sdg_images_path, f"{idx + 1}.png")
         if os.path.exists(image_path):
-            html_buttons += f"""
-                <div style='text-align: center;'>
-                    <form action="" method="post">
-                        <button type="submit" name="sdg" value="{label}" style="border: none; background: none; cursor: pointer;">
-                            <img src="{image_path}" alt="{label}" style="width: 100px; height: auto;">
-                        </button>
-                    </form>
-                    <p style='color: white;'>{label}</p>
-                </div>
-            """
-
-    html_buttons += "</div>"
-    st.markdown(html_buttons, unsafe_allow_html=True)
-
-    # Ausgewähltes SDG aktualisieren
-    if st.experimental_get_query_params().get("sdg"):
-        st.session_state["selected_sdg"] = st.experimental_get_query_params()["sdg"][0]
+            if st.button(f"{label}", key=f"sdg_button_{idx}"):
+                update_sdg(label)
+                st.experimental_rerun()
+            st.image(image_path, width=100, caption=label)
 else:
     st.error("No valid SDG data available to display.")
