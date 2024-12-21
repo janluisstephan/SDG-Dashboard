@@ -112,9 +112,9 @@ if valid_sdg_labels:
         with col:
             image_path = os.path.join(sdg_images_path, f"{idx + 1}.png")
             if os.path.exists(image_path):
-                st.image(image_path, use_column_width=True, caption=sdg_labels[idx])
-                if st.button(label=sdg_labels[idx], key=f"sdg_button_{idx}"):
+                if st.button(image=st.image(image_path, use_column_width=True, caption=sdg_labels[idx]), key=f"sdg_button_{idx}"):
                     st.session_state["selected_sdg"] = sdg_labels[idx]
+                    st.experimental_rerun()
             else:
                 st.write(sdg_labels[idx])
 else:
