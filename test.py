@@ -110,12 +110,16 @@ if valid_sdg_labels:
     cols = st.columns(len(valid_sdg_labels))
     for idx, col in enumerate(cols):
         with col:
-            if st.button(
-                label=f"![{sdg_labels[idx]}](./{sdg_images_path}{idx + 1}.png)",
-                key=f"sdg_button_{idx}",
-                help=sdg_labels[idx]
-            ):
-                st.session_state["selected_sdg"] = sdg_labels[idx]
-                st.experimental_set_query_params(selected_sdg=sdg_labels[idx])
+            image_path = os.path.join(sdg_images_path, f"{idx + 1}.png")
+            if os.path.exists(image_path):
+                if st.button(
+                    label=f"![{sdg_labels[idx]}](/{image_path})",
+                    key=f"sdg_button_{idx}",
+                    help=sdg_labels[idx]
+                ):
+                    st.session_state["selected_sdg"] = sdg_labels[idx]
+                    st.experimental_set_query_params(selected_sdg=sdg_labels[idx])
+            else:
+                st.write(sdg_labels[idx])
 else:
     st.error("No valid SDG data available to display.")
