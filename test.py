@@ -73,7 +73,9 @@ st.title("🌍 Sustainable Development Goals Dashboard")
 def prepare_all_figures():
     figures = {}
     for idx, sdg in enumerate(color_columns):
-        filtered_data = color_data[["Country", sdg]].dropna()
+        if sdg not in color_data.columns:
+            continue
+        filtered_data = color_data["Country"].to_frame().join(color_data[[sdg]].dropna())
         filtered_data.rename(columns={sdg: "Color"}, inplace=True)
 
         fig = px.choropleth(
@@ -92,7 +94,7 @@ def prepare_all_figures():
 all_figures = prepare_all_figures()
 
 # SDG-Auswahl
-selected_sdg_label = st.selectbox("Select an SDG to view:", sdg_labels)
+selected_sdg_label = st.selectbox("Select an SDG to view:", [label for label in sdg_labels if label in all_figures])
 st.plotly_chart(all_figures[selected_sdg_label], use_container_width=True)
 
 # Legende
