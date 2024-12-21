@@ -115,8 +115,8 @@ if valid_sdg_labels:
         with col:
             image_path = os.path.join(sdg_images_path, f"{idx + 1}.png")
             if os.path.exists(image_path):
-                if st.button(label="", key=f"sdg_button_{idx}", on_click=update_sdg, args=(sdg_labels[idx],)):
+                if st.button(label=f" ", key=f"sdg_button_{idx}", on_click=update_sdg, args=(sdg_labels[idx],)):
                     pass
-                st.image(image_path, caption=sdg_labels[idx], width=80)
+                st.image(image_path, caption=sdg_labels[idx], use_column_width=True)
 else:
     st.error("No valid SDG data available to display.")
