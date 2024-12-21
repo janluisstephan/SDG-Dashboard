@@ -100,7 +100,10 @@ all_figures, valid_sdg_labels = prepare_all_figures()
 
 # Aktuelle SDG-Auswahl (Standard: erstes SDG)
 if valid_sdg_labels:
-    selected_sdg_label = st.session_state.get("selected_sdg", valid_sdg_labels[0])
+    if "selected_sdg" not in st.session_state:
+        st.session_state["selected_sdg"] = valid_sdg_labels[0]
+
+    selected_sdg_label = st.session_state["selected_sdg"]
 
     # Karte anzeigen
     st.plotly_chart(all_figures[selected_sdg_label], use_container_width=True, config={"displayModeBar": False})
@@ -110,7 +113,7 @@ if valid_sdg_labels:
     cols = st.columns(len(valid_sdg_labels))
     for idx, col in enumerate(cols):
         with col:
-            if st.button(sdg_labels[idx]):
+            if col.button(sdg_labels[idx]):
                 st.session_state["selected_sdg"] = sdg_labels[idx]
                 st.experimental_rerun()
 else:
