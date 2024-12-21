@@ -91,13 +91,20 @@ def prepare_all_figures():
         fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0}, paper_bgcolor="#f9f9f9", plot_bgcolor="#f9f9f9")
         figures[sdg_labels[idx]] = fig
         valid_labels.append(sdg_labels[idx])
+
+    # Debugging-Ausgabe
+    print("Valid Labels:", valid_labels)
+    print("Figure Keys:", list(figures.keys()))
     return figures, valid_labels
 
 all_figures, valid_sdg_labels = prepare_all_figures()
 
 # SDG-Auswahl
-selected_sdg_label = st.selectbox("Select an SDG to view:", valid_sdg_labels)
-st.plotly_chart(all_figures[selected_sdg_label], use_container_width=True)
+if valid_sdg_labels:
+    selected_sdg_label = st.selectbox("Select an SDG to view:", valid_sdg_labels)
+    st.plotly_chart(all_figures[selected_sdg_label], use_container_width=True)
+else:
+    st.error("No valid SDG data available to display.")
 
 # Legende
 st.write("### Legend")
