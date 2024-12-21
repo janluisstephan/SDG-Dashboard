@@ -29,7 +29,7 @@ trend_columns = [
     for col in color_columns
 ]
 
-# SDG-Labels vorbereiten
+# SDG-Labels vorbereiten (nur gültige Labels berücksichtigen)
 sdg_labels = [
     "No Poverty",
     "Zero Hunger",
@@ -72,10 +72,11 @@ st.title("🌍 Sustainable Development Goals Dashboard")
 @st.cache_data
 def prepare_all_figures():
     figures = {}
+    valid_labels = []
     for idx, sdg in enumerate(color_columns):
-        if sdg not in color_data.columns:
-            continue
-        filtered_data = color_data["Country"].to_frame().join(color_data[[sdg]].dropna())
+        if idx >= len(sdg_labels):
+            break
+        filtered_data = color_data[["Country", sdg]].dropna()
         filtered_data.rename(columns={sdg: "Color"}, inplace=True)
 
         fig = px.choropleth(
@@ -89,12 +90,13 @@ def prepare_all_figures():
         )
         fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0}, paper_bgcolor="#f9f9f9", plot_bgcolor="#f9f9f9")
         figures[sdg_labels[idx]] = fig
-    return figures
+        valid_labels.append(sdg_labels[idx])
+    return figures, valid_labels
 
-all_figures = prepare_all_figures()
+all_figures, valid_sdg_labels = prepare_all_figures()
 
 # SDG-Auswahl
-selected_sdg_label = st.selectbox("Select an SDG to view:", [label for label in sdg_labels if label in all_figures])
+selected_sdg_label = st.selectbox("Select an SDG to view:", valid_sdg_labels)
 st.plotly_chart(all_figures[selected_sdg_label], use_container_width=True)
 
 # Legende
