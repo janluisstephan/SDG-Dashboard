@@ -25,10 +25,6 @@ if sheet_name not in data.sheet_names:
 else:
     map_data = pd.read_excel(DATA_PATH, sheet_name=sheet_name)
 
-    # Identify possible columns for visualization
-    st.sidebar.write("### Available Columns")
-    st.sidebar.write(map_data.columns.tolist())
-
     # Set default column for color or fallback to first numeric column
     color_column = "SDG Progress" if "SDG Progress" in map_data.columns else None
     if not color_column:
@@ -42,49 +38,22 @@ else:
     if color_column:
         st.title("🌍 Sustainable Development Goals Dashboard")
 
-        # Debugging: Show a sample of the data
-        st.sidebar.write("### Data Preview")
-        st.sidebar.write(map_data.head())
-
-        # World map visualization
-        st.write("## Global View")
-        fig = px.choropleth(
-            map_data,
-            locations="Country",
-            locationmode="country names",
-            color=color_column,
-            hover_name="Country",
-            color_continuous_scale=px.colors.sequential.Viridis,
-            title="Global SDG Progress"
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
         # SDG-specific visualizations
-        st.write("## Explore Individual SDGs")
         sdg_options = [col for col in map_data.columns if col.startswith("SDG")]
-        selected_sdg = st.selectbox("Select an SDG to view details:", sdg_options)
+        selected_sdg = st.selectbox("Select an SDG to view on the map:", sdg_options)
 
         if selected_sdg in map_data.columns:
+            # World map visualization for selected SDG
+            st.write(f"## Progress on {selected_sdg}")
             fig_sdg = px.choropleth(
                 map_data,
                 locations="Country",
                 locationmode="country names",
                 color=selected_sdg,
                 hover_name="Country",
-                color_continuous_scale=px.colors.sequential.Plasma,
+                color_continuous_scale=["#e31a1c", "#fd8d3c", "#fecc5c", "#31a354"], # Custom SDG colors
                 title=f"Progress on {selected_sdg}"
             )
             st.plotly_chart(fig_sdg, use_container_width=True)
         else:
             st.write("No data available for the selected SDG.")
-
-# Explanation
-st.sidebar.title("Legend")
-st.sidebar.write("- **Goal Achievement:** Green\n- **Challenges remain:** Yellow\n- **Significant challenges:** Orange\n- **Major challenges:** Red\n- **Insufficient data:** Grey")
-
-# Add an upload option for future expansion
-st.sidebar.write("### Upload new data")
-uploaded_file = st.sidebar.file_uploader("Upload Excel file", type=["xlsx"])
-if uploaded_file:
-    data = pd.ExcelFile(uploaded_file)
-    st.sidebar.success("Data updated successfully!")
