@@ -27,11 +27,11 @@ else:
 
     # Define SDG color mapping based on legend
     sdg_color_mapping = {
-        "Goal Achievement": "#31a354",  # Green
-        "Challenges remain": "#fecc5c",  # Yellow
-        "Significant challenges": "#fd8d3c",  # Orange
-        "Major challenges": "#e31a1c",  # Red
-        "Insufficient data": "#969696"   # Grey
+        "Goal Achievement": "#2ca02c",  # Green
+        "Challenges remain": "#ff7f0e",  # Yellow-Orange
+        "Significant challenges": "#d62728",  # Red
+        "Major challenges": "#9467bd",  # Purple
+        "Insufficient data": "#8c8c8c"   # Grey
     }
 
     # Ensure required columns
@@ -67,9 +67,9 @@ else:
         st.markdown(
             """
             - **Green:** Goal Achievement  
-            - **Yellow:** Challenges remain  
-            - **Orange:** Significant challenges  
-            - **Red:** Major challenges  
+            - **Yellow-Orange:** Challenges remain  
+            - **Red:** Significant challenges  
+            - **Purple:** Major challenges  
             - **Grey:** Insufficient data  
             """
         )
