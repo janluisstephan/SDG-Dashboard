@@ -7,8 +7,14 @@ import os
 data_path = 'Data/SDR2024-data.xlsx'
 sdg_images_path = 'assets/'
 
-sdg_data = pd.read_excel(data_path, sheet_name='Full Database', engine='openpyxl')
-color_data = pd.read_excel(data_path, sheet_name='Overview', engine='openpyxl')
+# Daten cachen, um Ladezeiten zu reduzieren
+@st.cache_data
+def load_data():
+    sdg_data = pd.read_excel(data_path, sheet_name='Full Database', engine='openpyxl')
+    color_data = pd.read_excel(data_path, sheet_name='Overview', engine='openpyxl')
+    return sdg_data, color_data
+
+sdg_data, color_data = load_data()
 
 # SDG-Spalten identifizieren
 sdg_columns = [col for col in sdg_data.columns if "Goal" in col and "Score" in col]
@@ -61,31 +67,29 @@ color_meanings = {
 st.set_page_config(page_title="Sustainable Development Goals Dashboard", layout="wide")
 st.title("🌍 Sustainable Development Goals Dashboard")
 
-# Initial SDG-Index
-initial_sdg_index = 0
-current_sdg = color_columns[initial_sdg_index]
-current_trend = trend_columns[initial_sdg_index]
-
 # SDG-Auswahl
 selected_sdg_index = st.selectbox("Select an SDG to view:", range(len(sdg_labels)), format_func=lambda x: sdg_labels[x])
 current_sdg = color_columns[selected_sdg_index]
-current_trend = trend_columns[selected_sdg_index]
 
-# Karte aktualisieren
-filtered_data = color_data[["Country", current_sdg]].dropna()
-filtered_data.rename(columns={current_sdg: "Color"}, inplace=True)
+# Karte vorbereiten und cachen
+@st.cache_data
+def generate_figure(selected_sdg, color_mapping):
+    filtered_data = color_data[["Country", selected_sdg]].dropna()
+    filtered_data.rename(columns={selected_sdg: "Color"}, inplace=True)
 
-fig = px.choropleth(
-    filtered_data,
-    locations="Country",
-    locationmode="country names",
-    color="Color",
-    hover_name="Country",
-    title=f"{sdg_labels[selected_sdg_index]}",
-    color_discrete_map=color_mapping
-)
-fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0}, paper_bgcolor="#f9f9f9", plot_bgcolor="#f9f9f9")
+    fig = px.choropleth(
+        filtered_data,
+        locations="Country",
+        locationmode="country names",
+        color="Color",
+        hover_name="Country",
+        title=f"{sdg_labels[selected_sdg_index]}",
+        color_discrete_map=color_mapping
+    )
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0}, paper_bgcolor="#f9f9f9", plot_bgcolor="#f9f9f9")
+    return fig
 
+fig = generate_figure(current_sdg, color_mapping)
 st.plotly_chart(fig, use_container_width=True)
 
 # Legende
