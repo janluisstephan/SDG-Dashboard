@@ -113,7 +113,7 @@ if valid_sdg_labels:
     cols = st.columns(len(valid_sdg_labels))
     for idx, col in enumerate(cols):
         with col:
-            if col.button(sdg_labels[idx]):
+            if st.button(sdg_labels[idx], key=f"sdg_button_{idx}"):
                 st.session_state["selected_sdg"] = sdg_labels[idx]
                 st.experimental_rerun()
 else:
