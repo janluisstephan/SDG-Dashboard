@@ -88,7 +88,13 @@ def prepare_all_figures():
             title=f"{sdg_labels[idx]}",
             color_discrete_map=color_mapping
         )
-        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0}, paper_bgcolor="#f9f9f9", plot_bgcolor="#f9f9f9")
+        fig.update_layout(
+            margin={"r": 0, "t": 0, "l": 0, "b": 0},
+            paper_bgcolor="#f9f9f9",
+            plot_bgcolor="#f9f9f9",
+            dragmode=False,  # Deaktiviert das Ziehen der Karte
+            modebar_remove=["zoom", "pan", "reset"]  # Entfernt die Modus-Leiste
+        )
         figures[sdg_labels[idx]] = fig
         valid_labels.append(sdg_labels[idx])
 
@@ -102,7 +108,7 @@ all_figures, valid_sdg_labels = prepare_all_figures()
 # SDG-Auswahl
 if valid_sdg_labels:
     selected_sdg_label = st.selectbox("Select an SDG to view:", valid_sdg_labels)
-    st.plotly_chart(all_figures[selected_sdg_label], use_container_width=True)
+    st.plotly_chart(all_figures[selected_sdg_label], use_container_width=True, config={"displayModeBar": False})
 else:
     st.error("No valid SDG data available to display.")
 
