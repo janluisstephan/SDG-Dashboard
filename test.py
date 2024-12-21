@@ -92,8 +92,7 @@ def prepare_all_figures():
             margin={"r": 0, "t": 0, "l": 0, "b": 0},
             paper_bgcolor="#f9f9f9",
             plot_bgcolor="#f9f9f9",
-            dragmode=False,  # Deaktiviert das Ziehen der Karte
-            modebar_remove=["zoom", "pan", "reset"]  # Entfernt die Modus-Leiste
+            dragmode=False  # Deaktiviert das Ziehen der Karte
         )
         figures[sdg_labels[idx]] = fig
         valid_labels.append(sdg_labels[idx])
