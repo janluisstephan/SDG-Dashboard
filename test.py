@@ -38,9 +38,11 @@ def prepare_all_figures():
                 locations="Country",
                 locationmode="country names",
                 color="Color",
+                color_continuous_scale=[[0, "#FFEDA0"], [0.5, "#FEB24C"], [1.0, "#F03B20"]],
+                range_color=(0, 1),
                 title=sdg
             )
-            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+            fig.update_layout(margin={"r": 0, "t": 50, "l": 0, "b": 0})
             all_figures[sdg] = fig
     return all_figures
 
@@ -55,4 +57,7 @@ selected_sdg = st.selectbox("Select an SDG:", sdg_labels)
 
 # Display the selected SDG
 st.header(f"Selected SDG: {selected_sdg}")
-st.plotly_chart(all_figures[selected_sdg], use_container_width=True)
+if selected_sdg in all_figures:
+    st.plotly_chart(all_figures[selected_sdg], use_container_width=True)
+else:
+    st.error("Data for the selected SDG is not available.")
