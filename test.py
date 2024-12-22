@@ -78,11 +78,11 @@ fig = px.choropleth(
     color_discrete_map=color_mapping
 )
 
-# Margen und Hintergrund anpassen
+fig.update_traces(marker_line_width=0)
 fig.update_layout(
-    margin=dict(l=0, r=0, t=0, b=0),  # Alle Margen entfernen
-    paper_bgcolor="#f9f9f9",  # Hintergrundfarbe (optional)
-    plot_bgcolor="#f9f9f9",   # Plot-Hintergrundfarbe (optional)
+    margin={"r": 0, "t": 0, "l": 0, "b": 0},  # Weißen Rand entfernen
+    paper_bgcolor="#f9f9f9",
+    plot_bgcolor="#f9f9f9",
     showlegend=False,
     dragmode=False  # Karte statisch machen
 )
