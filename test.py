@@ -3,12 +3,15 @@ import pandas as pd
 import plotly.express as px
 import os
 
-# Daten laden
-data_path = 'Data/SDR2024-data.xlsx'
-sdg_images_path = 'assets/'
+# Daten laden mit Caching
+@st.cache_data
+def load_data():
+    data_path = 'Data/SDR2024-data.xlsx'
+    sdg_data = pd.read_excel(data_path, sheet_name='Full Database', engine='openpyxl')
+    color_data = pd.read_excel(data_path, sheet_name='Overview', engine='openpyxl')
+    return sdg_data, color_data
 
-sdg_data = pd.read_excel(data_path, sheet_name='Full Database', engine='openpyxl')
-color_data = pd.read_excel(data_path, sheet_name='Overview', engine='openpyxl')
+sdg_data, color_data = load_data()
 
 # SDG-Spalten identifizieren
 sdg_columns = [col for col in sdg_data.columns if "Goal" in col and "Score" in col]
@@ -83,7 +86,7 @@ fig.update_layout(
     dragmode=False  # Karte statisch machen
 )
 
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})  # Toolbar entfernen
 
 # Trendanzeige bei Länder-Auswahl
 st.write("### Country Trends")
