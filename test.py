@@ -75,10 +75,11 @@ fig = px.choropleth(
 
 fig.update_traces(marker_line_width=0)
 fig.update_layout(
-    margin={"r": 0, "t": 0, "l": 0, "b": 0},
+    margin={"r": 5, "t": 5, "l": 5, "b": 5},  # Reduzierte Ränder
     paper_bgcolor="#f9f9f9",
     plot_bgcolor="#f9f9f9",
-    showlegend=False
+    showlegend=False,
+    dragmode=False  # Macht die Karte statisch
 )
 
 st.plotly_chart(fig, use_container_width=True)
