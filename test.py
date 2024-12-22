@@ -10,9 +10,13 @@ data_path = 'Data/SDR2024-data.xlsx'
 def load_data():
     sdg_data = pd.read_excel(data_path, sheet_name='Full Database', engine='openpyxl')
     color_data = pd.read_excel(data_path, sheet_name='Overview', engine='openpyxl')
+    color_data.columns = color_data.columns.str.strip()  # Remove unwanted spaces in column names
     return sdg_data, color_data
 
 sdg_data, color_data = load_data()
+
+# Debugging: Output the columns in color_data
+st.write("Spalten in 'color_data':", color_data.columns.tolist())
 
 # SDG information
 sdg_labels = [
@@ -32,7 +36,11 @@ sdg_images = [f"{sdg_images_path}{i + 1}.png" for i in range(len(sdg_labels))]
 def prepare_all_figures():
     all_figures = {}
     for idx, sdg in enumerate(sdg_labels):
-        filtered_data = color_data[["Country", f"SDG{idx + 1}"]].dropna()
+        sdg_column = f"SDG{idx + 1}"
+        if sdg_column not in color_data.columns:
+            st.error(f"Spalte '{sdg_column}' nicht in den Daten gefunden!")
+            continue
+        filtered_data = color_data[["Country", sdg_column]].dropna()
         filtered_data.columns = ["Country", "Color"]
         fig = px.choropleth(
             filtered_data,
