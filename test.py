@@ -63,10 +63,11 @@ selected_sdg_index = sdg_labels.index(selected_sdg_label)
 current_sdg = color_columns[selected_sdg_index]
 current_trend = trend_columns[selected_sdg_index]
 
-# Update the map based on the current SDG
+# Karten-Daten vorbereiten
 filtered_data = color_data[["Country", current_sdg]].dropna()
 filtered_data.rename(columns={current_sdg: "Color"}, inplace=True)
 
+# Karte erstellen
 fig = px.choropleth(
     filtered_data,
     locations="Country",
@@ -86,47 +87,12 @@ fig.update_layout(
     dragmode=False  # Karte statisch machen
 )
 
-st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})  # Toolbar entfernen
+# Layout mit zwei Spalten
+col1, col2 = st.columns([4, 1])  # 80% für die Karte, 20% für die Legende
 
-# Trendanzeige bei Länder-Auswahl
-st.write("### Country Trends")
-selected_country = st.selectbox("Select a country to see the trend", filtered_data["Country"].unique())
+with col1:
+    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-if selected_country:
-    trend_value = color_data.loc[color_data["Country"] == selected_country, current_trend].values
-    if trend_value.size > 0:
-        trend_symbol = trend_value[0]
-        trend_description = {
-            '↑': 'On track or maintaining achievement',
-            '↓': 'Decreasing',
-            '➚': 'Moderately Increasing',
-            '→': 'Stagnating'
-        }.get(trend_symbol, 'No trend available')
-        st.write(f"**Country:** {selected_country}")
-        st.write(f"**Trend:** {trend_symbol} - {trend_description}")
-    else:
-        st.write("No trend data available for the selected country.")
-
-# Legende der Farbcodierungen
-st.write("### Legend")
-st.write("**Color Codes:**")
-st.markdown(
-    """ 
-    - <span style='color:#2ca02c;'>**Green:** Goal Achievement</span>
-    - <span style='color:#ffdd57;'>**Yellow:** Challenges remain</span>
-    - <span style='color:#ffa500;'>**Orange:** Significant challenges</span>
-    - <span style='color:#d62728;'>**Red:** Major challenges</span>
-    - <span style='color:#808080;'>**Grey:** Insufficient data
-    """,
-    unsafe_allow_html=True
-)
-
-st.write("**Trend Explanation:**")
-st.markdown(
-    """ 
-    - **↑:** On track or maintaining achievement
-    - **➚:** Moderately Increasing
-    - **→:** Stagnating
-    - **↓:** Decreasing
-    """
-)
+with col2:
+    st.write("### Legend")
+    st.write("This section is currently empty.")
