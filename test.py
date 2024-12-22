@@ -29,7 +29,7 @@ sdg_labels = [
 def prepare_all_figures():
     all_figures = {}
     for idx, sdg in enumerate(sdg_labels):
-        column_name = f"SDG{idx + 1}"
+        column_name = f"SDG{idx + 1}: {sdg}"
         if column_name in color_data.columns:
             filtered_data = color_data[["Country", column_name]].dropna()
             filtered_data.columns = ["Country", "Color"]
