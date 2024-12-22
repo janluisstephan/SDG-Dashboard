@@ -38,11 +38,17 @@ def prepare_all_figures():
                 locations="Country",
                 locationmode="country names",
                 color="Color",
-                color_continuous_scale=[[0, "#FFEDA0"], [0.5, "#FEB24C"], [1.0, "#F03B20"]],
-                range_color=(0, 1),
+                color_discrete_map={
+                    "green": "#00FF00",
+                    "yellow": "#FFFF00",
+                    "orange": "#FFA500",
+                    "red": "#FF0000",
+                    "grey": "#BEBEBE"
+                },
                 title=sdg
             )
             fig.update_layout(margin={"r": 0, "t": 50, "l": 0, "b": 0})
+            fig.update_traces(marker_line_width=0)
             all_figures[sdg] = fig
     return all_figures
 
