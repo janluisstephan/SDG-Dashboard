@@ -2,9 +2,6 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Streamlit app setup
-st.set_page_config(page_title="Sustainable Development Goals Dashboard", layout="wide")
-
 # Define paths for SDG data
 data_path = 'Data/SDR2024-data.xlsx'
 
@@ -63,6 +60,8 @@ def prepare_all_figures():
 
 all_figures = prepare_all_figures()
 
+# Streamlit app setup
+st.set_page_config(page_title="Sustainable Development Goals Dashboard", layout="wide")
 st.title("🌍 Sustainable Development Goals Dashboard")
 
 # Dropdown menu for SDG selection
