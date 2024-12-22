@@ -29,17 +29,19 @@ sdg_labels = [
 def prepare_all_figures():
     all_figures = {}
     for idx, sdg in enumerate(sdg_labels):
-        filtered_data = color_data[["Country", f"SDG{idx + 1}"]].dropna()
-        filtered_data.columns = ["Country", "Color"]
-        fig = px.choropleth(
-            filtered_data,
-            locations="Country",
-            locationmode="country names",
-            color="Color",
-            title=sdg
-        )
-        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-        all_figures[sdg] = fig
+        column_name = f"SDG{idx + 1}"
+        if column_name in color_data.columns:
+            filtered_data = color_data[["Country", column_name]].dropna()
+            filtered_data.columns = ["Country", "Color"]
+            fig = px.choropleth(
+                filtered_data,
+                locations="Country",
+                locationmode="country names",
+                color="Color",
+                title=sdg
+            )
+            fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+            all_figures[sdg] = fig
     return all_figures
 
 all_figures = prepare_all_figures()
