@@ -1,72 +1,73 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import os
 
-# Streamlit-Konfiguration
-st.set_page_config(page_title="SDG Dashboard", layout="wide")
+# Define paths for SDG images and data
+sdg_images_path = 'assets/'
+data_path = 'Data/SDR2024-data.xlsx'
 
-# Beispiel-Daten
+# Load data
+def load_data():
+    sdg_data = pd.read_excel(data_path, sheet_name='Full Database', engine='openpyxl')
+    color_data = pd.read_excel(data_path, sheet_name='Overview', engine='openpyxl')
+    return sdg_data, color_data
+
+sdg_data, color_data = load_data()
+
+# SDG information
 sdg_labels = [
-    "No Poverty",
-    "Zero Hunger",
-    "Good Health and Well-being",
-    "Quality Education",
-    "Gender Equality",
-    "Clean Water and Sanitation",
-    "Affordable and Clean Energy",
-    "Decent Work and Economic Growth",
-    "Industry, Innovation and Infrastructure",
-    "Reduced Inequalities",
-    "Sustainable Cities and Communities",
-    "Responsible Consumption and Production",
-    "Climate Action",
-    "Life Below Water",
-    "Life on Land",
-    "Peace, Justice and Strong Institutions",
-    "Partnerships for the Goals"
+    "No Poverty", "Zero Hunger", "Good Health and Well-being", "Quality Education",
+    "Gender Equality", "Clean Water and Sanitation", "Affordable and Clean Energy",
+    "Decent Work and Economic Growth", "Industry, Innovation and Infrastructure",
+    "Reduced Inequalities", "Sustainable Cities and Communities",
+    "Responsible Consumption and Production", "Climate Action", "Life Below Water",
+    "Life on Land", "Peace, Justice and Strong Institutions", "Partnerships for the Goals"
 ]
 
-sdg_images_path = 'assets'
+# Map image paths to SDGs
+sdg_images = [f"{sdg_images_path}{i + 1}.png" for i in range(len(sdg_labels))]
 
-# Session State initialisieren
+# Cache the map figures
+@st.cache_data
+def prepare_all_figures():
+    all_figures = {}
+    for idx, sdg in enumerate(sdg_labels):
+        filtered_data = color_data[["Country", f"SDG{idx + 1}"]].dropna()
+        filtered_data.columns = ["Country", "Color"]
+        fig = px.choropleth(
+            filtered_data,
+            locations="Country",
+            locationmode="country names",
+            color="Color",
+            title=sdg
+        )
+        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+        all_figures[sdg] = fig
+    return all_figures
+
+all_figures = prepare_all_figures()
+
+# Streamlit app setup
+st.set_page_config(page_title="Sustainable Development Goals Dashboard", layout="wide")
+st.title("🌍 Sustainable Development Goals Dashboard")
+
+# Sidebar for SDG selection
 if "selected_sdg" not in st.session_state:
     st.session_state["selected_sdg"] = sdg_labels[0]
 
-def update_sdg(selected_sdg):
-    st.session_state["selected_sdg"] = selected_sdg
+selected_sdg = st.session_state["selected_sdg"]
 
-# Kartenanzeige (Dummy-Beispiel)
-st.header(f"Selected SDG: {st.session_state['selected_sdg']}")
+# Display the selected SDG
+st.header(f"Selected SDG: {selected_sdg}")
 
-# SDG-Schaltflächen mit Bildern
-st.write("### Select an SDG:")
+# Render the map
+st.plotly_chart(all_figures[selected_sdg], use_container_width=True)
 
-html_buttons = """
-<div style="display: flex; flex-wrap: wrap; justify-content: center;">
-"""
-
-for idx, label in enumerate(sdg_labels):
-    image_path = os.path.join(sdg_images_path, f"{idx + 1}.png")
-    if os.path.exists(image_path):
-        button_html = f"""
-        <div style='text-align: center; margin: 10px;'>
-            <form action="" method="get">
-                <button type="submit" name="sdg" value="{label}" style="border: none; background: none; cursor: pointer;">
-                    <img src="{image_path}" alt="{label}" style="width: 100px; height: auto;">
-                </button>
-            </form>
-            <p style='color: black;'>{label}</p>
-        </div>
-        """
-        html_buttons += button_html
-
-html_buttons += "</div>"
-
-st.markdown(html_buttons, unsafe_allow_html=True)
-
-# SDG-Auswahl aktualisieren
-query_params = st.experimental_get_query_params()
-if "sdg" in query_params:
-    selected_sdg = query_params["sdg"][0]
-    update_sdg(selected_sdg)
+# Generate SDG image buttons with clickable functionality
+cols = st.columns(len(sdg_labels))
+for idx, col in enumerate(cols):
+    with col:
+        st.image(sdg_images[idx], use_column_width=True, caption=sdg_labels[idx])
+        if st.button(f"Select {sdg_labels[idx]}", key=f"sdg_button_{idx}"):
+            st.session_state["selected_sdg"] = sdg_labels[idx]
+            st.experimental_rerun()
