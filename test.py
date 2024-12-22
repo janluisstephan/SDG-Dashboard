@@ -50,14 +50,15 @@ color_mapping = {
     "grey": "#808080"
 }
 
-# Initial States
-initial_sdg_index = 0
-current_sdg = color_columns[initial_sdg_index]
-current_trend = trend_columns[initial_sdg_index]
-
 # Streamlit Layout
 st.title("Sustainable Development Goals Dashboard")
 st.subheader("Select an SDG to view country performance and trends.")
+
+# Dropdown-Menü für SDG-Auswahl
+selected_sdg_label = st.selectbox("Choose an SDG:", sdg_labels)
+selected_sdg_index = sdg_labels.index(selected_sdg_label)
+current_sdg = color_columns[selected_sdg_index]
+current_trend = trend_columns[selected_sdg_index]
 
 # Update the map based on the current SDG
 filtered_data = color_data[["Country", current_sdg]].dropna()
@@ -75,11 +76,11 @@ fig = px.choropleth(
 
 fig.update_traces(marker_line_width=0)
 fig.update_layout(
-    margin={"r": 5, "t": 5, "l": 5, "b": 5},  # Reduzierte Ränder
+    margin={"r": 0, "t": 0, "l": 0, "b": 0},  # Weißen Rand entfernen
     paper_bgcolor="#f9f9f9",
     plot_bgcolor="#f9f9f9",
     showlegend=False,
-    dragmode=False  # Macht die Karte statisch
+    dragmode=False  # Karte statisch machen
 )
 
 st.plotly_chart(fig, use_container_width=True)
@@ -126,20 +127,3 @@ st.markdown(
     - **↓:** Decreasing
     """
 )
-
-# SDG-Knöpfe mit Icons
-st.write("### Select SDG via Icons")
-sdg_icons = st.columns(len(sdg_labels))
-
-for i, label in enumerate(sdg_labels):
-    icon_path = os.path.join(sdg_images_path, f"{i + 1}.png")
-    with sdg_icons[i]:
-        if st.button(
-            "",
-            help=label,
-            key=f"sdg_button_{i}"
-        ):
-            current_sdg = color_columns[i]
-            current_trend = trend_columns[i]
-            st.experimental_rerun()
-        st.image(icon_path, use_column_width=True)
