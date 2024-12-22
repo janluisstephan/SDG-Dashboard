@@ -88,7 +88,7 @@ fig.update_layout(
 )
 
 # Layout mit zwei Spalten
-col1, col2 = st.columns([4, 1])  # 80% für die Karte, 20% für die Legende
+col1, col2 = st.columns([5, 1])  # 83% für die Karte, 17% für die Legende
 
 with col1:
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
