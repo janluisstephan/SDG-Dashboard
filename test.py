@@ -57,7 +57,7 @@ if not st.session_state.proceed:
         2. View the map to see the global performance for the selected SDG.
         3. Use the dropdown under the legend to select a country and view its trend.
         """)
-        st.write("---")
+        
 
     with bias_col:
         st.write("---")
@@ -67,7 +67,7 @@ if not st.session_state.proceed:
         Factors such as data quality, collection methods, and regional differences in reporting standards 
         could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
         """)
-        st.write("---")
+        
 
     # Large Proceed button
     if st.button("Click 2x to proceed to SDG Dashboard", key="proceed_button"):
