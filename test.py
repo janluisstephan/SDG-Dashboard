@@ -88,12 +88,12 @@ if "selected_country" not in st.session_state:
 if "instructions_acknowledged" not in st.session_state:
     st.session_state.instructions_acknowledged = False
 
-# Instructions overlay
+# Blurred effect for the dashboard
 if not st.session_state.instructions_acknowledged:
     st.markdown(
         """
         <style>
-        .blur-content {
+        .blurred {
             filter: blur(5px);
             pointer-events: none;
         }
@@ -101,6 +101,7 @@ if not st.session_state.instructions_acknowledged:
         """,
         unsafe_allow_html=True
     )
+
     st.markdown("<div style='text-align: center; padding: 50px;'>" 
                 "<h2>Welcome to the SDG Dashboard</h2>" 
                 "<p>Please read the instructions carefully before proceeding.</p>" 
@@ -120,35 +121,39 @@ if not st.session_state.instructions_acknowledged:
         st.session_state.instructions_acknowledged = True
 
 if st.session_state.instructions_acknowledged:
-    # Layout: Instructions, Map, Legend
-    st.write("---")
-    header_cols = st.columns([1.5, 4, 1.5])
+    st.markdown('<div>', unsafe_allow_html=True)
+else:
+    st.markdown('<div class="blurred">', unsafe_allow_html=True)
 
-    with header_cols[0]:
-        st.markdown("## Instructions")
-        st.write("""
-        1. Select an SDG by clicking the button above its icon below the map.
-        2. View the map to see the global performance for the selected SDG.
-        3. Use the dropdown under the legend to select a country and view its trend.
-        
-        ### Bias
-        The data presented here is aggregated from various global sources and may include uncertainties. Factors such as data quality, collection methods, and regional differences in reporting standards could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
-        """)
+# Layout: Instructions, Map, Legend
+st.write("---")
+header_cols = st.columns([1.5, 4, 1.5])
 
-    with header_cols[1]:
-        st.markdown("<h2 style='text-align: center; margin-bottom: 10px;'>Global SDG Performance</h2>", unsafe_allow_html=True)
-        fig = generate_map(st.session_state.selected_sdg_index)
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+with header_cols[0]:
+    st.markdown("## Instructions")
+    st.write("""
+    1. Select an SDG by clicking the button above its icon below the map.
+    2. View the map to see the global performance for the selected SDG.
+    3. Use the dropdown under the legend to select a country and view its trend.
+    
+    ### Bias
+    The data presented here is aggregated from various global sources and may include uncertainties. Factors such as data quality, collection methods, and regional differences in reporting standards could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
+    """)
 
-    with header_cols[2]:
-        st.markdown("## Legend")
-        for color, description in color_mapping.items():
-            st.markdown(
-                f"<div style='display: flex; align-items: center;'>"
-                f"<div style='background-color: {color_hex_mapping[color]}; width: 20px; height: 20px; margin-right: 10px;'></div>"
-                f"<span style='font-size: 14px;'>{description}</span></div>",
-                unsafe_allow_html=True
-            )
+with header_cols[1]:
+    st.markdown("<h2 style='text-align: center; margin-bottom: 10px;'>Global SDG Performance</h2>", unsafe_allow_html=True)
+    fig = generate_map(st.session_state.selected_sdg_index)
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+with header_cols[2]:
+    st.markdown("## Legend")
+    for color, description in color_mapping.items():
+        st.markdown(
+            f"<div style='display: flex; align-items: center;'>"
+            f"<div style='background-color: {color_hex_mapping[color]}; width: 20px; height: 20px; margin-right: 10px;'></div>"
+            f"<span style='font-size: 14px;'>{description}</span></div>",
+            unsafe_allow_html=True
+        )
 
         # Add country selection dropdown and trend display aligned with Bias
         st.markdown("<div style='margin-top: 50px;'>", unsafe_allow_html=True)  # Adjust vertical alignment
@@ -169,18 +174,18 @@ if st.session_state.instructions_acknowledged:
                         </div>
                     """, unsafe_allow_html=True)
 
-    # SDG selection section
-    st.write("---")
+# SDG selection section
+st.write("---")
 
-    cols = st.columns(len(sdg_labels))
+cols = st.columns(len(sdg_labels))
 
-    for i, col in enumerate(cols):
-        with col:
-            if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
-                st.session_state.selected_sdg_index = i
+for i, col in enumerate(cols):
+    with col:
+        if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
+            st.session_state.selected_sdg_index = i
 
-            image_path = os.path.join("assets", f"{i + 1}.png")
-            if os.path.exists(image_path):
-                st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)  # Highlight SDG 7
-else:
-    st.markdown("<div class='blur-content'>", unsafe_allow_html=True)
+        image_path = os.path.join("assets", f"{i + 1}.png")
+        if os.path.exists(image_path):
+            st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)  # Highlight SDG 7
+
+st.markdown('</div>', unsafe_allow_html=True)
