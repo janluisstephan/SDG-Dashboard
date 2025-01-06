@@ -53,10 +53,7 @@ color_mapping = {
     "grey": "#808080"
 }
 
-# Streamlit Layout
-st.title("Sustainable Development Goals Dashboard")
-
-# Karten-Daten vorbereiten
+# Funktion für die Karte
 def generate_map(selected_sdg_index):
     current_sdg = color_columns[selected_sdg_index]
     filtered_data = color_data[["Country", current_sdg]].dropna()
@@ -68,7 +65,6 @@ def generate_map(selected_sdg_index):
         locationmode="country names",
         color="Color",
         hover_name="Country",
-        title="",
         color_discrete_map=color_mapping
     )
 
@@ -82,31 +78,55 @@ def generate_map(selected_sdg_index):
     )
     return fig
 
-# Hauptkarte anzeigen
+# Streamlit Layout
+st.title("Sustainable Development Goals Dashboard")
+
+# Hauptkarte
 col1, col2 = st.columns([4, 1])
 with col1:
     st.write("### Global SDG Performance")
-    # Platzhalter für Karte
     map_placeholder = st.empty()
 
 with col2:
     st.write("### Legend")
     st.write("This section is currently empty.")
 
-# Buttons und Bilder für SDGs
+# CSS für Buttons mit Hintergrundbildern
+button_style = """
+<style>
+.sdg-button {
+    display: inline-block;
+    width: 120px;
+    height: 120px;
+    margin: 10px;
+    background-size: cover;
+    background-position: center;
+    border: none;
+    cursor: pointer;
+    outline: none;
+}
+</style>
+"""
+
+st.markdown(button_style, unsafe_allow_html=True)
+
+# Buttons mit Bildern und Funktion
 st.write("### Explore SDGs")
 button_cols = st.columns(4)  # Vier Buttons pro Zeile
 
 for i, label in enumerate(sdg_labels):
     col = button_cols[i % 4]
     with col:
-        # SDG-Bild laden
         image_path = os.path.join('assets', f'sdg_{i + 1}.png')
         if os.path.exists(image_path):
-            st.image(image_path, use_column_width=True)
-
-        # Button für SDG
-        if st.button(label):
+            st.markdown(
+                f"""
+                <button class="sdg-button" style="background-image: url('{image_path}');" onclick="window.location.href='/?sdg={i}'">
+                </button>
+                """,
+                unsafe_allow_html=True
+            )
+        if st.experimental_get_query_params().get("sdg") == [str(i)]:
             selected_sdg_index = i
             fig = generate_map(selected_sdg_index)
             map_placeholder.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
