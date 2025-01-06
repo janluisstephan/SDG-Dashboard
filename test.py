@@ -71,4 +71,16 @@ if not st.session_state.proceed:
 
 # Full dashboard
 if st.session_state.proceed:
-    st.write("Dashboard Placeholder")  # Replace with the actual dashboard code as needed
+    st.markdown("## Dashboard")
+    
+    # Example dashboard content
+    st.write("### Reliability Score: ", st.session_state.reliability_score)
+    st.write("This is the main dashboard content. Replace this section with your actual dashboard logic.")
+
+    # Example chart
+    example_data = pd.DataFrame({
+        "Category": ["A", "B", "C", "D"],
+        "Values": [10, 23, 15, 7]
+    })
+    fig = px.bar(example_data, x="Category", y="Values", title="Example Chart")
+    st.plotly_chart(fig, use_container_width=True)
