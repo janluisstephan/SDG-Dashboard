@@ -49,7 +49,7 @@ if not st.session_state.proceed:
     instruction_col, bias_col = st.columns(2)
 
     with instruction_col:
-        st.markdown("## Instructions")
+        st.markdown("## Instructions for Dashboard")
         st.write("""
         1. Select an SDG by clicking the button above its icon below the map.
         2. View the map to see the global performance for the selected SDG.
