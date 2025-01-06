@@ -87,6 +87,7 @@ if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 
 # Layout: Instructions, Map, Legend
+st.write("---")
 header_cols = st.columns([1.5, 4, 1.5])
 
 with header_cols[0]:
@@ -130,15 +131,20 @@ with header_cols[2]:
                     </div>
                 """, unsafe_allow_html=True)
 
+# SDG selection section
+st.write("---")
+st.write("### Explore SDGs")
 
 cols = st.columns(len(sdg_labels))
 for i, col in enumerate(cols):
     with col:
         # Center the button above the image and match the button width to the image
-        button_style = f"width: {'130px' if i == 6 else '90px'}; margin: 0 auto; display: block;"
-        if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
-            st.session_state.selected_sdg_index = i
-
         image_path = os.path.join("assets", f"{i + 1}.png")
         if os.path.exists(image_path):
             st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)  # Highlight SDG 7
+        st.markdown(
+            f"<div style='text-align: center; margin-top: -10px;'>"
+            f"<button style='width: {'130px' if i == 6 else '90px'}; height: 30px; background-color: white; border: 1px solid #ccc; border-radius: 5px;'>SDG {i + 1}</button>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
