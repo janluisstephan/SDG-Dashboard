@@ -230,7 +230,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 # Indicator dashboard
 if st.session_state.new_dashboard:
     # Layout with columns
-    dashboard_cols = st.columns([1, 10])  # Left column for the image, right column for the rest of the content
+    dashboard_cols = st.columns([1, 10])  # Left column for the logo, right for the dashboard content
 
     # Add the SDG7 logo in the top-left corner
     with dashboard_cols[0]:
@@ -240,7 +240,33 @@ if st.session_state.new_dashboard:
         else:
             st.write("Logo not found in assets folder.")
 
-    # Placeholder for the Indicator Dashboard content
+    # Add content for the Indicator-Dashboard
     with dashboard_cols[1]:
         st.markdown("## Indicator-Dashboard")
-        st.write("This is a placeholder for the new dashboard.")
+        st.write("This is a placeholder for the main content of the dashboard.")
+
+        # Divider to visually separate the logo from the indicator box
+        st.markdown("---")
+
+        # Indicators Section
+        st.markdown("### Indicators")
+        indicators = {
+            "7.1.1": "Proportion of population with access to electricity",
+            "7.1.2": "Proportion of population with primary reliance on clean fuels and technology",
+            "7.2.1": "Renewable energy share in the total final energy consumption",
+            "7.3.1": "Energy intensity measured in terms of primary energy and GDP",
+            "7.a.1": "International financial flows to developing countries in support of clean energy research and development and renewable energy production, including in hybrid systems",
+            "7.b.1": "Installed renewable energy-generating capacity in developing and developed countries (in watts per capita)"
+        }
+
+        # Indicator Boxes
+        for key, description in indicators.items():
+            st.markdown(
+                f"""
+                <div style='border: 1px solid #f39c12; border-radius: 8px; padding: 10px; margin-bottom: 10px; background-color: #fdf2e9;'>
+                    <strong>{key}</strong>: {description}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
