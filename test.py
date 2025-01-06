@@ -59,6 +59,7 @@ if not st.session_state.proceed:
         """)
 
     with bias_col:
+        st.write("---")
         st.markdown("## Bias")
         st.write("""
         The data presented here is aggregated from various global sources and may include uncertainties. 
