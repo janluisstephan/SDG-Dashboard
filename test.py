@@ -48,6 +48,14 @@ sdg_labels = [
 
 # Farbcodierungen und Bedeutungen
 color_mapping = {
+    "green": "Goal Achievement",
+    "yellow": "Challenges Remain",
+    "orange": "Significant Challenges",
+    "red": "Major Challenges",
+    "grey": "Insufficient Data"
+}
+
+color_hex_mapping = {
     "green": "#2ca02c",
     "yellow": "#ffdd57",
     "orange": "#ffa500",
@@ -69,7 +77,7 @@ def generate_map(selected_sdg_index):
         hover_name="Country",
         hover_data={"Country": True, "Color": False},
         title="",
-        color_discrete_map=color_mapping
+        color_discrete_map=color_hex_mapping
     )
 
     fig.update_traces(marker_line_width=0)
@@ -113,8 +121,8 @@ with header_cols[2]:
     for color, description in color_mapping.items():
         st.markdown(
             f"<div style='display: flex; align-items: center;'>"
-            f"<div style='background-color: {color_mapping[color]}; width: 20px; height: 20px; margin-right: 10px;'></div>"
-            f"{description}</div>",
+            f"<div style='background-color: {color_hex_mapping[color]}; width: 20px; height: 20px; margin-right: 10px;'></div>"
+            f"<span style='font-size: 14px;'>{description}</span></div>",
             unsafe_allow_html=True
         )
 
