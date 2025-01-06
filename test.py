@@ -23,16 +23,6 @@ if "selected_sdg_index" not in st.session_state:
 if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 
-# JavaScript to scroll to the dashboard
-scroll_script = """
-    <script>
-        var element = document.getElementById('dashboard-section');
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    </script>
-"""
-
 # Leading question section
 if not st.session_state.proceed:
     st.markdown(
@@ -73,15 +63,13 @@ if not st.session_state.proceed:
         """)
 
     # Large Proceed button (Streamlit button)
-    proceed_button = st.button("Proceed", key="proceed_button", help="Click to proceed to the dashboard")
+    proceed_button = st.button("Proceed (click 2x)", key="proceed_button", help="Click to proceed to the dashboard")
 
     if proceed_button:
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
-        # Trigger the JavaScript scroll after the button click
-        st.markdown(scroll_script, unsafe_allow_html=True)
 
-
+# Full dashboard
 # Full dashboard
 if st.session_state.proceed:
     # Identify SDG and trend columns
