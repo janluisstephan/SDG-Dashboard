@@ -49,7 +49,7 @@ color_hex_mapping = {
 }
 trend_mapping = {
     "↑": "On track or maintaining achievement",
-    "↗": "Moderately Increasing",
+    "➚": "Moderately Increasing",
     "→": "Stagnating",
     "↓": "Decreasing"
 }
