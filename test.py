@@ -116,7 +116,8 @@ with header_cols[2]:
             unsafe_allow_html=True
         )
 
-    # Add country selection dropdown and trend display
+    # Add country selection dropdown and trend display aligned with Bias
+    st.markdown("<div style='margin-top: 50px;'>", unsafe_allow_html=True)  # Adjust vertical alignment
     st.markdown("### Trend for")
     selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
 
@@ -136,7 +137,6 @@ with header_cols[2]:
 
 # SDG selection section
 st.write("---")
-st.write("### Explore SDGs")
 
 cols = st.columns(len(sdg_labels))
 
