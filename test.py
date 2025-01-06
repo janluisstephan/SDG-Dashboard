@@ -98,6 +98,35 @@ if "selected_sdg_index" not in st.session_state:
 if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 
+# Callback to update selected country
+def select_country(data):
+    if "points" in data and data["points"]:
+        st.session_state.selected_country = data["points"][0]["hovertext"]
+
+# Display Trends for Selected Country
+def display_country_trend(selected_country, selected_sdg_index):
+    if selected_country:
+        st.markdown(f"### Trends for {selected_country}")
+        trend_images = {
+            "up": "assets/up.png",
+            "down": "assets/down.png",
+            "no_trend": "assets/no_trend.png",
+            "right": "assets/right.png",
+            "right-up": "assets/right-up.png"
+        }
+        trend_data = color_data[color_data["Country"] == selected_country]
+        trend_column = trend_columns[selected_sdg_index]
+
+        if trend_column in trend_data.columns and not trend_data[trend_column].isna().all():
+            trend = trend_data.iloc[0][trend_column]
+            trend_image = trend_images.get(trend, None)
+            if trend_image and os.path.exists(trend_image):
+                st.image(trend_image, width=50, caption=f"Trend: {trend.capitalize()}")
+        else:
+            st.write("No trend data available for this country.")
+    else:
+        st.write("Click on a country to view its trend.")
+
 # Top row: Instructions, Map, Legend
 st.write("---")
 header_cols = st.columns([1.5, 4, 1.5])
@@ -112,9 +141,8 @@ with header_cols[0]:
 
 with header_cols[1]:
     st.markdown("<h2 style='text-align: center; margin-bottom: 10px;'>Global SDG Performance</h2>", unsafe_allow_html=True)
-    # Embed map directly in the header row for alignment
     fig = generate_map(st.session_state.selected_sdg_index)
-    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    click_data = st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False}, on_hover=select_country)
 
 with header_cols[2]:
     st.markdown("## Legend")
@@ -126,6 +154,10 @@ with header_cols[2]:
             unsafe_allow_html=True
         )
 
+# Trends Section under Legend
+with header_cols[2]:
+    display_country_trend(st.session_state.selected_country, st.session_state.selected_sdg_index)
+
 # SDG Icons with Buttons Centered Above
 st.write("---")
 st.write("### Explore SDGs")
@@ -134,19 +166,12 @@ st.write("### Explore SDGs")
 cols = st.columns(len(sdg_labels))  # Create one column per SDG
 for i, col in enumerate(cols):
     with col:
-        # Change button appearance for the selected SDG
-        button_style = (
-            "background-color: #f0f0f0; border: 2px solid #007bff; border-radius: 5px; padding: 5px;"
-            if i == st.session_state.selected_sdg_index
-            else "background-color: white; border: 1px solid #ccc; border-radius: 5px; padding: 5px;"
-        )
-
-        if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}", help=f"Select SDG {i + 1}"):
+        if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
             st.session_state.selected_sdg_index = i
             st.session_state.selected_country = None
 
         # Display the SDG image
-        image_path = os.path.join('assets', f'{i + 1}.png')
+        image_path = os.path.join("assets", f"{i + 1}.png")
         if os.path.exists(image_path):
             if i == 6:  # Highlight SDG 7 (index 6)
                 st.image(image_path, use_container_width=False, width=130)  # Larger size for SDG 7
