@@ -49,7 +49,7 @@ color_hex_mapping = {
 }
 trend_mapping = {
     "↑": "On track or maintaining achievement",
-    "➚": "Moderately Increasing",
+    "↗": "Moderately Increasing",
     "→": "Stagnating",
     "↓": "Decreasing"
 }
@@ -87,6 +87,7 @@ if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 
 # Layout: Instructions, Map, Legend
+st.write("---")
 header_cols = st.columns([1.5, 4, 1.5])
 
 with header_cols[0]:
@@ -113,7 +114,7 @@ with header_cols[2]:
         )
 
     # Add country selection dropdown and trend display
-    st.markdown("### Show Trend for:")
+    st.markdown("### Trend for")
     selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
 
     if selected_country:
@@ -132,17 +133,20 @@ with header_cols[2]:
 
 # SDG selection section
 st.write("---")
+st.write("### Explore SDGs")
 
 cols = st.columns(len(sdg_labels))
 for i, col in enumerate(cols):
     with col:
         # Center the button above the image and match the button width to the image
+        button_style = (
+            "background-color: #f0f0f0; border: 2px solid #007bff; border-radius: 5px; padding: 5px;"
+            if i == st.session_state.selected_sdg_index
+            else "background-color: white; border: 1px solid #ccc; border-radius: 5px; padding: 5px;"
+        )
+        if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
+            st.session_state.selected_sdg_index = i
+
         image_path = os.path.join("assets", f"{i + 1}.png")
         if os.path.exists(image_path):
-            st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)  # Highlight SDG 7
-        st.markdown(
-            f"<div style='text-align: center; margin-top: -10px;'>"
-            f"<button style='width: {'130px' if i == 6 else '90px'}; height: 30px; background-color: white; border: 1px solid #ccc; border-radius: 5px;'>SDG {i + 1}</button>"
-            f"</div>",
-            unsafe_allow_html=True
-        )
+            st.image(image_path, use_column_width=True, caption=None)
