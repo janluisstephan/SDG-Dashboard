@@ -16,36 +16,24 @@ def load_data():
 
 sdg_data, color_data = load_data()
 
-# SDG-Spalten identifizieren
-sdg_columns = [col for col in sdg_data.columns if "Goal" in col and "Score" in col]
+# Identify SDG and trend columns
 color_columns = [col for col in color_data.columns if col.startswith("SDG")]
 trend_columns = [
     color_data.columns[color_data.columns.get_loc(col) + 1] if color_data.columns.get_loc(col) + 1 < len(color_data.columns) else None
     for col in color_columns
 ]
 
-# SDG-Labels vorbereiten
+# SDG labels
 sdg_labels = [
-    "No Poverty",
-    "Zero Hunger",
-    "Good Health and Well-being",
-    "Quality Education",
-    "Gender Equality",
-    "Clean Water and Sanitation",
-    "Affordable and Clean Energy",  # SDG 7
-    "Decent Work and Economic Growth",
-    "Industry, Innovation and Infrastructure",
-    "Reduced Inequalities",
-    "Sustainable Cities and Communities",
-    "Responsible Consumption and Production",
-    "Climate Action",
-    "Life Below Water",
-    "Life on Land",
-    "Peace, Justice and Strong Institutions",
-    "Partnerships for the Goals"
+    "No Poverty", "Zero Hunger", "Good Health and Well-being", "Quality Education",
+    "Gender Equality", "Clean Water and Sanitation", "Affordable and Clean Energy",
+    "Decent Work and Economic Growth", "Industry, Innovation and Infrastructure",
+    "Reduced Inequalities", "Sustainable Cities and Communities",
+    "Responsible Consumption and Production", "Climate Action", "Life Below Water",
+    "Life on Land", "Peace, Justice and Strong Institutions", "Partnerships for the Goals"
 ]
 
-# Farbcodierungen und Bedeutungen
+# Color and trend mappings
 color_mapping = {
     "green": "Goal Achievement",
     "yellow": "Challenges Remain",
@@ -53,7 +41,6 @@ color_mapping = {
     "red": "Major Challenges",
     "grey": "Insufficient Data"
 }
-
 color_hex_mapping = {
     "green": "#2ca02c",
     "yellow": "#ffdd57",
@@ -61,8 +48,6 @@ color_hex_mapping = {
     "red": "#d62728",
     "grey": "#808080"
 }
-
-# Arrow mapping for trends
 trend_mapping = {
     "↑": "On track or maintaining achievement",
     "↗": "Moderately Increasing",
@@ -70,7 +55,7 @@ trend_mapping = {
     "↓": "Decreasing"
 }
 
-# Karten-Daten vorbereiten
+# Generate map
 def generate_map(selected_sdg_index):
     current_sdg = color_columns[selected_sdg_index]
     filtered_data = color_data[["Country", current_sdg]].dropna()
@@ -83,7 +68,6 @@ def generate_map(selected_sdg_index):
         color="Color",
         hover_name="Country",
         hover_data={"Country": True, "Color": False},
-        title="",
         color_discrete_map=color_hex_mapping
     )
 
@@ -97,22 +81,20 @@ def generate_map(selected_sdg_index):
     )
     return fig
 
-# Default selected SDG index
+# Default session states
 if "selected_sdg_index" not in st.session_state:
     st.session_state.selected_sdg_index = 0
-
-# Default selected country
 if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 
-# Display Trends for Selected Country
+# Display trend for selected country
 def display_country_trend(selected_country, selected_sdg_index):
-    if selected_country:
-        trend_column = trend_columns[selected_sdg_index]
+    trend_column = trend_columns[selected_sdg_index]
+    if selected_country and trend_column:
         trend_data = color_data[color_data["Country"] == selected_country]
-        if trend_column in trend_data.columns and not trend_data[trend_column].isna().all():
+        if not trend_data.empty and trend_column in trend_data.columns:
             trend = trend_data.iloc[0][trend_column]
-            trend_description = trend_mapping.get(trend, "Unknown trend")
+            trend_description = trend_mapping.get(trend, "No trend description available.")
             st.markdown(f"### Trend for {selected_country}")
             st.markdown(f"""
                 <div style='display: flex; align-items: center;'>
@@ -124,9 +106,9 @@ def display_country_trend(selected_country, selected_sdg_index):
             st.markdown(f"### Trend for {selected_country}")
             st.write("No trend data available.")
     else:
-        st.write("Click on a country to view its trend.")
+        st.write("Select a country to view its trend.")
 
-# Top row: Instructions, Map, Legend
+# Layout: Instructions, Map, Legend
 st.write("---")
 header_cols = st.columns([1.5, 4, 1.5])
 
@@ -157,26 +139,21 @@ with header_cols[2]:
             unsafe_allow_html=True
         )
 
-# Trends Section under Legend
+# Display trends below legend
 with header_cols[2]:
     display_country_trend(st.session_state.selected_country, st.session_state.selected_sdg_index)
 
-# SDG Icons with Buttons Centered Above
+# SDG selection section
 st.write("---")
 st.write("### Explore SDGs")
+cols = st.columns(len(sdg_labels))
 
-# Create horizontal layout with images and centered buttons
-cols = st.columns(len(sdg_labels))  # Create one column per SDG
 for i, col in enumerate(cols):
     with col:
         if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
             st.session_state.selected_sdg_index = i
             st.session_state.selected_country = None
 
-        # Display the SDG image
         image_path = os.path.join("assets", f"{i + 1}.png")
         if os.path.exists(image_path):
-            if i == 6:  # Highlight SDG 7 (index 6)
-                st.image(image_path, use_container_width=False, width=130)  # Larger size for SDG 7
-            else:
-                st.image(image_path, use_container_width=False, width=90)  # Default size for other SDGs
+            st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)  # Highlight SDG 7
