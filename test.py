@@ -229,7 +229,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 
 # Indicator Dashboard
 if st.session_state.new_dashboard:
-    goal7_data_path = '/absolute/path/to/Data/goal7.xlsx'
+    goal7_data_path = 'Data/goal7.xlsx'
     goal7_data = pd.read_excel(goal7_data_path, engine='openpyxl')
     goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod', 'Location'])
 
