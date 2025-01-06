@@ -111,7 +111,10 @@ with header_cols[0]:
     """)
 
 with header_cols[1]:
-    st.markdown("<h2 style='text-align: center;'>Global SDG Performance</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; margin-bottom: 10px;'>Global SDG Performance</h2>", unsafe_allow_html=True)
+    # Embed map directly in the header row for alignment
+    fig = generate_map(st.session_state.selected_sdg_index)
+    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 with header_cols[2]:
     st.markdown("## Legend")
@@ -122,11 +125,6 @@ with header_cols[2]:
             f"{description}</div>",
             unsafe_allow_html=True
         )
-
-# Map Placeholder
-st.write("---")
-fig = generate_map(st.session_state.selected_sdg_index)
-st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 # SDG Icons with Buttons Centered Above
 st.write("---")
