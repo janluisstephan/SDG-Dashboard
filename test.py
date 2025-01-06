@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from streamlit_plotly_events import plotly_events
 import os
 
 st.set_page_config(layout="wide")
@@ -117,17 +116,13 @@ with header_cols[0]:
     st.write("""
     1. Select an SDG by clicking the button above its icon below the map.
     2. View the map to see the global performance for the selected SDG.
-    3. Click on a country to view specific trends.
+    3. Use the dropdown below to select a country and view its trend.
     """)
 
 with header_cols[1]:
     st.markdown("<h2 style='text-align: center; margin-bottom: 10px;'>Global SDG Performance</h2>", unsafe_allow_html=True)
     fig = generate_map(st.session_state.selected_sdg_index)
-    selected_points = plotly_events(fig, click_event=True, override_height=600)
-    if selected_points:
-        country = selected_points[0].get("hovertext")
-        if country:
-            st.session_state.selected_country = country
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 with header_cols[2]:
     st.markdown("## Legend")
@@ -139,9 +134,15 @@ with header_cols[2]:
             unsafe_allow_html=True
         )
 
+# Country selection dropdown
+st.write("---")
+st.write("### Select a Country")
+country_list = color_data["Country"].unique().tolist()
+selected_country = st.selectbox("Choose a country to view its trend:", country_list)
+
 # Display trends below legend
 with header_cols[2]:
-    display_country_trend(st.session_state.selected_country, st.session_state.selected_sdg_index)
+    display_country_trend(selected_country, st.session_state.selected_sdg_index)
 
 # SDG selection section
 st.write("---")
@@ -152,7 +153,6 @@ for i, col in enumerate(cols):
     with col:
         if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
             st.session_state.selected_sdg_index = i
-            st.session_state.selected_country = None
 
         image_path = os.path.join("assets", f"{i + 1}.png")
         if os.path.exists(image_path):
