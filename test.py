@@ -227,89 +227,63 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
             if os.path.exists(image_path):
                 st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
 
+# Indicator dashboard
+if st.session_state.new_dashboard:
+    st.title("SDG 7: Affordable and Clean Energy")
+    st.markdown("""
+    SDG 7 aims to ensure access to affordable, reliable, sustainable, and modern energy for all.
+    This dashboard explores how this goal is measured using various indicators.
+    """)
 
+    sdg7_data = sdg_data[sdg_data['SDG'] == 7]
+    indicators = sdg7_data['Indicator'].unique()
 
-import streamlit as st
-import pandas as pd
-import plotly.express as px
+    if "selected_indicator" not in st.session_state:
+        st.session_state.selected_indicator = indicators[0]
 
-st.set_page_config(layout="wide")
+    if "selected_countries" not in st.session_state:
+        st.session_state.selected_countries = []
 
-# Load data with caching
-@st.cache_data
-def load_data():
-    data_path = 'Data/SDR2024-data.xlsx'
-    sdg_data = pd.read_excel(data_path, sheet_name='Full Database', engine='openpyxl')
-    return sdg_data
+    col1, col2 = st.columns([2, 3])
 
-sdg_data = load_data()
+    # Indicators List
+    with col1:
+        st.subheader("Indicators")
+        for indicator in indicators:
+            with st.expander(indicator):
+                st.write(sdg7_data[sdg7_data['Indicator'] == indicator]['Description'].iloc[0])
 
-# Filter SDG 7 data
-sdg7_data = sdg_data[sdg_data['SDG'] == 7]
-indicators = sdg7_data['Indicator'].unique()
+    # Indicator Chart
+    with col2:
+        selected_indicator_data = sdg7_data[sdg7_data['Indicator'] == st.session_state.selected_indicator]
 
-# Initialize session state
-if "selected_indicator" not in st.session_state:
-    st.session_state.selected_indicator = indicators[0]
+        # Country Selection
+        countries = selected_indicator_data['Country'].unique()
+        st.multiselect(
+            "Choose countries to display data for:",
+            countries,
+            key="selected_countries",
+            default=countries[:3]  # Default to first three countries
+        )
 
-if "selected_countries" not in st.session_state:
-    st.session_state.selected_countries = []
+        # Plot
+        if st.session_state.selected_countries:
+            chart_data = selected_indicator_data[selected_indicator_data['Country'].isin(st.session_state.selected_countries)]
+            fig = px.line(chart_data, x='Year', y='Value', color='Country',
+                          title=f"{st.session_state.selected_indicator} Progress")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.write("Select at least one country to display data.")
 
-# Layout
-st.title("SDG 7: Affordable and Clean Energy")
-st.markdown("""
-SDG 7 aims to ensure access to affordable, reliable, sustainable, and modern energy for all.
-This dashboard explores how this goal is measured using various indicators.
-""")
+    # Disclaimer
+    st.markdown("""
+    ### Disclaimer
+    The data presented here is aggregated from various global sources and may include uncertainties.
+    Interpret trends cautiously, acknowledging potential biases in data collection and reporting.
+    """)
 
-# Sidebar for Indicators
-st.sidebar.header("Indicators")
-for indicator in indicators:
-    if st.sidebar.button(indicator, key=f"indicator_{indicator}"):
-        st.session_state.selected_indicator = indicator
-
-# Main Section
-col1, col2 = st.columns([2, 3])
-
-# Indicators List
-with col1:
-    st.subheader("Indicators")
-    for indicator in indicators:
-        with st.expander(indicator):
-            st.write(sdg7_data[sdg7_data['Indicator'] == indicator]['Description'].iloc[0])
-
-# Indicator Chart
-with col2:
-    selected_indicator_data = sdg7_data[sdg7_data['Indicator'] == st.session_state.selected_indicator]
-
-    # Country Selection
-    countries = selected_indicator_data['Country'].unique()
-    st.multiselect(
-        "Choose countries to display data for:",
-        countries,
-        key="selected_countries",
-        default=countries[:3]  # Default to first three countries
-    )
-
-    # Plot
-    if st.session_state.selected_countries:
-        chart_data = selected_indicator_data[selected_indicator_data['Country'].isin(st.session_state.selected_countries)]
-        fig = px.line(chart_data, x='Year', y='Value', color='Country',
-                      title=f"{st.session_state.selected_indicator} Progress")
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.write("Select at least one country to display data.")
-
-# Disclaimer
-st.markdown("""
-### Disclaimer
-The data presented here is aggregated from various global sources and may include uncertainties.
-Interpret trends cautiously, acknowledging potential biases in data collection and reporting.
-""")
-
-# Placeholder for future analysis
-st.markdown("""
-### What If Analysis (Coming Soon)
-Explore the potential future scenarios and impacts of achieving SDG 7 for all countries.
-""")
-
+    # Placeholder for future analysis
+    st.markdown("""
+    ### What If Analysis (Coming Soon)
+    Explore the potential future scenarios and impacts of achieving SDG 7 for all countries.
+    """)
