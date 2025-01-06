@@ -62,30 +62,10 @@ if not st.session_state.proceed:
         could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
         """)
 
-    # Large Proceed button
-    st.markdown(
-        """
-        <div style="text-align: center; margin-top: 30px;">
-            <button style="
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 15px 50px;
-                text-align: center;
-                text-decoration: none;
-                display: inline-block;
-                font-size: 18px;
-                margin: 10px auto;
-                cursor: pointer;
-                border-radius: 5px;
-            " onclick="document.location.reload()">Proceed</button>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    # Large Proceed button (Streamlit button)
+    proceed_button = st.button("Proceed", key="proceed_button", help="Click to proceed to the dashboard")
 
-    # Capture button click
-    if st.button("Proceed", key="proceed_button"):
+    if proceed_button:
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
 
