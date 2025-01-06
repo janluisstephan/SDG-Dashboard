@@ -230,25 +230,19 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 # Indicator dashboard
 if st.session_state.new_dashboard:
     # Layout with columns
-    dashboard_cols = st.columns([1, 10])  # Left column for the logo, right for the dashboard content
+    dashboard_cols = st.columns([1, 4])  # First column for the logo and indicators, second column for placeholder content
 
     # Add the SDG7 logo in the top-left corner
     with dashboard_cols[0]:
+        # Add SDG7 logo
         logo_path = os.path.join("assets", "sdg7.png")
         if os.path.exists(logo_path):
             st.image(logo_path, use_container_width=True)
-        else:
-            st.write("Logo not found in assets folder.")
+        
+        # Add space between logo and indicators
+        st.markdown("<br>", unsafe_allow_html=True)
 
-    # Add content for the Indicator-Dashboard
-    with dashboard_cols[1]:
-        st.markdown("## Indicator-Dashboard")
-        st.write("This is a placeholder for the main content of the dashboard.")
-
-        # Divider to visually separate the logo from the indicator box
-        st.markdown("---")
-
-        # Indicators Section
+        # Indicators Section (compact on the left side)
         st.markdown("### Indicators")
         indicators = {
             "7.1.1": "Proportion of population with access to electricity",
@@ -259,14 +253,18 @@ if st.session_state.new_dashboard:
             "7.b.1": "Installed renewable energy-generating capacity in developing and developed countries (in watts per capita)"
         }
 
-        # Indicator Boxes
+        # Display indicators in smaller, compact boxes
         for key, description in indicators.items():
             st.markdown(
                 f"""
-                <div style='border: 1px solid #f39c12; border-radius: 8px; padding: 10px; margin-bottom: 10px; background-color: #fdf2e9;'>
+                <div style='border: 1px solid #f39c12; border-radius: 5px; padding: 5px; margin-bottom: 5px; background-color: #fdf2e9;'>
                     <strong>{key}</strong>: {description}
                 </div>
                 """,
                 unsafe_allow_html=True
             )
 
+    # Placeholder for the rest of the dashboard content
+    with dashboard_cols[1]:
+        st.markdown("## Indicator-Dashboard")
+        st.write("This is a placeholder for the main content of the dashboard.")
