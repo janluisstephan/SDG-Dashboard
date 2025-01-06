@@ -48,6 +48,7 @@ if not st.session_state.proceed:
     # Create two columns for Instructions and Bias
     instruction_col, bias_col = st.columns(2)
 
+     st.write("---")
     with instruction_col:
         st.markdown("## Instructions for Dashboard")
         st.write("""
