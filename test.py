@@ -227,8 +227,8 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
             if os.path.exists(image_path):
                 st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
 
-# Indicator dashboard
-if st.session_state.new_dashboard:
+
+    
     st.set_page_config(layout="wide")
 
 # Top section (logo and disclaimer)
