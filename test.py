@@ -79,9 +79,6 @@ def generate_map(selected_sdg_index):
     )
     return fig
 
-# Hauptlayout
-st.title("Sustainable Development Goals Dashboard")
-
 # Obere Zeile: Instructions, Map, Legend
 col1, col2, col3 = st.columns([1.5, 4, 1.5])  # Adjust column proportions
 
