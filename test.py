@@ -131,9 +131,6 @@ with header_cols[2]:
                     </div>
                 """, unsafe_allow_html=True)
 
-# SDG selection section
-st.write("---")
-st.write("### Explore SDGs")
 
 cols = st.columns(len(sdg_labels))
 for i, col in enumerate(cols):
