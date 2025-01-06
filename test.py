@@ -138,7 +138,8 @@ st.write("### Explore SDGs")
 cols = st.columns(len(sdg_labels))
 for i, col in enumerate(cols):
     with col:
-        # Center the button above the image and align it with the image width
+        # Center the button above the image and match the button width to the image
+        button_style = f"width: {'130px' if i == 6 else '90px'}; margin: 0 auto; display: block;"
         if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
             st.session_state.selected_sdg_index = i
 
