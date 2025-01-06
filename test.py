@@ -49,7 +49,7 @@ color_hex_mapping = {
 }
 trend_mapping = {
     "↑": "On track or maintaining achievement",
-    "➚": "Moderately Increasing",
+    "↗": "Moderately Increasing",
     "→": "Stagnating",
     "↓": "Decreasing"
 }
@@ -116,14 +116,14 @@ with header_cols[2]:
     # Add country selection dropdown and trend display
     st.markdown("### Trend for")
     selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
-    
+
     if selected_country:
         trend_column = trend_columns[st.session_state.selected_sdg_index]
         if trend_column and trend_column in color_data.columns:
             trend_data = color_data[color_data["Country"] == selected_country]
             if not trend_data.empty and trend_column in trend_data.columns:
                 trend = trend_data.iloc[0][trend_column]
-                trend_description = trend_mapping.get(str(trend).strip(), "No trend description available.")  # Ensure clean mapping
+                trend_description = trend_mapping.get(str(trend).strip(), "No trend description available.")
                 st.markdown(f"""
                     <div style='display: flex; align-items: center;'>
                         <span style='font-size: 24px; margin-right: 10px;'>{trend}</span>
@@ -133,14 +133,17 @@ with header_cols[2]:
 
 # SDG selection section
 st.write("---")
+st.write("### Explore SDGs")
 
 cols = st.columns(len(sdg_labels))
-
 for i, col in enumerate(cols):
     with col:
+        # Center the button above the image
+        button_html = f"<button style='margin: 0 auto; display: block; background-color: white; border: 1px solid #ccc; padding: 5px; border-radius: 5px;'>{f'SDG {i + 1}'}</button>"
         if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
             st.session_state.selected_sdg_index = i
 
         image_path = os.path.join("assets", f"{i + 1}.png")
         if os.path.exists(image_path):
+            st.markdown(button_html, unsafe_allow_html=True)
             st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)  # Highlight SDG 7
