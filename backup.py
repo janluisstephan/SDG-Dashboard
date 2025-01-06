@@ -48,24 +48,29 @@ if not st.session_state.proceed:
     # Create two columns for Instructions and Bias
     instruction_col, bias_col = st.columns(2)
 
+     
     with instruction_col:
-        st.markdown("## Instructions")
+        st.write("---")
+        st.markdown("## Instructions for Dashboard")
         st.write("""
         1. Select an SDG by clicking the button above its icon below the map.
         2. View the map to see the global performance for the selected SDG.
         3. Use the dropdown under the legend to select a country and view its trend.
         """)
+        
 
     with bias_col:
+        st.write("---")
         st.markdown("## Bias")
         st.write("""
         The data presented here is aggregated from various global sources and may include uncertainties. 
         Factors such as data quality, collection methods, and regional differences in reporting standards 
         could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
         """)
+        
 
     # Large Proceed button
-    if st.button("Proceed to SDG Dashboard", key="proceed_button"):
+    if st.button("Click 2x to proceed to SDG Dashboard", key="proceed_button"):
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
 
@@ -139,7 +144,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
         return fig
 
     # Layout: Instructions, Map, Legend
-    st.write("---")
+    
     header_cols = st.columns([1.5, 4, 1.5])
 
     with header_cols[0]:
@@ -197,7 +202,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 
         # Add Proceed button under the Trend display
         st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
-        if st.button("Proceed to Indicator-Dashboard", key="new_dashboard_button"):
+        if st.button("Click 2x to proceed to Indicator-Dashboard", key="new_dashboard_button"):
             st.session_state.new_dashboard = True
 
     # SDG selection section
