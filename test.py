@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from streamlit_plotly_events import plotly_events
 import os
 
 st.set_page_config(layout="wide")
@@ -31,7 +32,7 @@ sdg_labels = [
     "Quality Education",
     "Gender Equality",
     "Clean Water and Sanitation",
-    "Affordable and Clean Energy",
+    "Affordable and Clean Energy",  # SDG 7
     "Decent Work and Economic Growth",
     "Industry, Innovation and Infrastructure",
     "Reduced Inequalities",
@@ -104,11 +105,6 @@ if "selected_sdg_index" not in st.session_state:
 if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 
-# Callback to update selected country
-def select_country(data):
-    if "points" in data and data["points"]:
-        st.session_state.selected_country = data["points"][0]["hovertext"]
-
 # Display Trends for Selected Country
 def display_country_trend(selected_country, selected_sdg_index):
     if selected_country:
@@ -145,7 +141,9 @@ with header_cols[0]:
 with header_cols[1]:
     st.markdown("<h2 style='text-align: center; margin-bottom: 10px;'>Global SDG Performance</h2>", unsafe_allow_html=True)
     fig = generate_map(st.session_state.selected_sdg_index)
-    click_data = st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False}, on_hover=select_country)
+    selected_points = plotly_events(fig, click_event=True, override_height=600)
+    if selected_points:
+        st.session_state.selected_country = selected_points[0]["hovertext"]
 
 with header_cols[2]:
     st.markdown("## Legend")
