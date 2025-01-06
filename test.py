@@ -56,7 +56,9 @@ color_mapping = {
 # Funktion für die Karte
 def generate_map(selected_sdg_index):
     current_sdg = color_columns[selected_sdg_index]
-    filtered_data = color_data[["Country", current_sdg]].dropna()
+    filtered_data = color_data["Country"].to_frame()
+    filtered_data[current_sdg] = color_data[current_sdg]
+    filtered_data.dropna(subset=[current_sdg], inplace=True)
     filtered_data.rename(columns={current_sdg: "Color"}, inplace=True)
 
     fig = px.choropleth(
@@ -114,6 +116,11 @@ st.markdown(button_style, unsafe_allow_html=True)
 st.write("### Explore SDGs")
 button_cols = st.columns(4)  # Vier Buttons pro Zeile
 
+# Standardkarte anzeigen: "No Poverty" (Index 0)
+selected_sdg_index = 0
+fig = generate_map(selected_sdg_index)
+map_placeholder.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+
 for i, label in enumerate(sdg_labels):
     col = button_cols[i % 4]
     with col:
@@ -126,7 +133,10 @@ for i, label in enumerate(sdg_labels):
                 """,
                 unsafe_allow_html=True
             )
-        if st.experimental_get_query_params().get("sdg") == [str(i)]:
+
+        # Karte aktualisieren, wenn ein Button geklickt wird
+        query_params = st.experimental_get_query_params()
+        if "sdg" in query_params and query_params["sdg"] == [str(i)]:
             selected_sdg_index = i
             fig = generate_map(selected_sdg_index)
             map_placeholder.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
