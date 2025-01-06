@@ -34,7 +34,7 @@ if not st.session_state.proceed:
         """,
         unsafe_allow_html=True,
     )
-    
+
     # Slider
     reliability_score = st.slider(
         label="Rate the reliability:",
@@ -64,10 +64,8 @@ if not st.session_state.proceed:
         could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
         """)
 
-    # Large Proceed button (Streamlit button)
-    proceed_button = st.button("Click 2x to proceed to SDG Dashboard", key="proceed_button", help="Click 2x to proceed to the dashboard")
-
-    if proceed_button:
+    # Large Proceed button
+    if st.button("Proceed to SDG Dashboard", key="proceed_button"):
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
 
@@ -176,7 +174,11 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 
         # Add country selection dropdown and trend display
         st.markdown("<div style='margin-top: 50px;'>", unsafe_allow_html=True)
-        st.markdown("### Trend for")
+
+        # Dynamically display the selected SDG name
+        selected_sdg_label = sdg_labels[st.session_state.selected_sdg_index]
+        st.markdown(f"### Trend for {selected_sdg_label}")
+
         selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
 
         if selected_country:
