@@ -117,7 +117,7 @@ if not st.session_state.instructions_acknowledged:
     The data presented here is aggregated from various global sources and may include uncertainties. Factors such as data quality, collection methods, and regional differences in reporting standards could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
     """)
 
-    if st.button("Understood"):
+    if st.button("Understood", key="instructions_button"):
         st.session_state.instructions_acknowledged = True
 
 if st.session_state.instructions_acknowledged:
@@ -158,7 +158,7 @@ with header_cols[2]:
         # Add country selection dropdown and trend display aligned with Bias
         st.markdown("<div style='margin-top: 50px;'>", unsafe_allow_html=True)  # Adjust vertical alignment
         st.markdown("### Trend for")
-        selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
+        selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown_acknowledged" if st.session_state.instructions_acknowledged else "country_dropdown")
 
         if selected_country:
             trend_column = trend_columns[st.session_state.selected_sdg_index]
