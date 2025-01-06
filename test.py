@@ -48,6 +48,14 @@ sdg_labels = [
 
 # Farbcodierungen und Bedeutungen
 color_mapping = {
+    "green": "Goal Achievement",
+    "yellow": "Challenges Remain",
+    "orange": "Significant Challenges",
+    "red": "Major Challenges",
+    "grey": "Insufficient Data"
+}
+
+color_hex_mapping = {
     "green": "#2ca02c",
     "yellow": "#ffdd57",
     "orange": "#ffa500",
@@ -69,7 +77,7 @@ def generate_map(selected_sdg_index):
         hover_name="Country",
         hover_data={"Country": True, "Color": False},
         title="",
-        color_discrete_map=color_mapping
+        color_discrete_map=color_hex_mapping
     )
 
     fig.update_traces(marker_line_width=0)
@@ -91,10 +99,10 @@ if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 
 # Top row: Instructions, Map, Legend
-col1, col2, col3 = st.columns([1.5, 4, 1.5])
+st.write("---")
+header_cols = st.columns([1.5, 4, 1.5])
 
-# Instructions
-with col1:
+with header_cols[0]:
     st.markdown("## Instructions")
     st.write("""
     1. Select an SDG by clicking the button above its icon below the map.
@@ -102,38 +110,23 @@ with col1:
     3. Click on a country to view specific trends.
     """)
 
-# Map Placeholder
-with col2:
-    st.write("### Global SDG Performance")
-    map_placeholder = st.empty()
+with header_cols[1]:
+    st.markdown("<h2 style='text-align: center;'>Global SDG Performance</h2>", unsafe_allow_html=True)
 
-# Legend
-with col3:
+with header_cols[2]:
     st.markdown("## Legend")
-    st.markdown("### Colors")
-    for color, hex_value in color_mapping.items():
+    for color, description in color_mapping.items():
         st.markdown(
-            f"<div style='background-color: {hex_value}; width: 20px; height: 20px; display: inline-block; margin-right: 10px;'></div> {color.capitalize()}",
-            unsafe_allow_html=True)
+            f"<div style='display: flex; align-items: center;'>"
+            f"<div style='background-color: {color_hex_mapping[color]}; width: 20px; height: 20px; margin-right: 10px;'></div>"
+            f"{description}</div>",
+            unsafe_allow_html=True
+        )
 
-    if st.session_state.selected_country:
-        st.markdown(f"### Trends for {st.session_state.selected_country}")
-        trend_images = {
-            "up": "assets/up.png",
-            "down": "assets/down.png",
-            "no_trend": "assets/no_trend.png",
-            "right": "assets/right.png",
-            "right-up": "assets/right-up.png"
-        }
-        trend_data = color_data[color_data["Country"] == st.session_state.selected_country]
-        trend_column = trend_columns[st.session_state.selected_sdg_index]
-        if trend_column in trend_data.columns and not trend_data[trend_column].isna().all():
-            trend = trend_data.iloc[0][trend_column]
-            trend_image = trend_images.get(trend, None)
-            if trend_image and os.path.exists(trend_image):
-                st.image(trend_image, width=40, caption=f"Trend: {trend.capitalize()}")
-        else:
-            st.write("No trend data available for this country.")
+# Map Placeholder
+st.write("---")
+fig = generate_map(st.session_state.selected_sdg_index)
+st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 # SDG Icons with Buttons Centered Above
 st.write("---")
@@ -154,7 +147,3 @@ for i, col in enumerate(cols):
                 st.image(image_path, use_container_width=False, width=130)  # Larger size for SDG 7
             else:
                 st.image(image_path, use_container_width=False, width=90)  # Default size for other SDGs
-
-# Generate Map
-fig = generate_map(st.session_state.selected_sdg_index)
-map_placeholder.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
