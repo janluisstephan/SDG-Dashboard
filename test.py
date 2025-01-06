@@ -97,7 +97,7 @@ col1, col2, col3 = st.columns([1.5, 4, 1.5])
 with col1:
     st.markdown("## Instructions")
     st.write("""
-    1. Select an SDG by clicking its icon below the map.
+    1. Select an SDG by clicking the button above its icon below the map.
     2. View the map to see the global performance for the selected SDG.
     3. Click on a country to view specific trends.
     """)
@@ -135,21 +135,21 @@ with col3:
         else:
             st.write("No trend data available for this country.")
 
-# SDG Icons as Buttons
+# SDG Icons with Buttons Centered Above
 st.write("---")
 st.write("### Explore SDGs")
 
-# Create a horizontal row for SDG images as buttons
-cols = st.columns(len(sdg_labels))  # Create as many columns as there are SDGs
+# Create horizontal layout with images and centered buttons
+cols = st.columns(len(sdg_labels))  # Create one column per SDG
 for i, col in enumerate(cols):
-    image_path = os.path.join('assets', f'{i + 1}.png')
-    if os.path.exists(image_path):
-        with col:
-            # Make the image act as a button
-            if st.button("", key=f"sdg_button_{i}"):
-                st.session_state.selected_sdg_index = i
-                st.session_state.selected_country = None
-            # Display the image without a caption
+    with col:
+        # Button above the image
+        if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
+            st.session_state.selected_sdg_index = i
+            st.session_state.selected_country = None
+        # Display the SDG image
+        image_path = os.path.join('assets', f'{i + 1}.png')
+        if os.path.exists(image_path):
             st.image(image_path, use_container_width=True)
 
 # Generate Map
