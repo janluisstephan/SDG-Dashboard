@@ -48,8 +48,9 @@ if not st.session_state.proceed:
     # Create two columns for Instructions and Bias
     instruction_col, bias_col = st.columns(2)
 
-     st.write("---")
+     
     with instruction_col:
+        st.write("---")
         st.markdown("## Instructions for Dashboard")
         st.write("""
         1. Select an SDG by clicking the button above its icon below the map.
