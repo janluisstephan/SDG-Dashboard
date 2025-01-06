@@ -232,22 +232,28 @@ if st.session_state.new_dashboard:
     # Load the Goal 7 data only once
     @st.cache_data
     def load_goal7_data():
-        data_path = 'Data/Goal7.xlsx'
+        data_path = 'Data/goal7.xlsx'
         data = pd.read_excel(data_path, engine='openpyxl')
         return data
 
     goal7_data = load_goal7_data()
 
+    # Debug: Check missing values per column
+    st.write("Missing values per column in the dataset:")
+    st.write(goal7_data.isnull().sum())
+
+    # Preprocess the dataset
+    goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()  # Remove leading/trailing spaces
+
     # Debug: Check unique indicators before filtering
     st.write("Unique indicators in the dataset before filtering:")
     st.write(goal7_data["Indicator"].unique())
 
-    # Preprocess the dataset
-    goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod', 'Location'])
-    goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()  # Remove leading/trailing spaces
+    # Handle missing values only for essential columns
+    goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])  # Removed 'Location'
 
     # Debug: Check unique indicators after filtering
-    st.write("Unique indicators in the dataset after preprocessing:")
+    st.write("Unique indicators in the dataset after filtering:")
     st.write(goal7_data["Indicator"].unique())
 
     # Sidebar for indicator and country selection
@@ -305,4 +311,3 @@ if st.session_state.new_dashboard:
             st.write("No data available for the selected indicator and countries.")
     else:
         st.write("Click 'Generate Graph' to display the trends.")
-
