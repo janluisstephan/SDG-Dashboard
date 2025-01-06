@@ -123,7 +123,7 @@ with header_cols[2]:
             trend_data = color_data[color_data["Country"] == selected_country]
             if not trend_data.empty and trend_column in trend_data.columns:
                 trend = trend_data.iloc[0][trend_column]
-                trend_description = trend_mapping.get(trend, "No trend description available.")
+                trend_description = trend_mapping.get(str(trend).strip(), "No trend description available.")  # Ensure clean mapping
                 st.markdown(f"""
                     <div style='display: flex; align-items: center;'>
                         <span style='font-size: 24px; margin-right: 10px;'>{trend}</span>
