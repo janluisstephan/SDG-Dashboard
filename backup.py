@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.express as px
 import os
 
+st.set_page_config(layout="wide")
+
 # Daten laden mit Caching
 @st.cache_data
 def load_data():
@@ -79,9 +81,6 @@ def generate_map(selected_sdg_index):
         dragmode=False
     )
     return fig
-
-# Hauptlayout
-st.title("Sustainable Development Goals Dashboard")
 
 # Default selected SDG index
 if "selected_sdg_index" not in st.session_state:
