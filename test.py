@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import os
-from streamlit_plotly_events import plotly_events
 
 st.set_page_config(layout="wide")
 
@@ -11,13 +10,20 @@ st.set_page_config(layout="wide")
 def load_data():
     data_path = 'Data/SDR2024-data.xlsx'
     sdg_data = pd.read_excel(data_path, sheet_name='Full Database', engine='openpyxl')
-    return sdg_data
+    color_data = pd.read_excel(data_path, sheet_name='Overview', engine='openpyxl')
+    return sdg_data, color_data
 
-sdg_data = load_data()
+sdg_data, color_data = load_data()
 
 # SDG-Spalten identifizieren
-color_columns = [col for col in sdg_data.columns if "Dash" in col]
-trend_columns = [col for col in sdg_data.columns if "Trend" in col]
+sdg_columns = [col for col in sdg_data.columns if "Goal" in col and "Score" in col]
+color_columns = [col for col in color_data.columns if col.startswith("SDG")]
+
+# Dynamische Identifikation der Trendspalten
+trend_columns = [
+    color_data.columns[color_data.columns.get_loc(col) + 1] if color_data.columns.get_loc(col) + 1 < len(color_data.columns) else None
+    for col in color_columns
+]
 
 # SDG-Labels vorbereiten
 sdg_labels = [
@@ -52,7 +58,7 @@ color_mapping = {
 # Karten-Daten vorbereiten
 def generate_map(selected_sdg_index):
     current_sdg = color_columns[selected_sdg_index]
-    filtered_data = sdg_data[["Country", current_sdg]].dropna()
+    filtered_data = color_data[["Country", current_sdg]].dropna()
     filtered_data.rename(columns={current_sdg: "Color"}, inplace=True)
 
     fig = px.choropleth(
@@ -99,14 +105,7 @@ with col1:
 # Map Placeholder
 with col2:
     st.write("### Global SDG Performance")
-    fig = generate_map(st.session_state.selected_sdg_index)
-    selected_points = plotly_events(fig, click_event=True, override_height=600, override_width="100%")
-
-    # Handle country selection safely
-    if selected_points and "hovertext" in selected_points[0]:
-        st.session_state.selected_country = selected_points[0]["hovertext"]
-    elif selected_points and "Country" in selected_points[0]:  # Check if "Country" key exists
-        st.session_state.selected_country = selected_points[0]["Country"]
+    map_placeholder = st.empty()
 
 # Legend
 with col3:
@@ -120,20 +119,19 @@ with col3:
     if st.session_state.selected_country:
         st.markdown(f"### Trends for {st.session_state.selected_country}")
         trend_images = {
-            "↑": "assets/up.png",
-            "↓": "assets/down.png",
-            "→": "assets/right.png",
-            "↗": "assets/right-up.png",
-            "-": "assets/no_trend.png"
+            "up": "assets/up.png",
+            "down": "assets/down.png",
+            "no_trend": "assets/no_trend.png",
+            "right": "assets/right.png",
+            "right-up": "assets/right-up.png"
         }
-        # Extract trend for selected country and SDG
-        selected_country_data = sdg_data[sdg_data["Country"] == st.session_state.selected_country]
+        trend_data = color_data[color_data["Country"] == st.session_state.selected_country]
         trend_column = trend_columns[st.session_state.selected_sdg_index]
-        if trend_column in selected_country_data.columns and not selected_country_data[trend_column].isna().all():
-            trend = selected_country_data.iloc[0][trend_column]
+        if trend_column in trend_data.columns and not trend_data[trend_column].isna().all():
+            trend = trend_data.iloc[0][trend_column]
             trend_image = trend_images.get(trend, None)
             if trend_image and os.path.exists(trend_image):
-                st.image(trend_image, width=40, caption=f"Trend: {trend}")
+                st.image(trend_image, width=40, caption=f"Trend: {trend.capitalize()}")
         else:
             st.write("No trend data available for this country.")
 
@@ -149,10 +147,23 @@ for i, label in enumerate(sdg_labels):
         # SDG Image
         image_path = os.path.join('assets', f'{i + 1}.png')
         if os.path.exists(image_path):
-            col.image(image_path, use_container_width=True)
+            col.image(image_path, use_container_width=True)  # Replaced use_column_width with use_container_width
 
         # SDG Button
         if col.button(label, key=f"button_{i}"):
             st.session_state.selected_sdg_index = i
             st.session_state.selected_country = None
             fig = generate_map(st.session_state.selected_sdg_index)
+            map_placeholder.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+
+# Generate Map
+fig = generate_map(st.session_state.selected_sdg_index)
+map_placeholder.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+
+# Callback to capture selected country
+@st.cache_data
+def get_country_on_click(data):
+    if "Country" in data:
+        st.session_state.selected_country = data["Country"]
+
+# NOTE: Replace this part with the proper callback logic using Streamlit or Plotly extensions
