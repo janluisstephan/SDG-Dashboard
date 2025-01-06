@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import os
+from streamlit_plotly_events import plotly_events
 
 st.set_page_config(layout="wide")
 
@@ -98,7 +99,13 @@ with col1:
 # Map Placeholder
 with col2:
     st.write("### Global SDG Performance")
-    map_placeholder = st.empty()
+    fig = generate_map(st.session_state.selected_sdg_index)
+    selected_points = plotly_events(fig, click_event=True, override_height=600, override_width="100%")
+
+    # Handle country selection
+    if selected_points:
+        selected_country = selected_points[0]["hovertext"]
+        st.session_state.selected_country = selected_country
 
 # Legend
 with col3:
@@ -148,16 +155,3 @@ for i, label in enumerate(sdg_labels):
             st.session_state.selected_sdg_index = i
             st.session_state.selected_country = None
             fig = generate_map(st.session_state.selected_sdg_index)
-            map_placeholder.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-
-# Generate Map
-fig = generate_map(st.session_state.selected_sdg_index)
-map_placeholder.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-
-# Country click callback
-@st.cache_data
-def get_country_on_click(data):
-    if "Country" in data:
-        st.session_state.selected_country = data["Country"]
-
-# NOTE: Replace this part with proper callbacks for handling Plotly interactions.
