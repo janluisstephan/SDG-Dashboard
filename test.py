@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.express as px
 import os
 
+st.set_page_config(layout="wide")
+
 # Daten laden mit Caching
 @st.cache_data
 def load_data():
