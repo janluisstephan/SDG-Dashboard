@@ -141,14 +141,15 @@ st.write("### Explore SDGs")
 
 # Create a horizontal row for SDG images as buttons
 cols = st.columns(len(sdg_labels))  # Create as many columns as there are SDGs
-for i, (col, label) in enumerate(zip(cols, sdg_labels)):
+for i, col in enumerate(cols):
     image_path = os.path.join('assets', f'{i + 1}.png')
     if os.path.exists(image_path):
         with col:
             # Make the image act as a button
-            if st.button(f"{label}", key=f"sdg_button_{i}"):
+            if st.button("", key=f"sdg_button_{i}"):
                 st.session_state.selected_sdg_index = i
                 st.session_state.selected_country = None
+            # Display the image without a caption
             st.image(image_path, use_container_width=True)
 
 # Generate Map
