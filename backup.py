@@ -33,6 +33,7 @@ if not st.session_state.proceed:
         unsafe_allow_html=True,
     )
     
+    # Slider
     reliability_score = st.slider(
         label="Rate the reliability:",
         min_value=1,
@@ -41,11 +42,34 @@ if not st.session_state.proceed:
         step=1,
         help="Drag the slider to indicate your opinion on the reliability of SDG scores."
     )
-    
-    if st.button("Proceed", key="proceed_button"):
+
+    # Create two columns for Instructions and Bias
+    instruction_col, bias_col = st.columns(2)
+
+    with instruction_col:
+        st.markdown("## Instructions")
+        st.write("""
+        1. Select an SDG by clicking the button above its icon below the map.
+        2. View the map to see the global performance for the selected SDG.
+        3. Use the dropdown under the legend to select a country and view its trend.
+        """)
+
+    with bias_col:
+        st.markdown("## Bias")
+        st.write("""
+        The data presented here is aggregated from various global sources and may include uncertainties. 
+        Factors such as data quality, collection methods, and regional differences in reporting standards 
+        could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
+        """)
+
+    # Large Proceed button (Streamlit button)
+    proceed_button = st.button("Proceed", key="proceed_button", help="Click to proceed to the dashboard")
+
+    if proceed_button:
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
 
+# Full dashboard
 # Full dashboard
 if st.session_state.proceed:
     # Identify SDG and trend columns
