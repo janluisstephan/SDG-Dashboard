@@ -97,7 +97,7 @@ col1, col2, col3 = st.columns([1.5, 4, 1.5])
 with col1:
     st.markdown("## Instructions")
     st.write("""
-    1. Select an SDG using the buttons below the map.
+    1. Select an SDG by clicking its icon below the map.
     2. View the map to see the global performance for the selected SDG.
     3. Click on a country to view specific trends.
     """)
@@ -135,35 +135,21 @@ with col3:
         else:
             st.write("No trend data available for this country.")
 
-# SDG Buttons Section
+# SDG Icons as Buttons
 st.write("---")
 st.write("### Explore SDGs")
 
-button_cols = st.columns(8)
-
-for i, label in enumerate(sdg_labels):
-    col = button_cols[i % 8]
-    with col:
-        # SDG Image
-        image_path = os.path.join('assets', f'{i + 1}.png')
-        if os.path.exists(image_path):
-            col.image(image_path, use_container_width=True)  # Replaced use_column_width with use_container_width
-
-        # SDG Button
-        if col.button(label, key=f"button_{i}"):
-            st.session_state.selected_sdg_index = i
-            st.session_state.selected_country = None
-            fig = generate_map(st.session_state.selected_sdg_index)
-            map_placeholder.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+# Create a horizontal row for SDG images as buttons
+cols = st.columns(len(sdg_labels))  # Create as many columns as there are SDGs
+for i, (col, label) in enumerate(zip(cols, sdg_labels)):
+    image_path = os.path.join('assets', f'{i + 1}.png')
+    if os.path.exists(image_path):
+        with col:
+            if st.button("", key=f"button_{i}"):
+                st.session_state.selected_sdg_index = i
+                st.session_state.selected_country = None
+            st.image(image_path, use_container_width=True)
 
 # Generate Map
 fig = generate_map(st.session_state.selected_sdg_index)
 map_placeholder.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-
-# Callback to capture selected country
-@st.cache_data
-def get_country_on_click(data):
-    if "Country" in data:
-        st.session_state.selected_country = data["Country"]
-
-# NOTE: Replace this part with the proper callback logic using Streamlit or Plotly extensions
