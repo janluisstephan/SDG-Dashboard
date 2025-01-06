@@ -174,7 +174,11 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 
         # Add country selection dropdown and trend display
         st.markdown("<div style='margin-top: 50px;'>", unsafe_allow_html=True)
-        st.markdown("### Trend for")
+
+        # Dynamically display the selected SDG name
+        selected_sdg_label = sdg_labels[st.session_state.selected_sdg_index]
+        st.markdown(f"### Trend for {selected_sdg_label}")
+
         selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
 
         if selected_country:
