@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -227,7 +228,87 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
             if os.path.exists(image_path):
                 st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
 
-# Indicator dashboard
+# Indicator Dashboard
 if st.session_state.new_dashboard:
-    st.markdown("## Indicator-Dashboard")
-    st.write("This is a placeholder for the new dashboard.")
+    # Load the Goal 7 data only once
+    @st.cache_data
+    def load_goal7_data():
+        data_path = 'Data/Goal7.xlsx'
+        data = pd.read_excel(data_path, engine='openpyxl')
+        return data
+
+    goal7_data = load_goal7_data()
+
+    # Debug: Check missing values per column
+    st.write("Missing values per column in the dataset:")
+    st.write(goal7_data.isnull().sum())
+
+    # Preprocess the dataset
+    goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()  # Remove leading/trailing spaces
+
+    # Debug: Check unique indicators before filtering
+    st.write("Unique indicators in the dataset before filtering:")
+    st.write(goal7_data["Indicator"].unique())
+
+    # Handle missing values only for essential columns
+    goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])  # Removed 'Location'
+
+    # Debug: Check unique indicators after filtering
+    st.write("Unique indicators in the dataset after filtering:")
+    st.write(goal7_data["Indicator"].unique())
+
+    # Sidebar for indicator and country selection
+    st.sidebar.header("Select Indicator")
+    indicators = sorted(goal7_data["Indicator"].unique())  # Sort indicators for better usability
+    selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators)
+
+    st.sidebar.header("Select Countries")
+    countries = sorted(goal7_data["GeoAreaName"].unique())  # Sort countries for better usability
+    selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
+
+    # Add Generate button to control graph updates
+    generate = st.sidebar.button("Generate Graph")
+
+    # Generate the graph only when the button is clicked
+    if generate:
+        # Filter data for the selected indicator and countries
+        filtered_data = goal7_data[
+            (goal7_data["Indicator"] == selected_indicator) &
+            (goal7_data["GeoAreaName"].isin(selected_countries))
+        ]
+
+        # Ensure regions (ALLAREA, URBAN, RURAL) are properly displayed
+        allarea_data = filtered_data[filtered_data["Location"] == "ALLAREA"]
+        urban_data = filtered_data[filtered_data["Location"] == "URBAN"]
+        rural_data = filtered_data[filtered_data["Location"] == "RURAL"]
+
+        st.title("Indicator Dashboard")
+        st.markdown(f"### Indicator: {selected_indicator}")
+
+        if not filtered_data.empty:
+            # Create the line chart with better performance and distinct country colors
+            fig = px.line(
+                filtered_data,
+                x="TimePeriod",
+                y="Value",
+                color="GeoAreaName",  # Different colors for countries
+                line_dash="Location",  # Differentiates ALLAREA, URBAN, and RURAL
+                labels={
+                    "TimePeriod": "Year",
+                    "Value": "Indicator Value",
+                    "Location": "Region"
+                },
+                title=f"Trends for {selected_indicator}",
+                color_discrete_sequence=px.colors.qualitative.Set1  # Distinct colors
+            )
+            fig.update_layout(
+                xaxis_title="Year",
+                yaxis_title="Indicator Value",
+                legend_title="Country / Region",
+                template="plotly_white"
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.write("No data available for the selected indicator and countries.")
+    else:
+        st.write("Click 'Generate Graph' to display the trends.")
