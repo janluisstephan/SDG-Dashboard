@@ -81,26 +81,6 @@ if not st.session_state.proceed:
         # Trigger the JavaScript scroll after the button click
         st.markdown(scroll_script, unsafe_allow_html=True)
 
-# Full dashboard
-if st.session_state.proceed:
-    # Add an anchor ID for scrolling
-    st.markdown('<div id="dashboard-section"></div>', unsafe_allow_html=True)
-    
-    st.markdown("## Dashboard")
-    
-    # Example dashboard content
-    st.write("### Reliability Score: ", st.session_state.reliability_score)
-    st.write("This is the main dashboard content. Replace this section with your actual dashboard logic.")
-
-    # Example chart
-    example_data = pd.DataFrame({
-        "Category": ["A", "B", "C", "D"],
-        "Values": [10, 23, 15, 7]
-    })
-    fig = px.bar(example_data, x="Category", y="Values", title="Example Chart")
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Your actual dashboard logic starts here
 
 # Full dashboard
 if st.session_state.proceed:
