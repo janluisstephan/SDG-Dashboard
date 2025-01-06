@@ -229,5 +229,18 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 
 # Indicator dashboard
 if st.session_state.new_dashboard:
-    st.markdown("## Indicator-Dashboard")
-    st.write("This is a placeholder for the new dashboard.")
+    # Layout with columns
+    dashboard_cols = st.columns([1, 10])  # Left column for the image, right column for the rest of the content
+
+    # Add the SDG7 logo in the top-left corner
+    with dashboard_cols[0]:
+        logo_path = os.path.join("assets", "sdg7.png")
+        if os.path.exists(logo_path):
+            st.image(logo_path, use_container_width=True)
+        else:
+            st.write("Logo not found in assets folder.")
+
+    # Placeholder for the Indicator Dashboard content
+    with dashboard_cols[1]:
+        st.markdown("## Indicator-Dashboard")
+        st.write("This is a placeholder for the new dashboard.")
