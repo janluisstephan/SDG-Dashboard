@@ -18,6 +18,8 @@ sdg_data, color_data = load_data()
 # Initialize session state
 if "understood" not in st.session_state:
     st.session_state.understood = False
+if "selected_sdg_index" not in st.session_state:
+    st.session_state.selected_sdg_index = 0  # Default SDG index
 
 # CSS for blurring effect
 blurry_style = """
@@ -29,6 +31,53 @@ blurry_style = """
 }
 </style>
 """
+
+# Generate map
+def generate_map(selected_sdg_index):
+    try:
+        current_sdg = color_columns[selected_sdg_index]
+        filtered_data = color_data[["Country", current_sdg]].dropna()
+        filtered_data.rename(columns={current_sdg: "Color"}, inplace=True)
+
+        fig = px.choropleth(
+            filtered_data,
+            locations="Country",
+            locationmode="country names",
+            color="Color",
+            hover_name="Country",
+            hover_data={"Country": True, "Color": False},
+            color_discrete_map=color_hex_mapping
+        )
+
+        fig.update_traces(marker_line_width=0)
+        fig.update_layout(
+            margin={"r": 0, "t": 0, "l": 0, "b": 0},
+            paper_bgcolor="#f9f9f9",
+            plot_bgcolor="#f9f9f9",
+            showlegend=False,
+            dragmode=False
+        )
+        return fig
+    except Exception as e:
+        st.error(f"Error generating map: {e}")
+        return None
+
+# Color and trend mappings
+color_columns = [col for col in color_data.columns if col.startswith("SDG")]
+color_mapping = {
+    "green": "Goal Achievement",
+    "yellow": "Challenges Remain",
+    "orange": "Significant Challenges",
+    "red": "Major Challenges",
+    "grey": "Insufficient Data"
+}
+color_hex_mapping = {
+    "green": "#2ca02c",
+    "yellow": "#ffdd57",
+    "orange": "#ffa500",
+    "red": "#d62728",
+    "grey": "#808080"
+}
 
 # Instructions and Bias section
 st.write("---")
@@ -60,9 +109,10 @@ else:
 # Conditional rendering of the rest of the dashboard
 with header_cols[1]:
     st.markdown("<h2 style='text-align: center; margin-bottom: 10px;'>Global SDG Performance</h2>", unsafe_allow_html=True)
-    fig = generate_map(st.session_state.selected_sdg_index)
     st.markdown(f"<div class='{blur_class}'>", unsafe_allow_html=True)
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+    fig = generate_map(st.session_state.selected_sdg_index)
+    if fig:
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
     st.markdown("</div>", unsafe_allow_html=True)
 
 with header_cols[2]:
@@ -75,30 +125,12 @@ with header_cols[2]:
             f"<span style='font-size: 14px;'>{description}</span></div>",
             unsafe_allow_html=True
         )
-
-    st.markdown("<div style='margin-top: 50px;'>", unsafe_allow_html=True)
-    st.markdown("### Trend for")
-    selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
-
-    if selected_country:
-        trend_column = trend_columns[st.session_state.selected_sdg_index]
-        if trend_column and trend_column in color_data.columns:
-            trend_data = color_data[color_data["Country"] == selected_country]
-            if not trend_data.empty and trend_column in trend_data.columns:
-                trend = trend_data.iloc[0][trend_column]
-                trend_description = trend_mapping.get(str(trend).strip(), "No trend description available.")
-                st.markdown(f"""
-                    <div style='display: flex; align-items: center;' class='{blur_class}'>
-                        <span style='font-size: 24px; margin-right: 10px;'>{trend}</span>
-                        <span style='font-size: 16px;'>{trend_description}</span>
-                    </div>
-                """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 # SDG selection section
 st.write("---")
 st.markdown(f"<div class='{blur_class}'>", unsafe_allow_html=True)
-cols = st.columns(len(sdg_labels))
+cols = st.columns(len(color_columns))
 
 for i, col in enumerate(cols):
     with col:
