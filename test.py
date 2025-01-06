@@ -138,12 +138,10 @@ st.write("### Explore SDGs")
 cols = st.columns(len(sdg_labels))
 for i, col in enumerate(cols):
     with col:
-        # Center the button above the image
-        button_html = f"<button style='margin: 0 auto; display: block; background-color: white; border: 1px solid #ccc; padding: 5px; border-radius: 5px;'>{f'SDG {i + 1}'}</button>"
+        # Center the button above the image and align it with the image width
         if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
             st.session_state.selected_sdg_index = i
 
         image_path = os.path.join("assets", f"{i + 1}.png")
         if os.path.exists(image_path):
-            st.markdown(button_html, unsafe_allow_html=True)
             st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)  # Highlight SDG 7
