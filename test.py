@@ -90,6 +90,17 @@ if "instructions_acknowledged" not in st.session_state:
 
 # Instructions overlay
 if not st.session_state.instructions_acknowledged:
+    st.markdown(
+        """
+        <style>
+        .blur-content {
+            filter: blur(5px);
+            pointer-events: none;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
     st.markdown("<div style='text-align: center; padding: 50px;'>" 
                 "<h2>Welcome to the SDG Dashboard</h2>" 
                 "<p>Please read the instructions carefully before proceeding.</p>" 
@@ -107,7 +118,8 @@ if not st.session_state.instructions_acknowledged:
 
     if st.button("Understood"):
         st.session_state.instructions_acknowledged = True
-else:
+
+if st.session_state.instructions_acknowledged:
     # Layout: Instructions, Map, Legend
     st.write("---")
     header_cols = st.columns([1.5, 4, 1.5])
@@ -170,3 +182,5 @@ else:
             image_path = os.path.join("assets", f"{i + 1}.png")
             if os.path.exists(image_path):
                 st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)  # Highlight SDG 7
+else:
+    st.markdown("<div class='blur-content'>", unsafe_allow_html=True)
