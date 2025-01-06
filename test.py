@@ -150,7 +150,10 @@ for i, col in enumerate(cols):
         # Display the SDG image
         image_path = os.path.join('assets', f'{i + 1}.png')
         if os.path.exists(image_path):
-            st.image(image_path, use_container_width=True)
+            if i == 6:  # Highlight SDG 7 (index 6)
+                st.image(image_path, use_container_width=False, width=120)  # Larger image for SDG 7
+            else:
+                st.image(image_path, use_container_width=False, width=90)  # Default size for others
 
 # Generate Map
 fig = generate_map(st.session_state.selected_sdg_index)
