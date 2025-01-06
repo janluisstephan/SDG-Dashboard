@@ -80,9 +80,6 @@ def generate_map(selected_sdg_index):
     )
     return fig
 
-# Hauptlayout
-st.title("Sustainable Development Goals Dashboard")
-
 # Default selected SDG index
 if "selected_sdg_index" not in st.session_state:
     st.session_state.selected_sdg_index = 0
