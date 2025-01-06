@@ -195,7 +195,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 
         # Add Proceed button under the Trend display
         st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
-        if st.button("Proceed to New Dashboard", key="new_dashboard_button"):
+        if st.button("Proceed to Indicator-Dashboard", key="new_dashboard_button"):
             st.session_state.new_dashboard = True
 
     # SDG selection section
@@ -212,7 +212,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
             if os.path.exists(image_path):
                 st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
 
-# New dashboard
+# Indicator dashboard
 if st.session_state.new_dashboard:
-    st.markdown("## New Dashboard")
+    st.markdown("## Indicator-Dashboard")
     st.write("This is a placeholder for the new dashboard.")
