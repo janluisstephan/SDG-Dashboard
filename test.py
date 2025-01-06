@@ -49,7 +49,7 @@ color_hex_mapping = {
 }
 trend_mapping = {
     "↑": "On track or maintaining achievement",
-    "➚": "Moderately Increasing",
+    "↗": "Moderately Increasing",
     "→": "Stagnating",
     "↓": "Decreasing"
 }
@@ -85,66 +85,88 @@ if "selected_sdg_index" not in st.session_state:
     st.session_state.selected_sdg_index = 0
 if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
+if "instructions_acknowledged" not in st.session_state:
+    st.session_state.instructions_acknowledged = False
 
-# Layout: Instructions, Map, Legend
-st.write("---")
-header_cols = st.columns([1.5, 4, 1.5])
+# Instructions overlay
+if not st.session_state.instructions_acknowledged:
+    st.markdown("<div style='text-align: center; padding: 50px;'>" 
+                "<h2>Welcome to the SDG Dashboard</h2>" 
+                "<p>Please read the instructions carefully before proceeding.</p>" 
+                "</div>", unsafe_allow_html=True)
 
-with header_cols[0]:
     st.markdown("## Instructions")
     st.write("""
     1. Select an SDG by clicking the button above its icon below the map.
     2. View the map to see the global performance for the selected SDG.
     3. Use the dropdown under the legend to select a country and view its trend.
-    
+
     ### Bias
     The data presented here is aggregated from various global sources and may include uncertainties. Factors such as data quality, collection methods, and regional differences in reporting standards could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
     """)
 
-with header_cols[1]:
-    st.markdown("<h2 style='text-align: center; margin-bottom: 10px;'>Global SDG Performance</h2>", unsafe_allow_html=True)
-    fig = generate_map(st.session_state.selected_sdg_index)
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+    if st.button("Understood"):
+        st.session_state.instructions_acknowledged = True
+else:
+    # Layout: Instructions, Map, Legend
+    st.write("---")
+    header_cols = st.columns([1.5, 4, 1.5])
 
-with header_cols[2]:
-    st.markdown("## Legend")
-    for color, description in color_mapping.items():
-        st.markdown(
-            f"<div style='display: flex; align-items: center;'>"
-            f"<div style='background-color: {color_hex_mapping[color]}; width: 20px; height: 20px; margin-right: 10px;'></div>"
-            f"<span style='font-size: 14px;'>{description}</span></div>",
-            unsafe_allow_html=True
-        )
+    with header_cols[0]:
+        st.markdown("## Instructions")
+        st.write("""
+        1. Select an SDG by clicking the button above its icon below the map.
+        2. View the map to see the global performance for the selected SDG.
+        3. Use the dropdown under the legend to select a country and view its trend.
+        
+        ### Bias
+        The data presented here is aggregated from various global sources and may include uncertainties. Factors such as data quality, collection methods, and regional differences in reporting standards could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
+        """)
 
-    # Add country selection dropdown and trend display aligned with Bias
-    st.markdown("<div style='margin-top: 50px;'>", unsafe_allow_html=True)  # Adjust vertical alignment
-    st.markdown("### Trend for")
-    selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
+    with header_cols[1]:
+        st.markdown("<h2 style='text-align: center; margin-bottom: 10px;'>Global SDG Performance</h2>", unsafe_allow_html=True)
+        fig = generate_map(st.session_state.selected_sdg_index)
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
-    if selected_country:
-        trend_column = trend_columns[st.session_state.selected_sdg_index]
-        if trend_column and trend_column in color_data.columns:
-            trend_data = color_data[color_data["Country"] == selected_country]
-            if not trend_data.empty and trend_column in trend_data.columns:
-                trend = trend_data.iloc[0][trend_column]
-                trend_description = trend_mapping.get(str(trend).strip(), "No trend description available.")
-                st.markdown(f"""
-                    <div style='display: flex; align-items: center;'>
-                        <span style='font-size: 24px; margin-right: 10px;'>{trend}</span>
-                        <span style='font-size: 16px;'>{trend_description}</span>
-                    </div>
-                """, unsafe_allow_html=True)
+    with header_cols[2]:
+        st.markdown("## Legend")
+        for color, description in color_mapping.items():
+            st.markdown(
+                f"<div style='display: flex; align-items: center;'>"
+                f"<div style='background-color: {color_hex_mapping[color]}; width: 20px; height: 20px; margin-right: 10px;'></div>"
+                f"<span style='font-size: 14px;'>{description}</span></div>",
+                unsafe_allow_html=True
+            )
 
-# SDG selection section
-st.write("---")
+        # Add country selection dropdown and trend display aligned with Bias
+        st.markdown("<div style='margin-top: 50px;'>", unsafe_allow_html=True)  # Adjust vertical alignment
+        st.markdown("### Trend for")
+        selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
 
-cols = st.columns(len(sdg_labels))
+        if selected_country:
+            trend_column = trend_columns[st.session_state.selected_sdg_index]
+            if trend_column and trend_column in color_data.columns:
+                trend_data = color_data[color_data["Country"] == selected_country]
+                if not trend_data.empty and trend_column in trend_data.columns:
+                    trend = trend_data.iloc[0][trend_column]
+                    trend_description = trend_mapping.get(str(trend).strip(), "No trend description available.")
+                    st.markdown(f"""
+                        <div style='display: flex; align-items: center;'>
+                            <span style='font-size: 24px; margin-right: 10px;'>{trend}</span>
+                            <span style='font-size: 16px;'>{trend_description}</span>
+                        </div>
+                    """, unsafe_allow_html=True)
 
-for i, col in enumerate(cols):
-    with col:
-        if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
-            st.session_state.selected_sdg_index = i
+    # SDG selection section
+    st.write("---")
 
-        image_path = os.path.join("assets", f"{i + 1}.png")
-        if os.path.exists(image_path):
-            st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)  # Highlight SDG 7
+    cols = st.columns(len(sdg_labels))
+
+    for i, col in enumerate(cols):
+        with col:
+            if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
+                st.session_state.selected_sdg_index = i
+
+            image_path = os.path.join("assets", f"{i + 1}.png")
+            if os.path.exists(image_path):
+                st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)  # Highlight SDG 7
