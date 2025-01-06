@@ -230,7 +230,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 # Load the data
 @st.cache_data
 def load_data():
-    file_path = 'Goal7.xlsx'
+    file_path = 'Data/Goal7.xlsx'
     data = pd.read_excel(file_path, engine='openpyxl')
     return data
 
