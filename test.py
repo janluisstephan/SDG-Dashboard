@@ -52,6 +52,15 @@ color_mapping = {
     "grey": "#808080"
 }
 
+# Trend image mapping
+trend_image_mapping = {
+    "up": "assets/up.png",
+    "down": "assets/down.png",
+    "no_trend": "assets/no_trend.png",
+    "right": "assets/right.png",
+    "right-up": "assets/right-up.png"
+}
+
 # Streamlit Layout
 st.title("Sustainable Development Goals Dashboard")
 
@@ -60,7 +69,7 @@ st.markdown("## Instructions")
 st.write("""
 1. Select a Sustainable Development Goal (SDG) from the buttons below.
 2. View the map showing the performance of countries for the selected SDG.
-3. Check the legend to understand the color coding.
+3. Check the legend to understand the color coding and trends.
 """)
 
 # Default selected SDG (initial load)
@@ -104,9 +113,16 @@ with col1:
 
 with col2:
     st.markdown("## Legend")
+    # Color coding legend
+    st.markdown("### Colors")
     for color, hex_value in color_mapping.items():
         st.markdown(f"<div style='background-color: {hex_value}; width: 20px; height: 20px; display: inline-block; margin-right: 10px;'></div> {color.capitalize()}",
                     unsafe_allow_html=True)
+
+    # Trend legend
+    st.markdown("### Trends")
+    for trend_name, image_path in trend_image_mapping.items():
+        st.image(image_path, width=30, caption=trend_name.replace("_", " ").capitalize())
 
 st.write("---")
 
@@ -118,7 +134,7 @@ sdg_image_base_url = "https://github.com/your-repo/assets"  # Replace with your 
 
 for i, label in enumerate(sdg_labels):
     col = button_cols[i % 9]
-    image_url = f"{sdg_image_base_url}/SDG{i + 1}.png"  # Update to your actual image URL
+    image_url = f"{sdg_image_base_url}/{i + 1}.png"  # Update to your actual image URL
     col.image(image_url, use_column_width=True)  # Display the SDG icon
     if col.button(label, key=f"button_{i}"):
         st.session_state.selected_sdg_index = i
