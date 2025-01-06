@@ -143,7 +143,9 @@ with header_cols[1]:
     fig = generate_map(st.session_state.selected_sdg_index)
     selected_points = plotly_events(fig, click_event=True, override_height=600)
     if selected_points:
-        st.session_state.selected_country = selected_points[0]["hovertext"]
+        country = selected_points[0].get("hovertext")
+        if country:
+            st.session_state.selected_country = country
 
 with header_cols[2]:
     st.markdown("## Legend")
