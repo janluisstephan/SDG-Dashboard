@@ -227,45 +227,79 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
             if os.path.exists(image_path):
                 st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
 
-# Indicator dashboard
-if st.session_state.new_dashboard:
-    # Layout with columns
-    dashboard_cols = st.columns([1, 4])  # Left column for the logo and indicators, right for the main content
+# Load the data
+@st.cache_data
+def load_data():
+    file_path = 'Goal7.xlsx'
+    data = pd.read_excel(file_path, engine='openpyxl')
+    return data
 
-    # Add the SDG7 logo in the top-left corner, scaled down
-    with dashboard_cols[0]:
-        # Add scaled-down SDG7 logo
-        logo_path = os.path.join("assets", "sdg7.png")
-        if os.path.exists(logo_path):
-            st.image(logo_path, width=150)  # Scale down the logo to 150px width
-        
-        # Add space between logo and indicators
-        st.markdown("<br>", unsafe_allow_html=True)
+# Load the dataset
+data = load_data()
 
-        # Indicators Section
-        st.markdown("### Indicators")
-        indicators = {
-            "7.1.1": "Proportion of population with access to electricity",
-            "7.1.2": "Proportion of population with primary reliance on clean fuels and technology",
-            "7.2.1": "Renewable energy share in the total final energy consumption",
-            "7.3.1": "Energy intensity measured in terms of primary energy and GDP",
-            "7.a.1": "International financial flows to developing countries in support of clean energy research and development and renewable energy production, including in hybrid systems",
-            "7.b.1": "Installed renewable energy-generating capacity in developing and developed countries (in watts per capita)"
-        }
+# Filter out rows with missing essential data
+data = data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod', 'Location'])
 
-        # Display indicators in smaller, compact boxes
-        for key, description in indicators.items():
-            st.markdown(
-                f"""
-                <div style='border: 1px solid #f39c12; border-radius: 5px; padding: 5px; margin-bottom: 5px; background-color: #fdf2e9;'>
-                    <strong>{key}</strong>: {description}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+# Initialize session state for selected indicator and countries
+if "selected_indicator" not in st.session_state:
+    st.session_state.selected_indicator = "7.1.1"  # Default indicator
 
-    # Placeholder for the rest of the dashboard content
-    with dashboard_cols[1]:
-        st.markdown("## Indicator-Dashboard")
-        st.write("This is a placeholder for the main content of the dashboard.")
+if "selected_countries" not in st.session_state:
+    st.session_state.selected_countries = ["Brazil"]  # Default country
 
+# Sidebar for indicator selection
+st.sidebar.header("Select Indicator")
+indicators = data["Indicator"].unique()
+st.session_state.selected_indicator = st.sidebar.selectbox(
+    "Choose an indicator:",
+    options=indicators,
+    index=0
+)
+
+# Sidebar for country selection
+st.sidebar.header("Select Countries")
+countries = data["GeoAreaName"].unique()
+st.session_state.selected_countries = st.sidebar.multiselect(
+    "Choose countries to compare:",
+    options=countries,
+    default=["Brazil"]  # Default country
+)
+
+# Filter data based on selected indicator and countries
+filtered_data = data[
+    (data["Indicator"] == st.session_state.selected_indicator) &
+    (data["GeoAreaName"].isin(st.session_state.selected_countries))
+]
+
+# Further split the data into ALLAREA, URBAN, and RURAL
+allarea_data = filtered_data[filtered_data["Location"] == "ALLAREA"]
+urban_data = filtered_data[filtered_data["Location"] == "URBAN"]
+rural_data = filtered_data[filtered_data["Location"] == "RURAL"]
+
+# Create the interactive graph
+st.title("Indicator Dashboard")
+st.markdown(f"### Indicator: {st.session_state.selected_indicator}")
+
+if not filtered_data.empty:
+    fig = px.line(
+        filtered_data,
+        x="TimePeriod",
+        y="Value",
+        color="GeoAreaName",
+        line_dash="Location",  # Differentiates ALLAREA, URBAN, and RURAL
+        labels={
+            "TimePeriod": "Year",
+            "Value": "Indicator Value",
+            "Location": "Region"
+        },
+        title="Indicator Trends by Country and Region"
+    )
+    fig.update_layout(
+        xaxis_title="Year",
+        yaxis_title="Indicator Value",
+        legend_title="Country / Region",
+        template="plotly_white"
+    )
+    st.plotly_chart(fig, use_container_width=True)
+else:
+    st.write("No data available for the selected indicator and countries.")
