@@ -228,50 +228,52 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
                 st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
 
 
-    
+# Indicator dashboard
+if st.session_state.new_dashboard:
+    # Layout for Indicator Dashboard
     st.set_page_config(layout="wide")
 
-# Top section (logo and disclaimer)
-top_cols = st.columns([1, 8, 3])  # Logo, title, disclaimer
+    # Top section: Logo and Disclaimer
+    top_cols = st.columns([1, 8, 3])  # Logo, Title, Disclaimer
 
-# Logo in the top left
-with top_cols[0]:
-    logo_path = os.path.join("assets", "sdg7.png")
-    if os.path.exists(logo_path):
-        st.image(logo_path, use_container_width=True)
+    # SDG7 Logo in the top left corner
+    with top_cols[0]:
+        logo_path = os.path.join("assets", "sdg7.png")
+        if os.path.exists(logo_path):
+            st.image(logo_path, use_container_width=True)
 
-# Title in the center
-with top_cols[1]:
-    st.markdown("<h1 style='text-align: center; color: #2c3e50;'>Affordable & Clean Energy (SDG 7)</h1>", unsafe_allow_html=True)
+    # Title in the center
+    with top_cols[1]:
+        st.markdown("<h1 style='text-align: center; color: #2c3e50;'>Affordable & Clean Energy (SDG 7)</h1>", unsafe_allow_html=True)
 
-# Disclaimer box in the top right
-with top_cols[2]:
-    st.markdown("""
-    <div style='border: 2px solid #e74c3c; border-radius: 10px; padding: 10px;'>
-        <strong>Disclaimer:</strong> The data presented here may have biases or inaccuracies due to collection and aggregation methods. Interpret cautiously.
-    </div>
-    """, unsafe_allow_html=True)
+    # Disclaimer box in the top right
+    with top_cols[2]:
+        st.markdown("""
+        <div style='border: 2px solid #e74c3c; border-radius: 10px; padding: 10px;'>
+            <strong>Disclaimer:</strong> The data presented here may have biases or inaccuracies due to collection and aggregation methods. Interpret cautiously.
+        </div>
+        """, unsafe_allow_html=True)
 
-# Main body layout
-body_cols = st.columns([2, 6, 4])  # Indicators, Graph, Country selection
+    # Main body layout
+    body_cols = st.columns([2, 6, 4])  # Indicators, Graph, Country Selection
 
-# Indicators list (left)
-with body_cols[0]:
-    st.markdown("<h3>Indicators</h3>", unsafe_allow_html=True)
-    indicators = ["7.1.1", "7.2", "7.3", "7.a", "7.b"]
-    for ind in indicators:
-        if st.button(f"Indicator {ind}", key=f"indicator_{ind}"):
-            st.session_state.selected_indicator = ind
+    # Indicators List (Left Section)
+    with body_cols[0]:
+        st.markdown("<h3>Indicators</h3>", unsafe_allow_html=True)
+        indicators = ["7.1.1", "7.2", "7.3", "7.a", "7.b"]
+        for ind in indicators:
+            if st.button(f"Indicator {ind}", key=f"indicator_{ind}"):
+                st.session_state.selected_indicator = ind
 
-# Graph area (center)
-with body_cols[1]:
-    st.markdown("<h3>Indicator Graph</h3>", unsafe_allow_html=True)
-    st.write("This is where the graph for the selected indicator will be displayed.")
-    # Placeholder for graph visualization
-    st.empty()
+    # Graph Area (Center Section)
+    with body_cols[1]:
+        st.markdown("<h3>Indicator Graph</h3>", unsafe_allow_html=True)
+        st.write("This is where the graph for the selected indicator will be displayed.")
+        # Placeholder for dynamic graph visualization
+        st.empty()
 
-# Country selection (right)
-with body_cols[2]:
-    st.markdown("<h3>Country Data</h3>", unsafe_allow_html=True)
-    selected_country = st.selectbox("Choose a country to display data for:", options=["GER", "BRA", "BOTH", "EVERY COUNTRY"])
-    st.write(f"Data and trend information for {selected_country} will appear here.")
+    # Country Selection (Right Section)
+    with body_cols[2]:
+        st.markdown("<h3>Country Data</h3>", unsafe_allow_html=True)
+        selected_country = st.selectbox("Choose a country to display data for:", options=["GER", "BRA", "BOTH", "EVERY COUNTRY"])
+        st.write(f"Data and trend information for {selected_country} will appear here.")
