@@ -22,6 +22,8 @@ if "selected_sdg_index" not in st.session_state:
     st.session_state.selected_sdg_index = 0
 if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
+if "new_dashboard" not in st.session_state:
+    st.session_state.new_dashboard = False
 
 # Leading question section
 if not st.session_state.proceed:
@@ -63,15 +65,14 @@ if not st.session_state.proceed:
         """)
 
     # Large Proceed button (Streamlit button)
-    proceed_button = st.button("Proceed (click 2x)", key="proceed_button", help="Click to proceed to the dashboard")
+    proceed_button = st.button("Proceed to SDG Dashboard", key="proceed_button", help="Click to proceed to the dashboard")
 
     if proceed_button:
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
 
 # Full dashboard
-# Full dashboard
-if st.session_state.proceed:
+if st.session_state.proceed and not st.session_state.new_dashboard:
     # Identify SDG and trend columns
     color_columns = [col for col in color_data.columns if col.startswith("SDG")]
     trend_columns = [
@@ -149,9 +150,6 @@ if st.session_state.proceed:
         1. Select an SDG by clicking the button above its icon below the map.
         2. View the map to see the global performance for the selected SDG.
         3. Use the dropdown under the legend to select a country and view its trend.
-        
-        ### Bias
-        The data presented here is aggregated from various global sources and may include uncertainties. Factors such as data quality, collection methods, and regional differences in reporting standards could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
         """)
 
     with header_cols[1]:
@@ -201,3 +199,12 @@ if st.session_state.proceed:
             image_path = os.path.join("assets", f"{i + 1}.png")
             if os.path.exists(image_path):
                 st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
+
+    # Proceed button for new dashboard
+    if st.button("Proceed to New Dashboard", key="new_dashboard_button"):
+        st.session_state.new_dashboard = True
+
+# New dashboard
+if st.session_state.new_dashboard:
+    st.markdown("## New Dashboard")
+    st.write("This is a placeholder for the new dashboard.")
