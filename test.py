@@ -152,7 +152,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
         3. Use the dropdown under the legend to select a country and view its trend.
         """)
 
-        st.markdown("## Bias")  # Ensure Bias is visible here too
+        st.markdown("## Bias")
         st.write("""
         The data presented here is aggregated from various global sources and may include uncertainties. 
         Factors such as data quality, collection methods, and regional differences in reporting standards 
@@ -197,6 +197,20 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
         st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
         if st.button("Proceed to New Dashboard", key="new_dashboard_button"):
             st.session_state.new_dashboard = True
+
+    # SDG selection section
+    st.write("---")
+
+    cols = st.columns(len(sdg_labels))
+
+    for i, col in enumerate(cols):
+        with col:
+            if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
+                st.session_state.selected_sdg_index = i
+
+            image_path = os.path.join("assets", f"{i + 1}.png")
+            if os.path.exists(image_path):
+                st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
 
 # New dashboard
 if st.session_state.new_dashboard:
