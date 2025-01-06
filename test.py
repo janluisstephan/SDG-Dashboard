@@ -98,26 +98,6 @@ if "selected_sdg_index" not in st.session_state:
 if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 
-# Add a main title at the top
-st.markdown(
-    """
-    <div style='text-align: center; font-size: 32px; font-weight: bold; padding: 10px; background-color: #f5f5f5; border-radius: 5px;'>
-        Sustainable Development Goals Dashboard
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-# Add a brief subtitle or tagline
-st.markdown(
-    """
-    <div style='text-align: center; font-size: 18px; color: #555; margin-top: -10px;'>
-        Tracking global progress toward achieving the United Nations Sustainable Development Goals.
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
 # Top row: Instructions, Map, Legend
 st.write("---")
 header_cols = st.columns([1.5, 4, 1.5])
