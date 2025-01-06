@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import os
 
-st.set_page_config(layout="wide")  # Must be at the very top of the script
+st.set_page_config(layout="wide")
 
 # Load data with caching
 @st.cache_data
@@ -35,6 +35,7 @@ if not st.session_state.proceed:
         unsafe_allow_html=True,
     )
 
+    # Slider
     reliability_score = st.slider(
         label="Rate the reliability:",
         min_value=1,
@@ -44,6 +45,7 @@ if not st.session_state.proceed:
         help="Drag the slider to indicate your opinion on the reliability of SDG scores."
     )
 
+    # Create two columns for Instructions and Bias
     instruction_col, bias_col = st.columns(2)
 
     with instruction_col:
@@ -64,6 +66,7 @@ if not st.session_state.proceed:
         could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
         """)
 
+    # Large Proceed button
     if st.button("Click 2x to proceed to SDG Dashboard", key="proceed_button"):
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
@@ -89,6 +92,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
         "Life on Land", "Peace, Justice and Strong Institutions", "Partnerships for the Goals"
     ]
 
+    # Color and trend mappings
     color_mapping = {
         "green": "Goal Achievement",
         "yellow": "Challenges Remain",
@@ -102,6 +106,12 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
         "orange": "#ffa500",
         "red": "#d62728",
         "grey": "#808080"
+    }
+    trend_mapping = {
+        "↑": "On track or maintaining achievement",
+        "➚": "Moderately Increasing",
+        "→": "Stagnating",
+        "↓": "Decreasing"
     }
 
     # Generate map
@@ -130,51 +140,94 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
         )
         return fig
 
+    # Layout: Instructions, Map, Legend
     header_cols = st.columns([1.5, 4, 1.5])
 
+    with header_cols[0]:
+        st.markdown("## Instructions")
+        st.write("""
+        1. Select an SDG by clicking the button above its icon below the map.
+        2. View the map to see the global performance for the selected SDG.
+        3. Use the dropdown under the legend to select a country and view its trend.
+        """)
+
+        st.markdown("## Bias")
+        st.write("""
+        The data presented here is aggregated from various global sources and may include uncertainties. 
+        Factors such as data quality, collection methods, and regional differences in reporting standards 
+        could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
+        """)
+
     with header_cols[1]:
-        st.markdown("<h2 style='text-align: center;'>Global SDG Performance</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center; margin-bottom: 10px;'>Global SDG Performance</h2>", unsafe_allow_html=True)
         fig = generate_map(st.session_state.selected_sdg_index)
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
-    # Proceed button
-    if st.button("Proceed to Indicator Dashboard", key="new_dashboard_button"):
-        st.session_state.new_dashboard = True
+    with header_cols[2]:
+        st.markdown("## Legend")
+        for color, description in color_mapping.items():
+            st.markdown(
+                f"<div style='display: flex; align-items: center;'>"
+                f"<div style='background-color: {color_hex_mapping[color]}; width: 20px; height: 20px; margin-right: 10px;'></div>"
+                f"<span style='font-size: 14px;'>{description}</span></div>",
+                unsafe_allow_html=True
+            )
+
+        # Add country selection dropdown and current situation display
+        st.markdown("<div style='margin-top: 50px;'>", unsafe_allow_html=True)
+        selected_sdg_label = sdg_labels[st.session_state.selected_sdg_index]
+        st.markdown(f"### Trend for {selected_sdg_label}")
+
+        selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
+
+        if selected_country:
+            current_sdg = color_columns[st.session_state.selected_sdg_index]
+            if current_sdg in color_data.columns:
+                country_data = color_data[color_data["Country"] == selected_country]
+                if not country_data.empty:
+                    country_color = country_data.iloc[0][current_sdg]
+                    color_description = color_mapping.get(country_color, "No description available.")
+                    color_hex = color_hex_mapping.get(country_color, "#808080")
+                    st.markdown(f"""
+                        <div style='display: flex; align-items: center; margin-top: 10px;'>
+                            <div style='background-color: {color_hex}; width: 20px; height: 20px; margin-right: 10px;'></div>
+                            <span style='font-size: 16px;'>{color_description}</span>
+                        </div>
+                    """, unsafe_allow_html=True)
+
+            # Fetch and display trend
+            trend_column = trend_columns[st.session_state.selected_sdg_index]
+            if trend_column in color_data.columns:
+                trend_data = color_data[color_data["Country"] == selected_country]
+                if not trend_data.empty:
+                    trend = trend_data.iloc[0][trend_column]
+                    trend_description = trend_mapping.get(str(trend).strip(), "No trend description available.")
+                    st.markdown(f"""
+                        <div style='display: flex; align-items: center;'>
+                            <span style='font-size: 24px; margin-right: 10px;'>{trend}</span>
+                            <span style='font-size: 16px;'>{trend_description}</span>
+                        </div>
+                    """, unsafe_allow_html=True)
+
+        # Add Proceed button under the Trend display
+        st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
+        if st.button("Click 2x to proceed to Indicator-Dashboard", key="new_dashboard_button"):
+            st.session_state.new_dashboard = True
+
+    # SDG selection section
+    st.write("---")
+    cols = st.columns(len(sdg_labels))
+
+    for i, col in enumerate(cols):
+        with col:
+            if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
+                st.session_state.selected_sdg_index = i
+
+            image_path = os.path.join("assets", f"{i + 1}.png")
+            if os.path.exists(image_path):
+                st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
 
 # Indicator dashboard
 if st.session_state.new_dashboard:
-    # Layout
-    st.set_page_config(layout="wide")
-    top_cols = st.columns([1, 8, 3])
-
-    with top_cols[0]:
-        logo_path = os.path.join("assets", "sdg7.png")
-        if os.path.exists(logo_path):
-            st.image(logo_path, use_container_width=True)
-
-    with top_cols[2]:
-        st.markdown("""
-        <div style='border: 2px solid #e74c3c; border-radius: 10px; padding: 10px;'>
-            <strong>Disclaimer:</strong> Data may be incomplete or biased. Analyze carefully.
-        </div>
-        """, unsafe_allow_html=True)
-
-    body_cols = st.columns([2, 6, 4])
-
-    # Indicators List
-    with body_cols[0]:
-        st.markdown("### Indicators")
-        indicators = ["7.1.1", "7.2", "7.3", "7.a", "7.b"]
-        for ind in indicators:
-            if st.button(f"Indicator {ind}", key=f"indicator_{ind}"):
-                st.write(f"Selected: {ind}")
-
-    # Graph Placeholder
-    with body_cols[1]:
-        st.markdown("### Indicator Graph")
-        st.write("Graph visualization goes here.")
-
-    # Country Selection
-    with body_cols[2]:
-        selected_country = st.selectbox("Select a country:", ["Germany", "Brazil", "Every Country"])
-        st.write(f"Data for {selected_country}.")
+    st.markdown("## Indicator-Dashboard")
+    st.write("This is a placeholder for the new dashboard.")
