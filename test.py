@@ -33,6 +33,7 @@ if not st.session_state.proceed:
         unsafe_allow_html=True,
     )
     
+    # Slider
     reliability_score = st.slider(
         label="Rate the reliability:",
         min_value=1,
@@ -41,7 +42,49 @@ if not st.session_state.proceed:
         step=1,
         help="Drag the slider to indicate your opinion on the reliability of SDG scores."
     )
-    
+
+    # Create two columns for Instructions and Bias
+    instruction_col, bias_col = st.columns(2)
+
+    with instruction_col:
+        st.markdown("## Instructions")
+        st.write("""
+        1. Select an SDG by clicking the button above its icon below the map.
+        2. View the map to see the global performance for the selected SDG.
+        3. Use the dropdown under the legend to select a country and view its trend.
+        """)
+
+    with bias_col:
+        st.markdown("## Bias")
+        st.write("""
+        The data presented here is aggregated from various global sources and may include uncertainties. 
+        Factors such as data quality, collection methods, and regional differences in reporting standards 
+        could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
+        """)
+
+    # Large Proceed button
+    st.markdown(
+        """
+        <div style="text-align: center; margin-top: 30px;">
+            <button style="
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 15px 50px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 18px;
+                margin: 10px auto;
+                cursor: pointer;
+                border-radius: 5px;
+            " onclick="document.location.reload()">Proceed</button>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Capture button click
     if st.button("Proceed", key="proceed_button"):
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
@@ -125,9 +168,6 @@ if st.session_state.proceed:
         1. Select an SDG by clicking the button above its icon below the map.
         2. View the map to see the global performance for the selected SDG.
         3. Use the dropdown under the legend to select a country and view its trend.
-        
-        ### Bias
-        The data presented here is aggregated from various global sources and may include uncertainties. Factors such as data quality, collection methods, and regional differences in reporting standards could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
         """)
 
     with header_cols[1]:
@@ -144,36 +184,3 @@ if st.session_state.proceed:
                 f"<span style='font-size: 14px;'>{description}</span></div>",
                 unsafe_allow_html=True
             )
-
-        # Add country selection dropdown and trend display
-        st.markdown("<div style='margin-top: 50px;'>", unsafe_allow_html=True)
-        st.markdown("### Trend for")
-        selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
-
-        if selected_country:
-            trend_column = trend_columns[st.session_state.selected_sdg_index]
-            if trend_column and trend_column in color_data.columns:
-                trend_data = color_data[color_data["Country"] == selected_country]
-                if not trend_data.empty and trend_column in trend_data.columns:
-                    trend = trend_data.iloc[0][trend_column]
-                    trend_description = trend_mapping.get(str(trend).strip(), "No trend description available.")
-                    st.markdown(f"""
-                        <div style='display: flex; align-items: center;'>
-                            <span style='font-size: 24px; margin-right: 10px;'>{trend}</span>
-                            <span style='font-size: 16px;'>{trend_description}</span>
-                        </div>
-                    """, unsafe_allow_html=True)
-
-    # SDG selection section
-    st.write("---")
-
-    cols = st.columns(len(sdg_labels))
-
-    for i, col in enumerate(cols):
-        with col:
-            if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
-                st.session_state.selected_sdg_index = i
-
-            image_path = os.path.join("assets", f"{i + 1}.png")
-            if os.path.exists(image_path):
-                st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
