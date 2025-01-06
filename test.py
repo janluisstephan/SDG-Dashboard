@@ -86,27 +86,6 @@ if "selected_sdg_index" not in st.session_state:
 if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 
-# Display trend for selected country
-def display_country_trend(selected_country, selected_sdg_index):
-    trend_column = trend_columns[selected_sdg_index]
-    if selected_country and trend_column:
-        trend_data = color_data[color_data["Country"] == selected_country]
-        if not trend_data.empty and trend_column in trend_data.columns:
-            trend = trend_data.iloc[0][trend_column]
-            trend_description = trend_mapping.get(trend, "No trend description available.")
-            st.markdown(f"### Trend for {selected_country}")
-            st.markdown(f"""
-                <div style='display: flex; align-items: center;'>
-                    <span style='font-size: 24px; margin-right: 10px;'>{trend}</span>
-                    <span style='font-size: 16px;'>{trend_description}</span>
-                </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"### Trend for {selected_country}")
-            st.write("No trend data available.")
-    else:
-        st.markdown("")  # Clear trend section if no country is selected
-
 # Layout: Instructions, Map, Legend
 st.write("---")
 header_cols = st.columns([1.5, 4, 1.5])
@@ -116,7 +95,7 @@ with header_cols[0]:
     st.write("""
     1. Select an SDG by clicking the button above its icon below the map.
     2. View the map to see the global performance for the selected SDG.
-    3. Use the dropdown below to select a country and view its trend.
+    3. Use the dropdown under the legend to select a country and view its trend.
     """)
 
 with header_cols[1]:
@@ -134,15 +113,23 @@ with header_cols[2]:
             unsafe_allow_html=True
         )
 
-# Country selection dropdown
-st.write("---")
-st.write("### Select a Country")
-country_list = color_data["Country"].unique().tolist()
-selected_country = st.selectbox("Choose a country to view its trend:", country_list)
-
-# Display trends below legend
-with header_cols[2]:
-    display_country_trend(selected_country, st.session_state.selected_sdg_index)
+    # Add country selection dropdown and trend display
+    st.markdown("### Trend for")
+    selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
+    
+    if selected_country:
+        trend_column = trend_columns[st.session_state.selected_sdg_index]
+        if trend_column and trend_column in color_data.columns:
+            trend_data = color_data[color_data["Country"] == selected_country]
+            if not trend_data.empty and trend_column in trend_data.columns:
+                trend = trend_data.iloc[0][trend_column]
+                trend_description = trend_mapping.get(trend, "No trend description available.")
+                st.markdown(f"""
+                    <div style='display: flex; align-items: center;'>
+                        <span style='font-size: 24px; margin-right: 10px;'>{trend}</span>
+                        <span style='font-size: 16px;'>{trend_description}</span>
+                    </div>
+                """, unsafe_allow_html=True)
 
 # SDG selection section
 st.write("---")
