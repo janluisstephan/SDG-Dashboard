@@ -65,7 +65,7 @@ if not st.session_state.proceed:
         """)
 
     # Large Proceed button (Streamlit button)
-    proceed_button = st.button("Proceed to SDG Dashboard", key="proceed_button", help="Click to proceed to the dashboard")
+    proceed_button = st.button("Click 2x to proceed to SDG Dashboard", key="proceed_button", help="Click 2x to proceed to the dashboard")
 
     if proceed_button:
         st.session_state.proceed = True
