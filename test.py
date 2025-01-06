@@ -230,19 +230,19 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 # Indicator dashboard
 if st.session_state.new_dashboard:
     # Layout with columns
-    dashboard_cols = st.columns([1, 4])  # First column for the logo and indicators, second column for placeholder content
+    dashboard_cols = st.columns([1, 4])  # Left column for the logo and indicators, right for the main content
 
-    # Add the SDG7 logo in the top-left corner
+    # Add the SDG7 logo in the top-left corner, scaled down
     with dashboard_cols[0]:
-        # Add SDG7 logo
+        # Add scaled-down SDG7 logo
         logo_path = os.path.join("assets", "sdg7.png")
         if os.path.exists(logo_path):
-            st.image(logo_path, use_container_width=True)
+            st.image(logo_path, width=150)  # Scale down the logo to 150px width
         
         # Add space between logo and indicators
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Indicators Section (compact on the left side)
+        # Indicators Section
         st.markdown("### Indicators")
         indicators = {
             "7.1.1": "Proportion of population with access to electricity",
@@ -268,3 +268,4 @@ if st.session_state.new_dashboard:
     with dashboard_cols[1]:
         st.markdown("## Indicator-Dashboard")
         st.write("This is a placeholder for the main content of the dashboard.")
+
