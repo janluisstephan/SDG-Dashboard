@@ -48,14 +48,6 @@ sdg_labels = [
 
 # Farbcodierungen und Bedeutungen
 color_mapping = {
-    "green": "Goal Achievement",
-    "yellow": "Challenges Remain",
-    "orange": "Significant Challenges",
-    "red": "Major Challenges",
-    "grey": "Insufficient Data"
-}
-
-color_hex_mapping = {
     "green": "#2ca02c",
     "yellow": "#ffdd57",
     "orange": "#ffa500",
@@ -77,7 +69,7 @@ def generate_map(selected_sdg_index):
         hover_name="Country",
         hover_data={"Country": True, "Color": False},
         title="",
-        color_discrete_map=color_hex_mapping
+        color_discrete_map=color_mapping
     )
 
     fig.update_traces(marker_line_width=0)
@@ -121,7 +113,7 @@ with header_cols[2]:
     for color, description in color_mapping.items():
         st.markdown(
             f"<div style='display: flex; align-items: center;'>"
-            f"<div style='background-color: {color_hex_mapping[color]}; width: 20px; height: 20px; margin-right: 10px;'></div>"
+            f"<div style='background-color: {color_mapping[color]}; width: 20px; height: 20px; margin-right: 10px;'></div>"
             f"{description}</div>",
             unsafe_allow_html=True
         )
@@ -134,10 +126,17 @@ st.write("### Explore SDGs")
 cols = st.columns(len(sdg_labels))  # Create one column per SDG
 for i, col in enumerate(cols):
     with col:
-        # Button above the image
-        if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
+        # Change button appearance for the selected SDG
+        button_style = (
+            "background-color: #f0f0f0; border: 2px solid #007bff; border-radius: 5px; padding: 5px;"
+            if i == st.session_state.selected_sdg_index
+            else "background-color: white; border: 1px solid #ccc; border-radius: 5px; padding: 5px;"
+        )
+
+        if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}", help=f"Select SDG {i + 1}"):
             st.session_state.selected_sdg_index = i
             st.session_state.selected_country = None
+
         # Display the SDG image
         image_path = os.path.join('assets', f'{i + 1}.png')
         if os.path.exists(image_path):
