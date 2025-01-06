@@ -48,7 +48,6 @@ if not st.session_state.proceed:
     # Create two columns for Instructions and Bias
     instruction_col, bias_col = st.columns(2)
 
-     
     with instruction_col:
         st.write("---")
         st.markdown("## Instructions for Dashboard")
@@ -57,7 +56,6 @@ if not st.session_state.proceed:
         2. View the map to see the global performance for the selected SDG.
         3. Use the dropdown under the legend to select a country and view its trend.
         """)
-        
 
     with bias_col:
         st.write("---")
@@ -67,7 +65,6 @@ if not st.session_state.proceed:
         Factors such as data quality, collection methods, and regional differences in reporting standards 
         could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
         """)
-        
 
     # Large Proceed button
     if st.button("Click 2x to proceed to SDG Dashboard", key="proceed_button"):
@@ -144,7 +141,6 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
         return fig
 
     # Layout: Instructions, Map, Legend
-    
     header_cols = st.columns([1.5, 4, 1.5])
 
     with header_cols[0]:
@@ -177,20 +173,33 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
                 unsafe_allow_html=True
             )
 
-        # Add country selection dropdown and trend display
+        # Add country selection dropdown and current situation display
         st.markdown("<div style='margin-top: 50px;'>", unsafe_allow_html=True)
-
-        # Dynamically display the selected SDG name
         selected_sdg_label = sdg_labels[st.session_state.selected_sdg_index]
         st.markdown(f"### Trend for {selected_sdg_label}")
 
         selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
 
         if selected_country:
+            current_sdg = color_columns[st.session_state.selected_sdg_index]
+            if current_sdg in color_data.columns:
+                country_data = color_data[color_data["Country"] == selected_country]
+                if not country_data.empty:
+                    country_color = country_data.iloc[0][current_sdg]
+                    color_description = color_mapping.get(country_color, "No description available.")
+                    color_hex = color_hex_mapping.get(country_color, "#808080")
+                    st.markdown(f"""
+                        <div style='display: flex; align-items: center; margin-top: 10px;'>
+                            <div style='background-color: {color_hex}; width: 20px; height: 20px; margin-right: 10px;'></div>
+                            <span style='font-size: 16px;'>{color_description}</span>
+                        </div>
+                    """, unsafe_allow_html=True)
+
+            # Fetch and display trend
             trend_column = trend_columns[st.session_state.selected_sdg_index]
-            if trend_column and trend_column in color_data.columns:
+            if trend_column in color_data.columns:
                 trend_data = color_data[color_data["Country"] == selected_country]
-                if not trend_data.empty and trend_column in trend_data.columns:
+                if not trend_data.empty:
                     trend = trend_data.iloc[0][trend_column]
                     trend_description = trend_mapping.get(str(trend).strip(), "No trend description available.")
                     st.markdown(f"""
@@ -207,7 +216,6 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 
     # SDG selection section
     st.write("---")
-
     cols = st.columns(len(sdg_labels))
 
     for i, col in enumerate(cols):
