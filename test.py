@@ -154,4 +154,4 @@ for i, col in enumerate(cols):
         # Display the SDG image
         image_path = os.path.join("assets", f"{i + 1}.png")
         if os.path.exists(image_path):
-            st.image(image_path, use_container_width=True)  # Replace deprecated parameter
+            st.image(image_path, use_container_width=True)
