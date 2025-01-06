@@ -19,12 +19,6 @@ sdg_data, color_data = load_data()
 sdg_columns = [col for col in sdg_data.columns if "Goal" in col and "Score" in col]
 color_columns = [col for col in color_data.columns if col.startswith("SDG")]
 
-# Dynamische Identifikation der Trendspalten
-trend_columns = [
-    color_data.columns[color_data.columns.get_loc(col) + 1] if color_data.columns.get_loc(col) + 1 < len(color_data.columns) else None
-    for col in color_columns
-]
-
 # SDG-Labels vorbereiten
 sdg_labels = [
     "No Poverty",
@@ -98,35 +92,6 @@ if "selected_sdg_index" not in st.session_state:
 if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 
-# Callback to update selected country
-def select_country(data):
-    if "points" in data and data["points"]:
-        st.session_state.selected_country = data["points"][0]["hovertext"]
-
-# Display Trends for Selected Country
-def display_country_trend(selected_country, selected_sdg_index):
-    if selected_country:
-        st.markdown(f"### Trends for {selected_country}")
-        trend_images = {
-            "up": "assets/up.png",
-            "down": "assets/down.png",
-            "no_trend": "assets/no_trend.png",
-            "right": "assets/right.png",
-            "right-up": "assets/right-up.png"
-        }
-        trend_data = color_data[color_data["Country"] == selected_country]
-        trend_column = trend_columns[selected_sdg_index]
-
-        if trend_column in trend_data.columns and not trend_data[trend_column].isna().all():
-            trend = trend_data.iloc[0][trend_column]
-            trend_image = trend_images.get(trend, None)
-            if trend_image and os.path.exists(trend_image):
-                st.image(trend_image, width=50, caption=f"Trend: {trend.capitalize()}")
-        else:
-            st.write("No trend data available for this country.")
-    else:
-        st.write("Click on a country to view its trend.")
-
 # Top row: Instructions, Map, Legend
 st.write("---")
 header_cols = st.columns([1.5, 4, 1.5])
@@ -141,8 +106,9 @@ with header_cols[0]:
 
 with header_cols[1]:
     st.markdown("<h2 style='text-align: center; margin-bottom: 10px;'>Global SDG Performance</h2>", unsafe_allow_html=True)
+    # Embed map directly in the header row for alignment
     fig = generate_map(st.session_state.selected_sdg_index)
-    click_data = st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False}, on_hover=select_country)
+    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 with header_cols[2]:
     st.markdown("## Legend")
@@ -153,10 +119,6 @@ with header_cols[2]:
             f"<span style='font-size: 14px;'>{description}</span></div>",
             unsafe_allow_html=True
         )
-
-# Trends Section under Legend
-with header_cols[2]:
-    display_country_trend(st.session_state.selected_country, st.session_state.selected_sdg_index)
 
 # SDG Icons with Buttons Centered Above
 st.write("---")
