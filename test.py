@@ -102,10 +102,11 @@ with col2:
     fig = generate_map(st.session_state.selected_sdg_index)
     selected_points = plotly_events(fig, click_event=True, override_height=600, override_width="100%")
 
-    # Handle country selection
-    if selected_points:
-        selected_country = selected_points[0]["hovertext"]
-        st.session_state.selected_country = selected_country
+    # Handle country selection safely
+    if selected_points and "hovertext" in selected_points[0]:
+        st.session_state.selected_country = selected_points[0]["hovertext"]
+    elif selected_points and "Country" in selected_points[0]:  # Check if "Country" key exists
+        st.session_state.selected_country = selected_points[0]["Country"]
 
 # Legend
 with col3:
