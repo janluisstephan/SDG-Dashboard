@@ -90,6 +90,11 @@ if "selected_sdg_index" not in st.session_state:
 if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 
+# Ensure selection updates without re-click
+def select_sdg(index):
+    st.session_state.selected_sdg_index = index
+    st.session_state.selected_country = None
+
 # Top row: Instructions, Map, Legend
 st.write("---")
 header_cols = st.columns([1.5, 4, 1.5])
@@ -128,14 +133,14 @@ for i, col in enumerate(cols):
     with col:
         # Change button appearance for the selected SDG
         button_style = (
-            "background-color: #f0f0f0; border: 2px solid #007bff; border-radius: 5px; padding: 5px;"
+            "background-color: #007bff; color: white; border: 2px solid #007bff; border-radius: 5px; padding: 5px;"
             if i == st.session_state.selected_sdg_index
             else "background-color: white; border: 1px solid #ccc; border-radius: 5px; padding: 5px;"
         )
 
-        if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}", help=f"Select SDG {i + 1}"):
-            st.session_state.selected_sdg_index = i
-            st.session_state.selected_country = None
+        # Use st.markdown for custom button style
+        if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
+            select_sdg(i)
 
         # Display the SDG image
         image_path = os.path.join('assets', f'{i + 1}.png')
