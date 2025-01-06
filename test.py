@@ -146,10 +146,10 @@ for i, (col, label) in enumerate(zip(cols, sdg_labels)):
     if os.path.exists(image_path):
         with col:
             # Make the image act as a button
-            if st.button("", key=f"sdg_button_{i}"):
+            if st.button(f"{label}", key=f"sdg_button_{i}"):
                 st.session_state.selected_sdg_index = i
                 st.session_state.selected_country = None
-            st.image(image_path, use_container_width=True, caption=f"{label}")
+            st.image(image_path, use_container_width=True)
 
 # Generate Map
 fig = generate_map(st.session_state.selected_sdg_index)
