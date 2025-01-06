@@ -229,7 +229,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 
 # Indicator dashboard
 if st.session_state.new_dashboard:
-st.set_page_config(layout="wide")
+    st.set_page_config(layout="wide")
 
 # Top section (logo and disclaimer)
 top_cols = st.columns([1, 8, 3])  # Logo, title, disclaimer
