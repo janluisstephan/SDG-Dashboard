@@ -87,7 +87,6 @@ if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 
 # Layout: Instructions, Map, Legend
-st.write("---")
 header_cols = st.columns([1.5, 4, 1.5])
 
 with header_cols[0]:
@@ -114,7 +113,7 @@ with header_cols[2]:
         )
 
     # Add country selection dropdown and trend display
-    st.markdown("### Trend for")
+    st.markdown("### Show Trend for:")
     selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
 
     if selected_country:
@@ -133,7 +132,6 @@ with header_cols[2]:
 
 # SDG selection section
 st.write("---")
-st.write("### Explore SDGs")
 
 cols = st.columns(len(sdg_labels))
 for i, col in enumerate(cols):
