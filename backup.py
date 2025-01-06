@@ -53,46 +53,118 @@ color_mapping = {
     "grey": "#808080"
 }
 
-# Streamlit Layout
-st.title("Sustainable Development Goals Dashboard")
-st.subheader("Select an SDG to view country performance and trends.")
-
-# Dropdown-Menü für SDG-Auswahl
-selected_sdg_label = st.selectbox("Choose an SDG:", sdg_labels)
-selected_sdg_index = sdg_labels.index(selected_sdg_label)
-current_sdg = color_columns[selected_sdg_index]
-current_trend = trend_columns[selected_sdg_index]
-
 # Karten-Daten vorbereiten
-filtered_data = color_data[["Country", current_sdg]].dropna()
-filtered_data.rename(columns={current_sdg: "Color"}, inplace=True)
+def generate_map(selected_sdg_index):
+    current_sdg = color_columns[selected_sdg_index]
+    filtered_data = color_data[["Country", current_sdg]].dropna()
+    filtered_data.rename(columns={current_sdg: "Color"}, inplace=True)
 
-# Karte erstellen
-fig = px.choropleth(
-    filtered_data,
-    locations="Country",
-    locationmode="country names",
-    color="Color",
-    hover_name="Country",
-    title="",
-    color_discrete_map=color_mapping
-)
+    fig = px.choropleth(
+        filtered_data,
+        locations="Country",
+        locationmode="country names",
+        color="Color",
+        hover_name="Country",
+        hover_data={"Country": True, "Color": False},
+        title="",
+        color_discrete_map=color_mapping
+    )
 
-fig.update_traces(marker_line_width=0)
-fig.update_layout(
-    margin={"r": 0, "t": 0, "l": 0, "b": 0},  # Weißen Rand entfernen
-    paper_bgcolor="#f9f9f9",
-    plot_bgcolor="#f9f9f9",
-    showlegend=False,
-    dragmode=False  # Karte statisch machen
-)
+    fig.update_traces(marker_line_width=0)
+    fig.update_layout(
+        margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        paper_bgcolor="#f9f9f9",
+        plot_bgcolor="#f9f9f9",
+        showlegend=False,
+        dragmode=False
+    )
+    return fig
 
-# Layout mit zwei Spalten
-col1, col2 = st.columns([4, 1])  # 80% für die Karte, 20% für die Legende
+# Hauptlayout
+st.title("Sustainable Development Goals Dashboard")
 
+# Default selected SDG index
+if "selected_sdg_index" not in st.session_state:
+    st.session_state.selected_sdg_index = 0
+
+# Default selected country
+if "selected_country" not in st.session_state:
+    st.session_state.selected_country = None
+
+# Top row: Instructions, Map, Legend
+col1, col2, col3 = st.columns([1.5, 4, 1.5])
+
+# Instructions
 with col1:
-    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    st.markdown("## Instructions")
+    st.write("""
+    1. Select an SDG using the buttons below the map.
+    2. View the map to see the global performance for the selected SDG.
+    3. Click on a country to view specific trends.
+    """)
 
+# Map Placeholder
 with col2:
-    st.write("### Legend")
-    st.write("This section is currently empty.")
+    st.write("### Global SDG Performance")
+    map_placeholder = st.empty()
+
+# Legend
+with col3:
+    st.markdown("## Legend")
+    st.markdown("### Colors")
+    for color, hex_value in color_mapping.items():
+        st.markdown(
+            f"<div style='background-color: {hex_value}; width: 20px; height: 20px; display: inline-block; margin-right: 10px;'></div> {color.capitalize()}",
+            unsafe_allow_html=True)
+
+    if st.session_state.selected_country:
+        st.markdown(f"### Trends for {st.session_state.selected_country}")
+        trend_images = {
+            "up": "assets/up.png",
+            "down": "assets/down.png",
+            "no_trend": "assets/no_trend.png",
+            "right": "assets/right.png",
+            "right-up": "assets/right-up.png"
+        }
+        trend_data = color_data[color_data["Country"] == st.session_state.selected_country]
+        trend_column = trend_columns[st.session_state.selected_sdg_index]
+        if trend_column in trend_data.columns and not trend_data[trend_column].isna().all():
+            trend = trend_data.iloc[0][trend_column]
+            trend_image = trend_images.get(trend, None)
+            if trend_image and os.path.exists(trend_image):
+                st.image(trend_image, width=40, caption=f"Trend: {trend.capitalize()}")
+        else:
+            st.write("No trend data available for this country.")
+
+# SDG Buttons Section
+st.write("---")
+st.write("### Explore SDGs")
+
+button_cols = st.columns(8)
+
+for i, label in enumerate(sdg_labels):
+    col = button_cols[i % 8]
+    with col:
+        # SDG Image
+        image_path = os.path.join('assets', f'{i + 1}.png')
+        if os.path.exists(image_path):
+            col.image(image_path, use_container_width=True)  # Replaced use_column_width with use_container_width
+
+        # SDG Button
+        if col.button(label, key=f"button_{i}"):
+            st.session_state.selected_sdg_index = i
+            st.session_state.selected_country = None
+            fig = generate_map(st.session_state.selected_sdg_index)
+            map_placeholder.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+
+# Generate Map
+fig = generate_map(st.session_state.selected_sdg_index)
+map_placeholder.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+
+# Callback to capture selected country
+@st.cache_data
+def get_country_on_click(data):
+    if "Country" in data:
+        st.session_state.selected_country = data["Country"]
+
+# NOTE: Replace this part with the proper callback logic using Streamlit or Plotly extensions
