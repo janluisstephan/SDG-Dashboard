@@ -23,6 +23,16 @@ if "selected_sdg_index" not in st.session_state:
 if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 
+# JavaScript to scroll to the dashboard
+scroll_script = """
+    <script>
+        var element = document.getElementById('dashboard-section');
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
+"""
+
 # Leading question section
 if not st.session_state.proceed:
     st.markdown(
@@ -63,13 +73,35 @@ if not st.session_state.proceed:
         """)
 
     # Large Proceed button (Streamlit button)
-    proceed_button = st.button("Proceed (click 2x)", key="proceed_button", help="Click to proceed to the dashboard")
+    proceed_button = st.button("Proceed", key="proceed_button", help="Click to proceed to the dashboard")
 
     if proceed_button:
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
+        # Trigger the JavaScript scroll after the button click
+        st.markdown(scroll_script, unsafe_allow_html=True)
 
 # Full dashboard
+if st.session_state.proceed:
+    # Add an anchor ID for scrolling
+    st.markdown('<div id="dashboard-section"></div>', unsafe_allow_html=True)
+    
+    st.markdown("## Dashboard")
+    
+    # Example dashboard content
+    st.write("### Reliability Score: ", st.session_state.reliability_score)
+    st.write("This is the main dashboard content. Replace this section with your actual dashboard logic.")
+
+    # Example chart
+    example_data = pd.DataFrame({
+        "Category": ["A", "B", "C", "D"],
+        "Values": [10, 23, 15, 7]
+    })
+    fig = px.bar(example_data, x="Category", y="Values", title="Example Chart")
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Your actual dashboard logic starts here
+
 # Full dashboard
 if st.session_state.proceed:
     # Identify SDG and trend columns
