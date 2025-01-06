@@ -64,14 +64,6 @@ trend_image_mapping = {
 # Streamlit Layout
 st.title("Sustainable Development Goals Dashboard")
 
-# Add Instructions Section
-st.markdown("## Instructions")
-st.write("""
-1. Select a Sustainable Development Goal (SDG) from the buttons below.
-2. View the map showing the performance of countries for the selected SDG.
-3. Check the legend to understand the color coding and trends.
-""")
-
 # Default selected SDG (initial load)
 if "selected_sdg_index" not in st.session_state:
     st.session_state.selected_sdg_index = 0
@@ -105,13 +97,24 @@ fig.update_layout(
     dragmode=False  # Static map
 )
 
-# Layout with two sections: Map + Legend and SDG Buttons
-col1, col2 = st.columns([4, 1])  # 80% for map, 20% for legend
+# Layout with three sections: Instructions, Map, Legend
+col1, col2, col3 = st.columns([1.5, 4, 1.5])  # Left, Center (Map), Right
 
+# Instructions Section
 with col1:
+    st.markdown("## Instructions")
+    st.write("""
+    1. Select a Sustainable Development Goal (SDG) from the buttons below.
+    2. View the map showing the performance of countries for the selected SDG.
+    3. Check the legend to understand the color coding and trends.
+    """)
+
+# Map Section
+with col2:
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-with col2:
+# Legend Section
+with col3:
     st.markdown("## Legend")
     # Color coding legend
     st.markdown("### Colors")
@@ -124,9 +127,8 @@ with col2:
     for trend_name, image_path in trend_image_mapping.items():
         st.image(image_path, width=30, caption=trend_name.replace("_", " ").capitalize())
 
+# SDG Buttons Section
 st.write("---")
-
-# Add SDG Buttons with Images
 st.markdown("### Select an SDG")
 
 button_cols = st.columns(9)  # Divide buttons into two rows of 9 columns each
