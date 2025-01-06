@@ -229,28 +229,39 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 
 # Indicator Dashboard
 if st.session_state.new_dashboard:
-    goal7_data_path = 'Data/Goal7.xlsx'
-    goal7_data = pd.read_excel(goal7_data_path, engine='openpyxl')
+    # Load the Goal 7 data only once
+    @st.cache_data
+    def load_goal7_data():
+        data_path = 'Data/Goal7.xlsx'
+        data = pd.read_excel(data_path, engine='openpyxl')
+        return data
+
+    goal7_data = load_goal7_data()
+
+    # Ensure all necessary columns have valid data
     goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod', 'Location'])
 
     # Sidebar for indicator and country selection
     st.sidebar.header("Select Indicator")
-    indicators = goal7_data["Indicator"].unique()
-    selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators, index=0)
+    indicators = sorted(goal7_data["Indicator"].unique())  # Sort indicators for better usability
+    selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators)
 
     st.sidebar.header("Select Countries")
-    countries = goal7_data["GeoAreaName"].unique()
+    countries = sorted(goal7_data["GeoAreaName"].unique())  # Sort countries for better usability
     selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
 
-    # Generate button to control graph updates
-    if st.sidebar.button("Generate Graph"):
+    # Add Generate button to control graph updates
+    generate = st.sidebar.button("Generate Graph")
+
+    # Generate the graph only when the button is clicked
+    if generate:
         # Filter data for the selected indicator and countries
         filtered_data = goal7_data[
             (goal7_data["Indicator"] == selected_indicator) &
             (goal7_data["GeoAreaName"].isin(selected_countries))
         ]
 
-        # Further split the data into ALLAREA, URBAN, and RURAL
+        # Ensure regions (ALLAREA, URBAN, RURAL) are properly displayed
         allarea_data = filtered_data[filtered_data["Location"] == "ALLAREA"]
         urban_data = filtered_data[filtered_data["Location"] == "URBAN"]
         rural_data = filtered_data[filtered_data["Location"] == "RURAL"]
@@ -259,19 +270,20 @@ if st.session_state.new_dashboard:
         st.markdown(f"### Indicator: {selected_indicator}")
 
         if not filtered_data.empty:
+            # Create the line chart with better performance and distinct country colors
             fig = px.line(
                 filtered_data,
                 x="TimePeriod",
                 y="Value",
-                color="GeoAreaName",
-                line_dash="Location",
+                color="GeoAreaName",  # Different colors for countries
+                line_dash="Location",  # Differentiates ALLAREA, URBAN, and RURAL
                 labels={
                     "TimePeriod": "Year",
                     "Value": "Indicator Value",
                     "Location": "Region"
                 },
-                title="Indicator Trends by Country and Region",
-                color_discrete_sequence=px.colors.qualitative.Set1  # Distinct colors for countries
+                title=f"Trends for {selected_indicator}",
+                color_discrete_sequence=px.colors.qualitative.Set1  # Distinct colors
             )
             fig.update_layout(
                 xaxis_title="Year",
@@ -284,3 +296,4 @@ if st.session_state.new_dashboard:
             st.write("No data available for the selected indicator and countries.")
     else:
         st.write("Click 'Generate Graph' to display the trends.")
+
