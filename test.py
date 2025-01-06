@@ -10,20 +10,13 @@ st.set_page_config(layout="wide")
 def load_data():
     data_path = 'Data/SDR2024-data.xlsx'
     sdg_data = pd.read_excel(data_path, sheet_name='Full Database', engine='openpyxl')
-    color_data = pd.read_excel(data_path, sheet_name='Overview', engine='openpyxl')
-    return sdg_data, color_data
+    return sdg_data
 
-sdg_data, color_data = load_data()
+sdg_data = load_data()
 
 # SDG-Spalten identifizieren
-sdg_columns = [col for col in sdg_data.columns if "Goal" in col and "Score" in col]
-color_columns = [col for col in color_data.columns if col.startswith("SDG")]
-
-# Dynamische Identifikation der Trendspalten
-trend_columns = [
-    color_data.columns[color_data.columns.get_loc(col) + 1] if color_data.columns.get_loc(col) + 1 < len(color_data.columns) else None
-    for col in color_columns
-]
+color_columns = [col for col in sdg_data.columns if "Dash" in col]
+trend_columns = [col for col in sdg_data.columns if "Trend" in col]
 
 # SDG-Labels vorbereiten
 sdg_labels = [
@@ -58,7 +51,7 @@ color_mapping = {
 # Karten-Daten vorbereiten
 def generate_map(selected_sdg_index):
     current_sdg = color_columns[selected_sdg_index]
-    filtered_data = color_data[["Country", current_sdg]].dropna()
+    filtered_data = sdg_data[["Country", current_sdg]].dropna()
     filtered_data.rename(columns={current_sdg: "Color"}, inplace=True)
 
     fig = px.choropleth(
@@ -119,19 +112,20 @@ with col3:
     if st.session_state.selected_country:
         st.markdown(f"### Trends for {st.session_state.selected_country}")
         trend_images = {
-            "up": "assets/up.png",
-            "down": "assets/down.png",
-            "no_trend": "assets/no_trend.png",
-            "right": "assets/right.png",
-            "right-up": "assets/right-up.png"
+            "↑": "assets/up.png",
+            "↓": "assets/down.png",
+            "→": "assets/right.png",
+            "↗": "assets/right-up.png",
+            "-": "assets/no_trend.png"
         }
-        trend_data = color_data[color_data["Country"] == st.session_state.selected_country]
+        # Extract trend for selected country and SDG
+        selected_country_data = sdg_data[sdg_data["Country"] == st.session_state.selected_country]
         trend_column = trend_columns[st.session_state.selected_sdg_index]
-        if trend_column in trend_data.columns and not trend_data[trend_column].isna().all():
-            trend = trend_data.iloc[0][trend_column]
+        if trend_column in selected_country_data.columns and not selected_country_data[trend_column].isna().all():
+            trend = selected_country_data.iloc[0][trend_column]
             trend_image = trend_images.get(trend, None)
             if trend_image and os.path.exists(trend_image):
-                st.image(trend_image, width=40, caption=f"Trend: {trend.capitalize()}")
+                st.image(trend_image, width=40, caption=f"Trend: {trend}")
         else:
             st.write("No trend data available for this country.")
 
@@ -147,7 +141,7 @@ for i, label in enumerate(sdg_labels):
         # SDG Image
         image_path = os.path.join('assets', f'{i + 1}.png')
         if os.path.exists(image_path):
-            col.image(image_path, use_container_width=True)  # Replaced use_column_width with use_container_width
+            col.image(image_path, use_container_width=True)
 
         # SDG Button
         if col.button(label, key=f"button_{i}"):
@@ -160,10 +154,10 @@ for i, label in enumerate(sdg_labels):
 fig = generate_map(st.session_state.selected_sdg_index)
 map_placeholder.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-# Callback to capture selected country
+# Country click callback
 @st.cache_data
 def get_country_on_click(data):
     if "Country" in data:
         st.session_state.selected_country = data["Country"]
 
-# NOTE: Replace this part with the proper callback logic using Streamlit or Plotly extensions
+# NOTE: Replace this part with proper callbacks for handling Plotly interactions.
