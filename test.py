@@ -232,7 +232,7 @@ if st.session_state.new_dashboard:
     # Load the Goal 7 data only once
     @st.cache_data
     def load_goal7_data():
-        data_path = 'Data/goal7.xlsx'
+        data_path = 'Data/Goal7.xlsx'
         data = pd.read_excel(data_path, engine='openpyxl')
         return data
 
