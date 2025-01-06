@@ -49,7 +49,7 @@ color_hex_mapping = {
 }
 trend_mapping = {
     "↑": "On track or maintaining achievement",
-    "➚": "Moderately Increasing",
+    "↗": "Moderately Increasing",
     "→": "Stagnating",
     "↓": "Decreasing"
 }
@@ -96,6 +96,9 @@ with header_cols[0]:
     1. Select an SDG by clicking the button above its icon below the map.
     2. View the map to see the global performance for the selected SDG.
     3. Use the dropdown under the legend to select a country and view its trend.
+    
+    ### Bias
+    The data presented here is aggregated from various global sources and may include uncertainties. Factors such as data quality, collection methods, and regional differences in reporting standards could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
     """)
 
 with header_cols[1]:
@@ -113,17 +116,18 @@ with header_cols[2]:
             unsafe_allow_html=True
         )
 
-    # Add country selection dropdown and trend display
+    # Add country selection dropdown and trend display aligned with Bias
+    st.markdown("<div style='margin-top: 50px;'>", unsafe_allow_html=True)  # Adjust vertical alignment
     st.markdown("### Trend for")
     selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
-    
+
     if selected_country:
         trend_column = trend_columns[st.session_state.selected_sdg_index]
         if trend_column and trend_column in color_data.columns:
             trend_data = color_data[color_data["Country"] == selected_country]
             if not trend_data.empty and trend_column in trend_data.columns:
                 trend = trend_data.iloc[0][trend_column]
-                trend_description = trend_mapping.get(str(trend).strip(), "No trend description available.")  # Ensure clean mapping
+                trend_description = trend_mapping.get(str(trend).strip(), "No trend description available.")
                 st.markdown(f"""
                     <div style='display: flex; align-items: center;'>
                         <span style='font-size: 24px; margin-right: 10px;'>{trend}</span>
