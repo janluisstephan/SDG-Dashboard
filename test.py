@@ -34,7 +34,7 @@ if not st.session_state.proceed:
         """,
         unsafe_allow_html=True,
     )
-    
+
     # Slider
     reliability_score = st.slider(
         label="Rate the reliability:",
@@ -64,10 +64,8 @@ if not st.session_state.proceed:
         could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
         """)
 
-    # Large Proceed button (Streamlit button)
-    proceed_button = st.button("Click 2x to proceed to SDG Dashboard", key="proceed_button", help="Click 2x to proceed to the dashboard")
-
-    if proceed_button:
+    # Large Proceed button
+    if st.button("Proceed to SDG Dashboard", key="proceed_button"):
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
 
