@@ -87,7 +87,6 @@ if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 
 # Layout: Instructions, Map, Legend
-st.write("---")
 header_cols = st.columns([1.5, 4, 1.5])
 
 with header_cols[0]:
