@@ -229,7 +229,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 
 # Indicator Dashboard
 if st.session_state.new_dashboard:
-    goal7_data_path = 'Data/Goal7.xlsx'
+    goal7_data_path = 'Data/goal7.xlsx'
     goal7_data = pd.read_excel(goal7_data_path, engine='openpyxl')
     goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod', 'Location'])
 
@@ -242,40 +242,45 @@ if st.session_state.new_dashboard:
     countries = goal7_data["GeoAreaName"].unique()
     selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
 
-    # Filter data for the selected indicator and countries
-    filtered_data = goal7_data[
-        (goal7_data["Indicator"] == selected_indicator) &
-        (goal7_data["GeoAreaName"].isin(selected_countries))
-    ]
+    # Generate button to control graph updates
+    if st.sidebar.button("Generate Graph"):
+        # Filter data for the selected indicator and countries
+        filtered_data = goal7_data[
+            (goal7_data["Indicator"] == selected_indicator) &
+            (goal7_data["GeoAreaName"].isin(selected_countries))
+        ]
 
-    # Further split the data into ALLAREA, URBAN, and RURAL
-    allarea_data = filtered_data[filtered_data["Location"] == "ALLAREA"]
-    urban_data = filtered_data[filtered_data["Location"] == "URBAN"]
-    rural_data = filtered_data[filtered_data["Location"] == "RURAL"]
+        # Further split the data into ALLAREA, URBAN, and RURAL
+        allarea_data = filtered_data[filtered_data["Location"] == "ALLAREA"]
+        urban_data = filtered_data[filtered_data["Location"] == "URBAN"]
+        rural_data = filtered_data[filtered_data["Location"] == "RURAL"]
 
-    st.title("Indicator Dashboard")
-    st.markdown(f"### Indicator: {selected_indicator}")
+        st.title("Indicator Dashboard")
+        st.markdown(f"### Indicator: {selected_indicator}")
 
-    if not filtered_data.empty:
-        fig = px.line(
-            filtered_data,
-            x="TimePeriod",
-            y="Value",
-            color="GeoAreaName",
-            line_dash="Location",
-            labels={
-                "TimePeriod": "Year",
-                "Value": "Indicator Value",
-                "Location": "Region"
-            },
-            title="Indicator Trends by Country and Region"
-        )
-        fig.update_layout(
-            xaxis_title="Year",
-            yaxis_title="Indicator Value",
-            legend_title="Country / Region",
-            template="plotly_white"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        if not filtered_data.empty:
+            fig = px.line(
+                filtered_data,
+                x="TimePeriod",
+                y="Value",
+                color="GeoAreaName",
+                line_dash="Location",
+                labels={
+                    "TimePeriod": "Year",
+                    "Value": "Indicator Value",
+                    "Location": "Region"
+                },
+                title="Indicator Trends by Country and Region",
+                color_discrete_sequence=px.colors.qualitative.Set1  # Distinct colors for countries
+            )
+            fig.update_layout(
+                xaxis_title="Year",
+                yaxis_title="Indicator Value",
+                legend_title="Country / Region",
+                template="plotly_white"
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.write("No data available for the selected indicator and countries.")
     else:
-        st.write("No data available for the selected indicator and countries.")
+        st.write("Click 'Generate Graph' to display the trends.")
