@@ -106,7 +106,7 @@ def display_country_trend(selected_country, selected_sdg_index):
             st.markdown(f"### Trend for {selected_country}")
             st.write("No trend data available.")
     else:
-        st.write("Select a country to view its trend.")
+        st.markdown("")  # Clear trend section if no country is selected
 
 # Layout: Instructions, Map, Legend
 st.write("---")
