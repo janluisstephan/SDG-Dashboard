@@ -138,15 +138,20 @@ st.write("### Explore SDGs")
 cols = st.columns(len(sdg_labels))
 for i, col in enumerate(cols):
     with col:
-        # Center the button above the image and match the button width to the image
+        # Center the button above the image and match its width
         button_style = (
             "background-color: #f0f0f0; border: 2px solid #007bff; border-radius: 5px; padding: 5px;"
             if i == st.session_state.selected_sdg_index
             else "background-color: white; border: 1px solid #ccc; border-radius: 5px; padding: 5px;"
         )
-        if st.button(f"SDG {i + 1}", key=f"sdg_button_{i}"):
-            st.session_state.selected_sdg_index = i
-
+        button_html = f"""
+        <div style='text-align: center;'>
+            <button style='{button_style}; width: 90px;'>SDG {i + 1}</button>
+        </div>
+        """
+        st.markdown(button_html, unsafe_allow_html=True)
+        
+        # Display the SDG image
         image_path = os.path.join("assets", f"{i + 1}.png")
         if os.path.exists(image_path):
-            st.image(image_path, use_column_width=True, caption=None)
+            st.image(image_path, use_container_width=True)  # Replace deprecated parameter
