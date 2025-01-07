@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -239,23 +238,11 @@ if st.session_state.new_dashboard:
 
     goal7_data = load_goal7_data()
 
-    # Debug: Check missing values per column
-    st.write("Missing values per column in the dataset:")
-    st.write(goal7_data.isnull().sum())
-
     # Preprocess the dataset
     goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()  # Remove leading/trailing spaces
 
-    # Debug: Check unique indicators before filtering
-    st.write("Unique indicators in the dataset before filtering:")
-    st.write(goal7_data["Indicator"].unique())
-
     # Handle missing values only for essential columns
     goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])  # Removed 'Location'
-
-    # Debug: Check unique indicators after filtering
-    st.write("Unique indicators in the dataset after filtering:")
-    st.write(goal7_data["Indicator"].unique())
 
     # Sidebar for indicator and country selection
     st.sidebar.header("Select Indicator")
