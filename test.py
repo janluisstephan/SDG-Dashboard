@@ -238,10 +238,6 @@ if st.session_state.new_dashboard:
 
     goal7_data = load_goal7_data()
 
-    # Debug: Check missing values per column
-    st.write("Missing values per column in the dataset:")
-    st.write(goal7_data.isnull().sum())
-
     # Preprocess the dataset
     goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()  # Remove leading/trailing spaces
 
