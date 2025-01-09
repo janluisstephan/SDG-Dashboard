@@ -171,9 +171,24 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
         """)
 
     with header_cols[1]:
-        st.markdown("<h2 style='text-align: center; margin-bottom: 10px;'>Global SDG Performance</h2>", unsafe_allow_html=True)
+        # Add container for rounded corners
+        st.markdown(
+            """
+            <div style="
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+                border: 1px solid #e0e0e0;">
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Display the map
         fig = generate_map(st.session_state.selected_sdg_index)
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+        # Close the container
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with header_cols[2]:
         st.markdown("## Legend")
