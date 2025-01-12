@@ -48,7 +48,7 @@ if not st.session_state.proceed:
     # Second question with slider
     st.markdown(
         """
-        <h1 style="text-align: center; color: #2c3e50; margin-top: 30px;">How would you rate your knowledge about the concept of SDGs?</h1>
+        <h1 style="text-align: center; color: #2c3e50; margin-top: 30px;">How would you rate your knowledge about the composition of SDGs?</h1>
         <p style="text-align: center; font-size: 16px; color: #7f8c8d;">Please rate on a scale from 1 to 10, where 10 means you have excellent knowledge.</p>
         """,
         unsafe_allow_html=True,
