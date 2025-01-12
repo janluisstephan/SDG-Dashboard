@@ -5,6 +5,26 @@ import os
 
 st.set_page_config(layout="wide")
 
+# Speicherort der Antworten
+DATA_FILE = "user_answers.csv"
+
+# Funktion zum Laden der Antworten
+def load_answers():
+    if os.path.exists(DATA_FILE):
+        return pd.read_csv(DATA_FILE)
+    else:
+        return pd.DataFrame(columns=["reliability_score", "sdg_knowledge_score"])
+
+# Funktion zum Speichern der Antworten
+def save_answer(reliability, knowledge):
+    answers = load_answers()
+    new_entry = {"reliability_score": reliability, "sdg_knowledge_score": knowledge}
+    answers = pd.concat([answers, pd.DataFrame([new_entry])], ignore_index=True)
+    answers.to_csv(DATA_FILE, index=False)
+
+# Lade gespeicherte Daten, falls vorhanden
+answers = load_answers()
+
 # Load data with caching
 @st.cache_data
 def load_data():
@@ -94,6 +114,8 @@ if not st.session_state.proceed:
 
     # Large Proceed button
     if st.button("Click 2x to proceed to SDG Dashboard", key="proceed_button"):
+        # Save the answers
+        save_answer(reliability_score, sdg_knowledge_score)
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
         st.session_state.sdg_knowledge_score = sdg_knowledge_score
