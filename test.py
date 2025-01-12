@@ -64,6 +64,7 @@ if not st.session_state.proceed:
         The data presented here is aggregated from various global sources and may include uncertainties. 
         Factors such as data quality, collection methods, and regional differences in reporting standards 
         could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
+        The data we introduce may construct a narrative. As we cannot include all existing data in the current version, we decided to provide the data that creates contrast and serves the investigation of our leading question. This is undeterrable and induced by selective bias.
         """)
 
     # Large Proceed button
