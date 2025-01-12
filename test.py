@@ -30,6 +30,21 @@ def save_answer(reliability, knowledge):
 # Lade gespeicherte Daten, falls vorhanden
 answers = load_answers()
 
+# Funktion zum Laden der SDG-Daten
+@st.cache_data
+def load_data():
+    data_path = "Data/SDR2024-data.xlsx"
+    if os.path.exists(data_path):
+        sdg_data = pd.read_excel(data_path, sheet_name="Full Database", engine="openpyxl")
+        color_data = pd.read_excel(data_path, sheet_name="Overview", engine="openpyxl")
+        return sdg_data, color_data
+    else:
+        st.error("Data file not found! Make sure 'SDR2024-data.xlsx' is in the 'Data' directory.")
+        return None, None
+
+# Lade SDG-Daten
+sdg_data, color_data = load_data()
+
 # Initialize session state
 if "proceed" not in st.session_state:
     st.session_state.proceed = False
@@ -117,14 +132,18 @@ if not st.session_state.proceed:
 
 # SDG dashboard
 if st.session_state.proceed and not st.session_state.new_dashboard:
-    # Identify SDG and trend columns
-    color_columns = [col for col in color_data.columns if col.startswith("SDG")]
-    trend_columns = [
-        color_data.columns[color_data.columns.get_loc(col) + 1]
-        if color_data.columns.get_loc(col) + 1 < len(color_data.columns)
-        else None
-        for col in color_columns
-    ]
+    if color_data is not None:
+        # Identify SDG and trend columns
+        color_columns = [col for col in color_data.columns if col.startswith("SDG")]
+        trend_columns = [
+            color_data.columns[color_data.columns.get_loc(col) + 1]
+            if color_data.columns.get_loc(col) + 1 < len(color_data.columns)
+            else None
+            for col in color_columns
+        ]
+        st.write("SDG Dashboard Placeholder")
+    else:
+        st.error("SDG data is not available.")
 
 
     # SDG labels
