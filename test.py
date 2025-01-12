@@ -298,126 +298,74 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 
 # Indicator Dashboard
 # Indicator Dashboard
-if st.session_state.new_dashboard:
-    # Sidebar selection to switch between dashboards
-    st.sidebar.header("Dashboard Selection")
-    dashboard_choice = st.sidebar.radio(
-        "Choose a dashboard:",
-        options=["Indicator Dashboard", "Electricity Loss Comparison"],
-        index=0  # Default to Indicator Dashboard
+if dashboard_choice == "Indicator Dashboard":
+    # Load the Goal 7 data only once
+    @st.cache_data
+    def load_goal7_data():
+        data_path = 'Data/Goal7.xlsx'
+        data = pd.read_excel(data_path, engine='openpyxl')
+        return data
+
+    goal7_data = load_goal7_data()
+
+    # Preprocess the dataset
+    goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()
+    goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])
+
+    # Create a mapping of indicator numbers to their descriptive names
+    indicator_names = {
+        "7.1.1": "Proportion of population with access to electricity, by urban/rural (%)",
+        "7.1.2": "Proportion of population with primary reliance on clean fuels and technology (%)",
+        "7.2.1": "Renewable energy share in the total final energy consumption (%)",
+        "7.3.1": "Energy intensity level of primary energy (megajoules per constant 2017 purchasing power parity GDP)",
+        "7.a.1": "International financial flows to developing countries in support of clean energy research and development and renewable energy production, including in hybrid systems (millions of constant 2021 United States dollars)",
+        "7.b.1": "Installed renewable electricity-generating capacity (watts per capita)"
+    }
+
+    # Sidebar for indicator and country selection
+    st.sidebar.header("Select Indicator and Countries")
+    indicators = sorted(goal7_data["Indicator"].unique())
+    selected_indicator = st.sidebar.selectbox(
+        "Choose an indicator:",
+        options=indicators,
+        format_func=lambda x: indicator_names.get(x, x)  # Show descriptive names, fallback to number if not mapped
     )
 
-    # Indicator Dashboard
-    if dashboard_choice == "Indicator Dashboard":
-        # Load the Goal 7 data only once
-        @st.cache_data
-        def load_goal7_data():
-            data_path = 'Data/Goal7.xlsx'
-            data = pd.read_excel(data_path, engine='openpyxl')
-            return data
+    countries = sorted(goal7_data["GeoAreaName"].unique())
+    selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
 
-        goal7_data = load_goal7_data()
+    generate_indicator_graph = st.sidebar.button("Generate Indicator Graph")
 
-        # Preprocess the dataset
-        goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()
-        goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])
+    if generate_indicator_graph:
+        # Filter data for the selected indicator and countries
+        filtered_data = goal7_data[
+            (goal7_data["Indicator"] == selected_indicator) &
+            (goal7_data["GeoAreaName"].isin(selected_countries))
+        ]
 
-        # Sidebar for indicator and country selection
-        st.sidebar.header("Select Indicator and Countries")
-        indicators = sorted(goal7_data["Indicator"].unique())
-        selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators)
+        st.title("Indicator Dashboard")
+        st.markdown(f"### Indicator: {indicator_names.get(selected_indicator, selected_indicator)}")
 
-        countries = sorted(goal7_data["GeoAreaName"].unique())
-        selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
-
-        generate_indicator_graph = st.sidebar.button("Generate Indicator Graph")
-
-        if generate_indicator_graph:
-            # Filter data for the selected indicator and countries
-            filtered_data = goal7_data[
-                (goal7_data["Indicator"] == selected_indicator) &
-                (goal7_data["GeoAreaName"].isin(selected_countries))
-            ]
-
-            st.title("Indicator Dashboard")
-            st.markdown(f"### Indicator: {selected_indicator}")
-
-            if not filtered_data.empty:
-                fig = px.line(
-                    filtered_data,
-                    x="TimePeriod",
-                    y="Value",
-                    color="GeoAreaName",
-                    labels={
-                        "TimePeriod": "Year",
-                        "Value": "Indicator Value",
-                        "GeoAreaName": "Country"
-                    },
-                    title=f"Trends for {selected_indicator}",
-                    color_discrete_sequence=px.colors.qualitative.Set1
-                )
-                fig.update_layout(
-                    xaxis_title="Year",
-                    yaxis_title="Indicator Value",
-                    legend_title="Country",
-                    template="plotly_white"
-                )
-                st.plotly_chart(fig, use_container_width=True)
-            else:
-                st.write("No data available for the selected indicator and countries.")
-
-    # Electricity Loss Comparison
-    elif dashboard_choice == "Electricity Loss Comparison":
-        # Load the elecloss2.csv dataset
-        @st.cache_data
-        def load_elecloss2_data():
-            data_path = 'Data/elecloss2.csv'
-            data = pd.read_csv(data_path, skiprows=4)
-            return data
-
-        elecloss2_data = load_elecloss2_data()
-
-        st.sidebar.header("Select Countries for Electricity Loss")
-        countries = sorted(elecloss2_data["Country Name"].dropna().unique())
-        selected_countries = st.sidebar.multiselect(
-            "Choose up to two countries to compare:",
-            options=countries,
-            default=["Brazil"]
-        )
-
-        generate_comparison = st.sidebar.button("Generate Comparison")
-
-        if generate_comparison and selected_countries:
-            # Filter data for the selected countries
-            filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
-
-            melted_data = filtered_data.melt(
-                id_vars=["Country Name"], 
-                var_name="Year", 
-                value_name="Electricity Loss (%)"
-            )
-
-            melted_data = melted_data[melted_data["Year"].str.isdigit()]
-            melted_data["Year"] = melted_data["Year"].astype(int)
-
+        if not filtered_data.empty:
             fig = px.line(
-                melted_data,
-                x="Year",
-                y="Electricity Loss (%)",
-                color="Country Name",
+                filtered_data,
+                x="TimePeriod",
+                y="Value",
+                color="GeoAreaName",
                 labels={
-                    "Year": "Year",
-                    "Electricity Loss (%)": "Electricity Loss (%)",
-                    "Country Name": "Country"
+                    "TimePeriod": "Year",
+                    "Value": "Indicator Value",
+                    "GeoAreaName": "Country"
                 },
-                title="Electric Power Transmission and Distribution Loss Comparison"
+                title=f"Trends for {indicator_names.get(selected_indicator, selected_indicator)}",
+                color_discrete_sequence=px.colors.qualitative.Set1
             )
             fig.update_layout(
                 xaxis_title="Year",
-                yaxis_title="Electricity Loss (%)",
+                yaxis_title="Indicator Value",
                 legend_title="Country",
                 template="plotly_white"
             )
             st.plotly_chart(fig, use_container_width=True)
-        elif not selected_countries:
-            st.warning("Please select at least one country for the comparison.")
+        else:
+            st.write("No data available for the selected indicator and countries.")
