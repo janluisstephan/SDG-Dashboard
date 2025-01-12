@@ -6,20 +6,24 @@ import os
 st.set_page_config(layout="wide")
 
 # Speicherort der Antworten
-DATA_FILE = "user_answers.csv"
+DATA_FILE = "lib.py"
 
 # Funktion zum Laden der Antworten
 def load_answers():
     if os.path.exists(DATA_FILE):
+        # Lese Daten aus lib.py (als CSV-Daten gespeichert)
         return pd.read_csv(DATA_FILE)
     else:
+        # Erstelle leeres DataFrame, falls Datei nicht existiert
         return pd.DataFrame(columns=["reliability_score", "sdg_knowledge_score"])
 
 # Funktion zum Speichern der Antworten
 def save_answer(reliability, knowledge):
     answers = load_answers()
     new_entry = {"reliability_score": reliability, "sdg_knowledge_score": knowledge}
+    # Füge neue Antworten hinzu
     answers = pd.concat([answers, pd.DataFrame([new_entry])], ignore_index=True)
+    # Speichere Antworten in lib.py (als CSV)
     answers.to_csv(DATA_FILE, index=False)
 
 # Lade gespeicherte Daten, falls vorhanden
@@ -120,6 +124,16 @@ if not st.session_state.proceed:
         st.session_state.reliability_score = reliability_score
         st.session_state.sdg_knowledge_score = sdg_knowledge_score
 
+# Review answers on the next page
+if st.session_state.proceed:
+    st.title("Review Your Answers")
+    st.write("Here are your previously submitted answers:")
+    st.dataframe(answers)
+
+    # Optionally, allow users to re-enter answers or proceed to the next step
+    if st.button("Clear Answers"):
+        os.remove(DATA_FILE)
+        st.experimental_rerun()
 
 # SDG dashboard
 if st.session_state.proceed and not st.session_state.new_dashboard:
