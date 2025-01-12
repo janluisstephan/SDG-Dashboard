@@ -58,14 +58,18 @@ if not st.session_state.proceed:
         """)
 
     with bias_col:
-        st.write("---")
-        st.markdown("## Bias")
+    st.write("---")
+    st.markdown("## Bias")
+    # Collapsible text using expander
+    with st.expander("Bias"):
         st.write("""
         The data presented here is aggregated from various global sources and may include uncertainties. 
         Factors such as data quality, collection methods, and regional differences in reporting standards 
         could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
+
         The data we introduce may construct a narrative. As we cannot include all existing data in the current version, 
-        we decided to provide the data that creates contrast and serves the investigation of our leading question. This is undeterrable and induced by selective bias.
+        we decided to provide the data that creates contrast and serves the investigation of our leading question. 
+        This is undeterrable and induced by selective bias.
         """)
 
     # Large Proceed button
@@ -145,13 +149,21 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
     # Layout: Instructions, Map, Legend
     header_cols = st.columns([1.5, 4, 1.5])
 
-    with header_cols[0]:
-        st.markdown("## Instructions")
+with bias_col:
+    st.write("---")
+    st.markdown("## Bias")
+    # Collapsible text using expander
+    with st.expander("Bias"):
         st.write("""
-        1. Select an SDG by clicking the button above its icon below the map.
-        2. View the map to see the global performance for the selected SDG.
-        3. Use the dropdown under the legend to select a country and view its trend.
+        The data presented here is aggregated from various global sources and may include uncertainties. 
+        Factors such as data quality, collection methods, and regional differences in reporting standards 
+        could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
+
+        The data we introduce may construct a narrative. As we cannot include all existing data in the current version, 
+        we decided to provide the data that creates contrast and serves the investigation of our leading question. 
+        This is undeterrable and induced by selective bias.
         """)
+
 
         st.markdown("## Bias")
         st.write("""
