@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import os
+import json  # Importiere das json-Modul
 
 st.set_page_config(layout="wide")
 
@@ -116,14 +117,9 @@ if not st.session_state.proceed:
 
 # SDG dashboard
 if st.session_state.proceed and not st.session_state.new_dashboard:
-    # Identify SDG and trend columns
-    color_columns = [col for col in color_data.columns if col.startswith("SDG")]
-    trend_columns = [
-        color_data.columns[color_data.columns.get_loc(col) + 1]
-        if color_data.columns.get_loc(col) + 1 < len(color_data.columns)
-        else None
-        for col in color_columns
-    ]
+    # Placeholder for SDG Dashboard functionality
+    st.write("SDG Dashboard Placeholder")
+
 
     # SDG labels
     sdg_labels = [
