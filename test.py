@@ -35,7 +35,7 @@ if not st.session_state.proceed:
         unsafe_allow_html=True,
     )
 
-    # Slider
+    # Slider for reliability score
     reliability_score = st.slider(
         label="Rate the reliability:",
         min_value=1,
@@ -45,38 +45,47 @@ if not st.session_state.proceed:
         help="Drag the slider to indicate your opinion on the reliability of SDG scores."
     )
 
-    # Create two columns for Instructions and Bias
-    instruction_col, bias_col = st.columns(2)
+    # Second question with slider
+    st.markdown(
+        """
+        <h1 style="text-align: center; color: #2c3e50; margin-top: 30px;">How would you rate your knowledge about the concept of SDGs?</h1>
+        <p style="text-align: center; font-size: 16px; color: #7f8c8d;">Please rate on a scale from 1 to 10, where 10 means you have excellent knowledge.</p>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    with instruction_col:
-        st.write("---")
-        st.markdown("## Instructions for Dashboard")
+    # Slider for SDG knowledge
+    sdg_knowledge_score = st.slider(
+        label="Rate your knowledge:",
+        min_value=1,
+        max_value=10,
+        value=5,
+        step=1,
+        help="Drag the slider to indicate your knowledge about the concept of SDGs."
+    )
+
+    # Bias section
+    st.write("---")
+    st.markdown("## Bias")
+    with st.expander("Read more about Bias..."):
         st.write("""
-        1. Select an SDG by clicking the button above its icon below the map.
-        2. View the map to see the global performance for the selected SDG.
-        3. Use the dropdown under the legend to select a country and view its trend.
+        The data presented here is aggregated from various global sources and may include uncertainties. 
+        Factors such as data quality, collection methods, and regional differences in reporting standards 
+        could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
+
+        The data we introduce may construct a narrative. As we cannot include all existing data in the current version, 
+        we decided to provide the data that creates contrast and serves the investigation of our leading question. 
+        This is undeterrable and induced by selective bias.
         """)
-
-    with bias_col:
-        st.write("---")
-        st.markdown("## Bias")
-        with st.expander("Read more about Bias..."):
-            st.write("""
-            The data presented here is aggregated from various global sources and may include uncertainties. 
-            Factors such as data quality, collection methods, and regional differences in reporting standards 
-            could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
-
-            The data we introduce may construct a narrative. As we cannot include all existing data in the current version, 
-            we decided to provide the data that creates contrast and serves the investigation of our leading question. 
-            This is undeterrable and induced by selective bias.
-            """)
 
     # Large Proceed button
     if st.button("Click 2x to proceed to SDG Dashboard", key="proceed_button"):
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
+        st.session_state.sdg_knowledge_score = sdg_knowledge_score
 
-# Full dashboard
+
+# SDG dashboard
 if st.session_state.proceed and not st.session_state.new_dashboard:
     # Identify SDG and trend columns
     color_columns = [col for col in color_data.columns if col.startswith("SDG")]
