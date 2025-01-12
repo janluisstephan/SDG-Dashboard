@@ -69,7 +69,7 @@ if not st.session_state.proceed:
 
     with guideline_col:
         st.write("---")
-        st.markdown("## Guideline for the Dashboard")
+        st.markdown("## Introduction")
         st.write("""
         In the context of sustainability we always talk about the Sustainable Development Goals (SDGs). 
         We accept their apparent importance and rarely scrutinize them. 
