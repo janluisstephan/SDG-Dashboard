@@ -435,10 +435,3 @@ if st.session_state.new_dashboard:
             st.plotly_chart(fig, use_container_width=True)
         elif not selected_countries:
             st.warning("Please select at least one country for the comparison.")
-
-# Button zum Schließen des Indicator Dashboards und Öffnen der Ergebnisseite
-st.sidebar.write("---")  # Trennlinie in der Sidebar
-if st.sidebar.button("Click 2x to proceed", key="proceed_to_results_button"):
-    st.session_state.results_shown = True  # Setze den Status für die Ergebnisanzeige
-    st.session_state.new_dashboard = False  # Schließe das Indicator Dashboard
-    st.experimental_rerun()  # Aktualisiere die App, um zur Ergebnisanzeige zu wechseln
