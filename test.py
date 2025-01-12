@@ -299,11 +299,16 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 # Indicator Dashboard
 # Indicator Dashboard
 if st.session_state.new_dashboard:
-    # Tabs for switching between Indicator Dashboard and Electricity Loss Comparison
-    tab1, tab2 = st.tabs(["Indicator Dashboard", "Electricity Loss Comparison"])
+    # Sidebar selection to switch between dashboards
+    st.sidebar.header("Dashboard Selection")
+    dashboard_choice = st.sidebar.radio(
+        "Choose a dashboard:",
+        options=["Indicator Dashboard", "Electricity Loss Comparison"],
+        index=0  # Default to Indicator Dashboard
+    )
 
-    # Tab 1: Original Indicator Dashboard
-    with tab1:
+    # Indicator Dashboard
+    if dashboard_choice == "Indicator Dashboard":
         # Load the Goal 7 data only once
         @st.cache_data
         def load_goal7_data():
@@ -314,15 +319,14 @@ if st.session_state.new_dashboard:
         goal7_data = load_goal7_data()
 
         # Preprocess the dataset
-        goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()  # Remove leading/trailing spaces
-        goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])  # Handle missing values
+        goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()
+        goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])
 
         # Sidebar for indicator and country selection
-        st.sidebar.header("Select Indicator")
+        st.sidebar.header("Select Indicator and Countries")
         indicators = sorted(goal7_data["Indicator"].unique())
         selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators)
 
-        st.sidebar.header("Select Countries")
         countries = sorted(goal7_data["GeoAreaName"].unique())
         selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
 
@@ -362,8 +366,8 @@ if st.session_state.new_dashboard:
             else:
                 st.write("No data available for the selected indicator and countries.")
 
-    # Tab 2: Electricity Loss Comparison
-    with tab2:
+    # Electricity Loss Comparison
+    elif dashboard_choice == "Electricity Loss Comparison":
         # Load the elecloss2.csv dataset
         @st.cache_data
         def load_elecloss2_data():
@@ -373,13 +377,18 @@ if st.session_state.new_dashboard:
 
         elecloss2_data = load_elecloss2_data()
 
-        st.sidebar.header("Electricity Loss Comparison")
+        st.sidebar.header("Select Countries for Electricity Loss")
         countries = sorted(elecloss2_data["Country Name"].dropna().unique())
-        selected_countries = st.sidebar.multiselect("Choose two countries to compare:", options=countries, default=countries[:2])
+        selected_countries = st.sidebar.multiselect(
+            "Choose up to two countries to compare:",
+            options=countries,
+            default=["Brazil"]
+        )
 
         generate_comparison = st.sidebar.button("Generate Comparison")
 
-        if generate_comparison and len(selected_countries) == 2:
+        if generate_comparison and selected_countries:
+            # Filter data for the selected countries
             filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
 
             melted_data = filtered_data.melt(
@@ -410,5 +419,5 @@ if st.session_state.new_dashboard:
                 template="plotly_white"
             )
             st.plotly_chart(fig, use_container_width=True)
-        elif len(selected_countries) != 2:
-            st.warning("Please select exactly two countries for comparison.")
+        elif not selected_countries:
+            st.warning("Please select at least one country for the comparison.")
