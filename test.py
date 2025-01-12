@@ -379,10 +379,10 @@ if st.session_state.new_dashboard:
             else:
                 st.write("No data available for the selected indicator and countries.")
 
-        # Button to proceed to the results page
-        st.write("---")  # Divider
-        if st.button("Click 2x to proceed", key="proceed_to_results_button"):
-            st.session_state.results_shown = True  # Set session state for results display
+        # Button to proceed to the results page (added below the "Generate Indicator Graph")
+        st.sidebar.write("---")  # Divider
+        if st.sidebar.button("Click 2x to proceed", key="proceed_to_results_button"):
+            st.session_state.results_shown = True  # Activate results page
             st.session_state.new_dashboard = False  # Close the Indicator Dashboard
             st.experimental_rerun()  # Reload the app to show results page
 
