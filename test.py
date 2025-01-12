@@ -118,19 +118,6 @@ if not st.session_state.proceed:
         st.session_state.reliability_score = reliability_score
         st.session_state.sdg_knowledge_score = sdg_knowledge_score
 
-# Review answers on the next page
-if st.session_state.proceed:
-    st.title("Review Your Answers")
-    st.write("Here are your previously submitted answers:")
-    st.json(answers)  # Zeigt die gespeicherten Antworten als JSON an
-
-    # Optionally, allow users to clear all answers
-    if st.button("Clear All Answers"):
-        if os.path.exists(DATA_FILE):
-            os.remove(DATA_FILE)
-        st.experimental_rerun()
-
-
 # SDG dashboard
 if st.session_state.proceed and not st.session_state.new_dashboard:
     # Identify SDG and trend columns
