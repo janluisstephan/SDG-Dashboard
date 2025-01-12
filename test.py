@@ -298,6 +298,13 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 
 # Indicator Dashboard
 # Indicator Dashboard
+st.sidebar.header("Dashboard Selection")
+dashboard_choice = st.sidebar.radio(
+    "Choose a dashboard:",
+    options=["Indicator Dashboard", "Electricity Loss Comparison"],
+    index=0  # Default to Indicator Dashboard
+)
+
 if dashboard_choice == "Indicator Dashboard":
     # Load the Goal 7 data only once
     @st.cache_data
