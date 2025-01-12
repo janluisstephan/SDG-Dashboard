@@ -64,18 +64,32 @@ if not st.session_state.proceed:
         help="Drag the slider to indicate your knowledge about the concept of SDGs."
     )
 
-    # Bias section
-    st.write("---")
-    st.markdown("## Bias")
-    with st.expander("Read more about Bias..."):
-        st.write("""
-        The data presented here is aggregated from various global sources and may include uncertainties. 
-        Factors such as data quality, collection methods, and regional differences in reporting standards 
-        could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
+    # Two columns: Bias on the left, Guideline on the right
+    bias_col, guideline_col = st.columns(2)
 
-        The data we introduce may construct a narrative. As we cannot include all existing data in the current version, 
-        we decided to provide the data that creates contrast and serves the investigation of our leading question. 
-        This is undeterrable and induced by selective bias.
+    with bias_col:
+        st.write("---")
+        st.markdown("## Bias")
+        with st.expander("Read more about Bias..."):
+            st.write("""
+            The data presented here is aggregated from various global sources and may include uncertainties. 
+            Factors such as data quality, collection methods, and regional differences in reporting standards 
+            could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
+
+            The data we introduce may construct a narrative. As we cannot include all existing data in the current version, 
+            we decided to provide the data that creates contrast and serves the investigation of our leading question. 
+            This is undeterrable and induced by selective bias.
+            """)
+
+    with guideline_col:
+        st.write("---")
+        st.markdown("## Guideline for the Dashboard")
+        st.write("""
+        In the context of sustainability we always talk about the Sustainable Development Goals (SDGs). 
+        We accept their apparent importance and rarely scrutinize them. 
+
+        Therefore we want to enable you to gain a deeper understanding of the SDGs, how they are constructed, 
+        and what their weaknesses are.
         """)
 
     # Large Proceed button
