@@ -297,7 +297,6 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
                 st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
 
 # Indicator Dashboard
-# Indicator Dashboard
 if st.session_state.new_dashboard:
     # Sidebar selection to switch between dashboards
     st.sidebar.header("Dashboard Selection")
@@ -380,6 +379,13 @@ if st.session_state.new_dashboard:
             else:
                 st.write("No data available for the selected indicator and countries.")
 
+        # Button to proceed to the results page
+        st.write("---")  # Divider
+        if st.button("Click 2x to proceed", key="proceed_to_results_button"):
+            st.session_state.results_shown = True  # Set session state for results display
+            st.session_state.new_dashboard = False  # Close the Indicator Dashboard
+            st.experimental_rerun()  # Reload the app to show results page
+
     # Electricity Loss Comparison
     elif dashboard_choice == "Electricity Loss Comparison":
         # Load the elecloss2.csv dataset
@@ -435,3 +441,13 @@ if st.session_state.new_dashboard:
             st.plotly_chart(fig, use_container_width=True)
         elif not selected_countries:
             st.warning("Please select at least one country for the comparison.")
+
+# Display results if the "results_shown" state is activated
+if "results_shown" in st.session_state and st.session_state.results_shown:
+    st.title("Results")
+    st.markdown("### Here are the responses you've provided:")
+    for idx, answer in enumerate(answers):
+        st.write(f"**Response {idx + 1}:**")
+        st.write(f"- Reliability Score: {answer['reliability_score']}")
+        st.write(f"- SDG Knowledge Score: {answer['sdg_knowledge_score']}")
+
