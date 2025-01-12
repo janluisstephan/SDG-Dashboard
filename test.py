@@ -298,73 +298,117 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 
 # Indicator Dashboard
 # Indicator Dashboard
-st.sidebar.header("Dashboard Selection")
-dashboard_choice = st.sidebar.radio(
-    "Choose a dashboard:",
-    options=["Indicator Dashboard", "Electricity Loss Comparison"],
-    index=0  # Default to Indicator Dashboard
-)
+if st.session_state.new_dashboard:
+    # Tabs for switching between Indicator Dashboard and Electricity Loss Comparison
+    tab1, tab2 = st.tabs(["Indicator Dashboard", "Electricity Loss Comparison"])
 
-if dashboard_choice == "Indicator Dashboard":
-    # Load the Goal 7 data only once
-    @st.cache_data
-    def load_goal7_data():
-        data_path = 'Data/Goal7.xlsx'
-        data = pd.read_excel(data_path, engine='openpyxl')
-        return data
+    # Tab 1: Original Indicator Dashboard
+    with tab1:
+        # Load the Goal 7 data only once
+        @st.cache_data
+        def load_goal7_data():
+            data_path = 'Data/Goal7.xlsx'
+            data = pd.read_excel(data_path, engine='openpyxl')
+            return data
 
-    goal7_data = load_goal7_data()
+        goal7_data = load_goal7_data()
 
-    # Extract indicator mappings
-    indicator_mappings = goal7_data[['Indicator', 'SeriesDescription']]
-    indicator_mappings.columns = ['Indicator', 'Name']
-    indicator_mappings = indicator_mappings.dropna(subset=['Indicator', 'Name']).drop_duplicates()
-    indicator_dict = dict(zip(indicator_mappings['Indicator'], indicator_mappings['Name']))
+        # Preprocess the dataset
+        goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()  # Remove leading/trailing spaces
+        goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])  # Handle missing values
 
-    # Sidebar for indicator and country selection
-    st.sidebar.header("Select Indicator and Countries")
-    indicators = sorted(indicator_dict.keys())  # Use numeric indicators as keys for dropdown
-    selected_indicator = st.sidebar.selectbox(
-        "Choose an indicator:",
-        options=indicators,
-        format_func=lambda x: indicator_dict[x]  # Display the description instead of the numeric code
-    )
+        # Sidebar for indicator and country selection
+        st.sidebar.header("Select Indicator")
+        indicators = sorted(goal7_data["Indicator"].unique())
+        selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators)
 
-    countries = sorted(goal7_data["GeoAreaName"].unique())
-    selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
+        st.sidebar.header("Select Countries")
+        countries = sorted(goal7_data["GeoAreaName"].unique())
+        selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
 
-    generate_indicator_graph = st.sidebar.button("Generate Indicator Graph")
+        generate_indicator_graph = st.sidebar.button("Generate Indicator Graph")
 
-    if generate_indicator_graph:
-        # Filter data for the selected indicator and countries
-        filtered_data = goal7_data[
-            (goal7_data["Indicator"] == selected_indicator) &
-            (goal7_data["GeoAreaName"].isin(selected_countries))
-        ]
+        if generate_indicator_graph:
+            # Filter data for the selected indicator and countries
+            filtered_data = goal7_data[
+                (goal7_data["Indicator"] == selected_indicator) &
+                (goal7_data["GeoAreaName"].isin(selected_countries))
+            ]
 
-        st.title("Indicator Dashboard")
-        st.markdown(f"### Indicator: {indicator_dict[selected_indicator]}")
+            st.title("Indicator Dashboard")
+            st.markdown(f"### Indicator: {selected_indicator}")
 
-        if not filtered_data.empty:
+            if not filtered_data.empty:
+                fig = px.line(
+                    filtered_data,
+                    x="TimePeriod",
+                    y="Value",
+                    color="GeoAreaName",
+                    labels={
+                        "TimePeriod": "Year",
+                        "Value": "Indicator Value",
+                        "GeoAreaName": "Country"
+                    },
+                    title=f"Trends for {selected_indicator}",
+                    color_discrete_sequence=px.colors.qualitative.Set1
+                )
+                fig.update_layout(
+                    xaxis_title="Year",
+                    yaxis_title="Indicator Value",
+                    legend_title="Country",
+                    template="plotly_white"
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.write("No data available for the selected indicator and countries.")
+
+    # Tab 2: Electricity Loss Comparison
+    with tab2:
+        # Load the elecloss2.csv dataset
+        @st.cache_data
+        def load_elecloss2_data():
+            data_path = 'Data/elecloss2.csv'
+            data = pd.read_csv(data_path, skiprows=4)
+            return data
+
+        elecloss2_data = load_elecloss2_data()
+
+        st.sidebar.header("Electricity Loss Comparison")
+        countries = sorted(elecloss2_data["Country Name"].dropna().unique())
+        selected_countries = st.sidebar.multiselect("Choose two countries to compare:", options=countries, default=countries[:2])
+
+        generate_comparison = st.sidebar.button("Generate Comparison")
+
+        if generate_comparison and len(selected_countries) == 2:
+            filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
+
+            melted_data = filtered_data.melt(
+                id_vars=["Country Name"], 
+                var_name="Year", 
+                value_name="Electricity Loss (%)"
+            )
+
+            melted_data = melted_data[melted_data["Year"].str.isdigit()]
+            melted_data["Year"] = melted_data["Year"].astype(int)
+
             fig = px.line(
-                filtered_data,
-                x="TimePeriod",
-                y="Value",
-                color="GeoAreaName",
+                melted_data,
+                x="Year",
+                y="Electricity Loss (%)",
+                color="Country Name",
                 labels={
-                    "TimePeriod": "Year",
-                    "Value": "Indicator Value",
-                    "GeoAreaName": "Country"
+                    "Year": "Year",
+                    "Electricity Loss (%)": "Electricity Loss (%)",
+                    "Country Name": "Country"
                 },
-                title=f"Trends for {indicator_dict[selected_indicator]}",
-                color_discrete_sequence=px.colors.qualitative.Set1
+                title="Electric Power Transmission and Distribution Loss Comparison"
             )
             fig.update_layout(
                 xaxis_title="Year",
-                yaxis_title="Indicator Value",
+                yaxis_title="Electricity Loss (%)",
                 legend_title="Country",
                 template="plotly_white"
             )
             st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.write("No data available for the selected indicator and countries.")
+        elif len(selected_countries) != 2:
+            st.warning("Please select exactly two countries for comparison.")
