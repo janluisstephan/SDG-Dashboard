@@ -442,35 +442,3 @@ if st.sidebar.button("Click 2x to proceed", key="proceed_to_results_button"):
     st.session_state.results_shown = True  # Setze den Status für die Ergebnisanzeige
     st.session_state.new_dashboard = False  # Schließe das Indicator Dashboard
     st.experimental_rerun()  # Aktualisiere die App, um zur Ergebnisanzeige zu wechseln
-
-# Ergebnisse-Seite
-if "results_shown" in st.session_state and st.session_state.results_shown:
-    st.title("Ihre Antworten")
-    st.markdown("### Zusammenfassung Ihrer bisherigen Bewertungen")
-
-    # Lade die gespeicherten Antworten
-    answers = load_answers()
-
-    if answers:
-        # Anzeigen der Antworten in einer Tabelle
-        st.write("Hier sind Ihre bisherigen Bewertungen:")
-        st.table(answers)
-
-        # Optional: Rohdaten als JSON anzeigen
-        with st.expander("Rohdaten anzeigen (JSON)"):
-            st.json(answers)
-    else:
-        st.write("Es wurden noch keine Antworten gespeichert.")
-
-    # Möglichkeit, die Antworten zu löschen
-    if st.button("Gespeicherte Antworten löschen"):
-        if os.path.exists(DATA_FILE):
-            os.remove(DATA_FILE)
-            st.success("Alle gespeicherten Antworten wurden erfolgreich gelöscht.")
-            st.experimental_rerun()
-
-    # Schaltfläche zum Zurückkehren zum Hauptmenü oder Neustarten der App
-    if st.button("Zurück zum Hauptmenü"):
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]  # Lösche den Session State, um die App zurückzusetzen
-        st.experimental_rerun()
