@@ -64,8 +64,19 @@ if not st.session_state.proceed:
         help="Drag the slider to indicate your knowledge about the concept of SDGs."
     )
 
-    # Two columns: Bias on the left, Guideline on the right
-    bias_col, guideline_col = st.columns(2)
+    # Two columns: Guideline on the left, Bias on the right
+    guideline_col, bias_col = st.columns(2)
+
+    with guideline_col:
+        st.write("---")
+        st.markdown("## Guideline for the Dashboard")
+        st.write("""
+        In the context of sustainability we always talk about the Sustainable Development Goals (SDGs). 
+        We accept their apparent importance and rarely scrutinize them. 
+
+        Therefore we want to enable you to gain a deeper understanding of the SDGs, how they are constructed, 
+        and what their weaknesses are.
+        """)
 
     with bias_col:
         st.write("---")
@@ -80,17 +91,6 @@ if not st.session_state.proceed:
             we decided to provide the data that creates contrast and serves the investigation of our leading question. 
             This is undeterrable and induced by selective bias.
             """)
-
-    with guideline_col:
-        st.write("---")
-        st.markdown("## Introduction")
-        st.write("""
-        In the context of sustainability we always talk about the Sustainable Development Goals (SDGs). 
-        We accept their apparent importance and rarely scrutinize them. 
-
-        Therefore we want to enable you to gain a deeper understanding of the SDGs, how they are constructed, 
-        and what their weaknesses are.
-        """)
 
     # Large Proceed button
     if st.button("Click 2x to proceed to SDG Dashboard", key="proceed_button"):
