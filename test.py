@@ -1,7 +1,3 @@
-‎test.py
--4
-Original file line number	Diff line number	Diff line change
-@@ -1,305 +1,301 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -242,9 +238,6 @@ if st.session_state.new_dashboard:
 
     goal7_data = load_goal7_data()
 
-    # Debug: Check missing values per column
-    st.write("Missing values per column in the dataset:")
-    st.write(goal7_data.isnull().sum())
     # Preprocess the dataset
     goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()  # Remove leading/trailing spaces
 
@@ -306,7 +299,3 @@ if st.session_state.new_dashboard:
             st.write("No data available for the selected indicator and countries.")
     else:
         st.write("Click 'Generate Graph' to display the trends.")
-0 commit comments
-Comments
-0
- (0)
