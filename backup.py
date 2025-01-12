@@ -2,17 +2,47 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import os
+import json  # Importiere das json-Modul
 
 st.set_page_config(layout="wide")
 
-# Load data with caching
+# Speicherort der Antworten
+DATA_FILE = "lib.py"
+
+# Funktion zum Laden der Antworten
+def load_answers():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as file:
+            try:
+                return json.load(file)
+            except json.JSONDecodeError:
+                return []  # Leere Liste, falls die Datei leer oder ungültig ist
+    else:
+        return []  # Leere Liste, wenn die Datei nicht existiert
+
+# Funktion zum Speichern der Antworten
+def save_answer(reliability, knowledge):
+    answers = load_answers()
+    answers.append({"reliability_score": reliability, "sdg_knowledge_score": knowledge})
+    with open(DATA_FILE, "w") as file:
+        json.dump(answers, file, indent=4)
+
+# Lade gespeicherte Daten, falls vorhanden
+answers = load_answers()
+
+# Funktion zum Laden der SDG-Daten
 @st.cache_data
 def load_data():
-    data_path = 'Data/SDR2024-data.xlsx'
-    sdg_data = pd.read_excel(data_path, sheet_name='Full Database', engine='openpyxl')
-    color_data = pd.read_excel(data_path, sheet_name='Overview', engine='openpyxl')
-    return sdg_data, color_data
+    data_path = "Data/SDR2024-data.xlsx"
+    if os.path.exists(data_path):
+        sdg_data = pd.read_excel(data_path, sheet_name="Full Database", engine="openpyxl")
+        color_data = pd.read_excel(data_path, sheet_name="Overview", engine="openpyxl")
+        return sdg_data, color_data
+    else:
+        st.error("Data file not found! Make sure 'SDR2024-data.xlsx' is in the 'Data' directory.")
+        return None, None
 
+# Lade SDG-Daten
 sdg_data, color_data = load_data()
 
 # Initialize session state
@@ -94,21 +124,27 @@ if not st.session_state.proceed:
 
     # Large Proceed button
     if st.button("Click 2x to proceed to SDG Dashboard", key="proceed_button"):
+        # Save the answers
+        save_answer(reliability_score, sdg_knowledge_score)
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
         st.session_state.sdg_knowledge_score = sdg_knowledge_score
 
-
 # SDG dashboard
 if st.session_state.proceed and not st.session_state.new_dashboard:
-    # Identify SDG and trend columns
-    color_columns = [col for col in color_data.columns if col.startswith("SDG")]
-    trend_columns = [
-        color_data.columns[color_data.columns.get_loc(col) + 1]
-        if color_data.columns.get_loc(col) + 1 < len(color_data.columns)
-        else None
-        for col in color_columns
-    ]
+    if color_data is not None:
+        # Identify SDG and trend columns
+        color_columns = [col for col in color_data.columns if col.startswith("SDG")]
+        trend_columns = [
+            color_data.columns[color_data.columns.get_loc(col) + 1]
+            if color_data.columns.get_loc(col) + 1 < len(color_data.columns)
+            else None
+            for col in color_columns
+        ]
+        st.write("SDG Dashboard Placeholder")
+    else:
+        st.error("SDG data is not available.")
+
 
     # SDG labels
     sdg_labels = [
@@ -263,11 +299,16 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 # Indicator Dashboard
 # Indicator Dashboard
 if st.session_state.new_dashboard:
-    # Tabs for switching between Indicator Dashboard and Electricity Loss Comparison
-    tab1, tab2 = st.tabs(["Indicator Dashboard", "Electricity Loss Comparison"])
+    # Sidebar selection to switch between dashboards
+    st.sidebar.header("Dashboard Selection")
+    dashboard_choice = st.sidebar.radio(
+        "Choose a dashboard:",
+        options=["Indicator Dashboard", "Electricity Loss Comparison"],
+        index=0  # Default to Indicator Dashboard
+    )
 
-    # Tab 1: Original Indicator Dashboard
-    with tab1:
+    # Indicator Dashboard
+    if dashboard_choice == "Indicator Dashboard":
         # Load the Goal 7 data only once
         @st.cache_data
         def load_goal7_data():
@@ -278,15 +319,28 @@ if st.session_state.new_dashboard:
         goal7_data = load_goal7_data()
 
         # Preprocess the dataset
-        goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()  # Remove leading/trailing spaces
-        goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])  # Handle missing values
+        goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()
+        goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])
+
+        # Create a mapping of indicator numbers to their descriptive names
+        indicator_names = {
+            "7.1.1": "Proportion of population with access to electricity, by urban/rural (%)",
+            "7.1.2": "Proportion of population with primary reliance on clean fuels and technology (%)",
+            "7.2.1": "Renewable energy share in the total final energy consumption (%)",
+            "7.3.1": "Energy intensity level of primary energy (megajoules per constant 2017 purchasing power parity GDP)",
+            "7.a.1": "International financial flows to developing countries in support of clean energy research and development and renewable energy production, including in hybrid systems (millions of constant 2021 United States dollars)",
+            "7.b.1": "Installed renewable electricity-generating capacity (watts per capita)"
+        }
 
         # Sidebar for indicator and country selection
-        st.sidebar.header("Select Indicator")
+        st.sidebar.header("Select Indicator and Countries")
         indicators = sorted(goal7_data["Indicator"].unique())
-        selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators)
+        selected_indicator = st.sidebar.selectbox(
+            "Choose an indicator:",
+            options=indicators,
+            format_func=lambda x: indicator_names.get(x, x)  # Show descriptive names, fallback to number if not mapped
+        )
 
-        st.sidebar.header("Select Countries")
         countries = sorted(goal7_data["GeoAreaName"].unique())
         selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
 
@@ -300,7 +354,7 @@ if st.session_state.new_dashboard:
             ]
 
             st.title("Indicator Dashboard")
-            st.markdown(f"### Indicator: {selected_indicator}")
+            st.markdown(f"### Indicator: {indicator_names.get(selected_indicator, selected_indicator)}")
 
             if not filtered_data.empty:
                 fig = px.line(
@@ -313,7 +367,7 @@ if st.session_state.new_dashboard:
                         "Value": "Indicator Value",
                         "GeoAreaName": "Country"
                     },
-                    title=f"Trends for {selected_indicator}",
+                    title=f"Trends for {indicator_names.get(selected_indicator, selected_indicator)}",
                     color_discrete_sequence=px.colors.qualitative.Set1
                 )
                 fig.update_layout(
@@ -326,8 +380,8 @@ if st.session_state.new_dashboard:
             else:
                 st.write("No data available for the selected indicator and countries.")
 
-    # Tab 2: Electricity Loss Comparison
-    with tab2:
+    # Electricity Loss Comparison
+    elif dashboard_choice == "Electricity Loss Comparison":
         # Load the elecloss2.csv dataset
         @st.cache_data
         def load_elecloss2_data():
@@ -337,13 +391,18 @@ if st.session_state.new_dashboard:
 
         elecloss2_data = load_elecloss2_data()
 
-        st.sidebar.header("Electricity Loss Comparison")
+        st.sidebar.header("Select Countries for Electricity Loss")
         countries = sorted(elecloss2_data["Country Name"].dropna().unique())
-        selected_countries = st.sidebar.multiselect("Choose two countries to compare:", options=countries, default=countries[:2])
+        selected_countries = st.sidebar.multiselect(
+            "Choose up to two countries to compare:",
+            options=countries,
+            default=["Brazil"]
+        )
 
         generate_comparison = st.sidebar.button("Generate Comparison")
 
-        if generate_comparison and len(selected_countries) == 2:
+        if generate_comparison and selected_countries:
+            # Filter data for the selected countries
             filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
 
             melted_data = filtered_data.melt(
@@ -374,5 +433,5 @@ if st.session_state.new_dashboard:
                 template="plotly_white"
             )
             st.plotly_chart(fig, use_container_width=True)
-        elif len(selected_countries) != 2:
-            st.warning("Please select exactly two countries for comparison.")
+        elif not selected_countries:
+            st.warning("Please select at least one country for the comparison.")
