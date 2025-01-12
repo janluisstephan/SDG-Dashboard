@@ -35,7 +35,7 @@ if not st.session_state.proceed:
         unsafe_allow_html=True,
     )
 
-    # Slider
+    # Slider for reliability score
     reliability_score = st.slider(
         label="Rate the reliability:",
         min_value=1,
@@ -45,33 +45,61 @@ if not st.session_state.proceed:
         help="Drag the slider to indicate your opinion on the reliability of SDG scores."
     )
 
-    # Create two columns for Instructions and Bias
-    instruction_col, bias_col = st.columns(2)
+    # Second question with slider
+    st.markdown(
+        """
+        <h1 style="text-align: center; color: #2c3e50; margin-top: 30px;">How would you rate your knowledge about the concept of SDGs?</h1>
+        <p style="text-align: center; font-size: 16px; color: #7f8c8d;">Please rate on a scale from 1 to 10, where 10 means you have excellent knowledge.</p>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    with instruction_col:
-        st.write("---")
-        st.markdown("## Instructions for Dashboard")
-        st.write("""
-        1. Select an SDG by clicking the button above its icon below the map.
-        2. View the map to see the global performance for the selected SDG.
-        3. Use the dropdown under the legend to select a country and view its trend.
-        """)
+    # Slider for SDG knowledge
+    sdg_knowledge_score = st.slider(
+        label="Rate your knowledge:",
+        min_value=1,
+        max_value=10,
+        value=5,
+        step=1,
+        help="Drag the slider to indicate your knowledge about the concept of SDGs."
+    )
+
+    # Two columns: Bias on the left, Guideline on the right
+    bias_col, guideline_col = st.columns(2)
 
     with bias_col:
         st.write("---")
         st.markdown("## Bias")
+        with st.expander("Read more about Bias..."):
+            st.write("""
+            The data presented here is aggregated from various global sources and may include uncertainties. 
+            Factors such as data quality, collection methods, and regional differences in reporting standards 
+            could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
+
+            The data we introduce may construct a narrative. As we cannot include all existing data in the current version, 
+            we decided to provide the data that creates contrast and serves the investigation of our leading question. 
+            This is undeterrable and induced by selective bias.
+            """)
+
+    with guideline_col:
+        st.write("---")
+        st.markdown("## Introduction")
         st.write("""
-        The data presented here is aggregated from various global sources and may include uncertainties. 
-        Factors such as data quality, collection methods, and regional differences in reporting standards 
-        could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
+        In the context of sustainability we always talk about the Sustainable Development Goals (SDGs). 
+        We accept their apparent importance and rarely scrutinize them. 
+
+        Therefore we want to enable you to gain a deeper understanding of the SDGs, how they are constructed, 
+        and what their weaknesses are.
         """)
 
     # Large Proceed button
     if st.button("Click 2x to proceed to SDG Dashboard", key="proceed_button"):
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
+        st.session_state.sdg_knowledge_score = sdg_knowledge_score
 
-# Full dashboard
+
+# SDG dashboard
 if st.session_state.proceed and not st.session_state.new_dashboard:
     # Identify SDG and trend columns
     color_columns = [col for col in color_data.columns if col.startswith("SDG")]
@@ -152,11 +180,16 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
         """)
 
         st.markdown("## Bias")
-        st.write("""
-        The data presented here is aggregated from various global sources and may include uncertainties. 
-        Factors such as data quality, collection methods, and regional differences in reporting standards 
-        could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
-        """)
+        with st.expander("Read more about Bias..."):
+            st.write("""
+            The data presented here is aggregated from various global sources and may include uncertainties. 
+            Factors such as data quality, collection methods, and regional differences in reporting standards 
+            could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
+
+            The data we introduce may construct a narrative. As we cannot include all existing data in the current version, 
+            we decided to provide the data that creates contrast and serves the investigation of our leading question. 
+            This is undeterrable and induced by selective bias.
+            """)
 
     with header_cols[1]:
         st.markdown("<h2 style='text-align: center; margin-bottom: 10px;'>Global SDG Performance</h2>", unsafe_allow_html=True)
@@ -228,74 +261,118 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
                 st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
 
 # Indicator Dashboard
+# Indicator Dashboard
 if st.session_state.new_dashboard:
-    # Load the Goal 7 data only once
-    @st.cache_data
-    def load_goal7_data():
-        data_path = 'Data/Goal7.xlsx'
-        data = pd.read_excel(data_path, engine='openpyxl')
-        return data
+    # Tabs for switching between Indicator Dashboard and Electricity Loss Comparison
+    tab1, tab2 = st.tabs(["Indicator Dashboard", "Electricity Loss Comparison"])
 
-    goal7_data = load_goal7_data()
+    # Tab 1: Original Indicator Dashboard
+    with tab1:
+        # Load the Goal 7 data only once
+        @st.cache_data
+        def load_goal7_data():
+            data_path = 'Data/Goal7.xlsx'
+            data = pd.read_excel(data_path, engine='openpyxl')
+            return data
 
-    # Preprocess the dataset
-    goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()  # Remove leading/trailing spaces
+        goal7_data = load_goal7_data()
 
-    # Handle missing values only for essential columns
-    goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])  # Removed 'Location'
+        # Preprocess the dataset
+        goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()  # Remove leading/trailing spaces
+        goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])  # Handle missing values
 
-    # Sidebar for indicator and country selection
-    st.sidebar.header("Select Indicator")
-    indicators = sorted(goal7_data["Indicator"].unique())  # Sort indicators for better usability
-    selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators)
+        # Sidebar for indicator and country selection
+        st.sidebar.header("Select Indicator")
+        indicators = sorted(goal7_data["Indicator"].unique())
+        selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators)
 
-    st.sidebar.header("Select Countries")
-    countries = sorted(goal7_data["GeoAreaName"].unique())  # Sort countries for better usability
-    selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
+        st.sidebar.header("Select Countries")
+        countries = sorted(goal7_data["GeoAreaName"].unique())
+        selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
 
-    # Add Generate button to control graph updates
-    generate = st.sidebar.button("Generate Graph")
+        generate_indicator_graph = st.sidebar.button("Generate Indicator Graph")
 
-    # Generate the graph only when the button is clicked
-    if generate:
-        # Filter data for the selected indicator and countries
-        filtered_data = goal7_data[
-            (goal7_data["Indicator"] == selected_indicator) &
-            (goal7_data["GeoAreaName"].isin(selected_countries))
-        ]
+        if generate_indicator_graph:
+            # Filter data for the selected indicator and countries
+            filtered_data = goal7_data[
+                (goal7_data["Indicator"] == selected_indicator) &
+                (goal7_data["GeoAreaName"].isin(selected_countries))
+            ]
 
-        # Ensure regions (ALLAREA, URBAN, RURAL) are properly displayed
-        allarea_data = filtered_data[filtered_data["Location"] == "ALLAREA"]
-        urban_data = filtered_data[filtered_data["Location"] == "URBAN"]
-        rural_data = filtered_data[filtered_data["Location"] == "RURAL"]
+            st.title("Indicator Dashboard")
+            st.markdown(f"### Indicator: {selected_indicator}")
 
-        st.title("Indicator Dashboard")
-        st.markdown(f"### Indicator: {selected_indicator}")
+            if not filtered_data.empty:
+                fig = px.line(
+                    filtered_data,
+                    x="TimePeriod",
+                    y="Value",
+                    color="GeoAreaName",
+                    labels={
+                        "TimePeriod": "Year",
+                        "Value": "Indicator Value",
+                        "GeoAreaName": "Country"
+                    },
+                    title=f"Trends for {selected_indicator}",
+                    color_discrete_sequence=px.colors.qualitative.Set1
+                )
+                fig.update_layout(
+                    xaxis_title="Year",
+                    yaxis_title="Indicator Value",
+                    legend_title="Country",
+                    template="plotly_white"
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.write("No data available for the selected indicator and countries.")
 
-        if not filtered_data.empty:
-            # Create the line chart with better performance and distinct country colors
+    # Tab 2: Electricity Loss Comparison
+    with tab2:
+        # Load the elecloss2.csv dataset
+        @st.cache_data
+        def load_elecloss2_data():
+            data_path = 'Data/elecloss2.csv'
+            data = pd.read_csv(data_path, skiprows=4)
+            return data
+
+        elecloss2_data = load_elecloss2_data()
+
+        st.sidebar.header("Electricity Loss Comparison")
+        countries = sorted(elecloss2_data["Country Name"].dropna().unique())
+        selected_countries = st.sidebar.multiselect("Choose two countries to compare:", options=countries, default=countries[:2])
+
+        generate_comparison = st.sidebar.button("Generate Comparison")
+
+        if generate_comparison and len(selected_countries) == 2:
+            filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
+
+            melted_data = filtered_data.melt(
+                id_vars=["Country Name"], 
+                var_name="Year", 
+                value_name="Electricity Loss (%)"
+            )
+
+            melted_data = melted_data[melted_data["Year"].str.isdigit()]
+            melted_data["Year"] = melted_data["Year"].astype(int)
+
             fig = px.line(
-                filtered_data,
-                x="TimePeriod",
-                y="Value",
-                color="GeoAreaName",  # Different colors for countries
-                line_dash="Location",  # Differentiates ALLAREA, URBAN, and RURAL
+                melted_data,
+                x="Year",
+                y="Electricity Loss (%)",
+                color="Country Name",
                 labels={
-                    "TimePeriod": "Year",
-                    "Value": "Indicator Value",
-                    "Location": "Region"
+                    "Year": "Year",
+                    "Electricity Loss (%)": "Electricity Loss (%)",
+                    "Country Name": "Country"
                 },
-                title=f"Trends for {selected_indicator}",
-                color_discrete_sequence=px.colors.qualitative.Set1  # Distinct colors
+                title="Electric Power Transmission and Distribution Loss Comparison"
             )
             fig.update_layout(
                 xaxis_title="Year",
-                yaxis_title="Indicator Value",
-                legend_title="Country / Region",
+                yaxis_title="Electricity Loss (%)",
+                legend_title="Country",
                 template="plotly_white"
             )
             st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.write("No data available for the selected indicator and countries.")
-    else:
-        st.write("Click 'Generate Graph' to display the trends.")
+        elif len(selected_countries) != 2:
+            st.warning("Please select exactly two countries for comparison.")
