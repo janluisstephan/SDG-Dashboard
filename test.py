@@ -1,9 +1,12 @@
+‎test.py
+-4
+Original file line number	Diff line number	Diff line change
+@@ -1,305 +1,301 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import os
 
-# Set Streamlit page configuration
 st.set_page_config(layout="wide")
 
 # Load data with caching
@@ -36,6 +39,7 @@ if not st.session_state.proceed:
         unsafe_allow_html=True,
     )
 
+    # Slider
     reliability_score = st.slider(
         label="Rate the reliability:",
         min_value=1,
@@ -45,6 +49,7 @@ if not st.session_state.proceed:
         help="Drag the slider to indicate your opinion on the reliability of SDG scores."
     )
 
+    # Create two columns for Instructions and Bias
     instruction_col, bias_col = st.columns(2)
 
     with instruction_col:
@@ -65,12 +70,14 @@ if not st.session_state.proceed:
         could introduce biases. Interpret trends and performance cautiously, acknowledging these limitations.
         """)
 
+    # Large Proceed button
     if st.button("Click 2x to proceed to SDG Dashboard", key="proceed_button"):
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
 
-# Full SDG Dashboard
+# Full dashboard
 if st.session_state.proceed and not st.session_state.new_dashboard:
+    # Identify SDG and trend columns
     color_columns = [col for col in color_data.columns if col.startswith("SDG")]
     trend_columns = [
         color_data.columns[color_data.columns.get_loc(col) + 1]
@@ -79,6 +86,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
         for col in color_columns
     ]
 
+    # SDG labels
     sdg_labels = [
         "No Poverty", "Zero Hunger", "Good Health and Well-being", "Quality Education",
         "Gender Equality", "Clean Water and Sanitation", "Affordable and Clean Energy",
@@ -88,6 +96,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
         "Life on Land", "Peace, Justice and Strong Institutions", "Partnerships for the Goals"
     ]
 
+    # Color and trend mappings
     color_mapping = {
         "green": "Goal Achievement",
         "yellow": "Challenges Remain",
@@ -109,6 +118,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
         "↓": "Decreasing"
     }
 
+    # Generate map
     def generate_map(selected_sdg_index):
         current_sdg = color_columns[selected_sdg_index]
         filtered_data = color_data[["Country", current_sdg]].dropna()
@@ -124,35 +134,17 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
             color_discrete_map=color_hex_mapping
         )
 
+        fig.update_traces(marker_line_width=0)
         fig.update_layout(
             margin={"r": 0, "t": 0, "l": 0, "b": 0},
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            geo=dict(
-                showcountries=True,
-                showcoastlines=True,
-                coastlinecolor="LightGray",
-                showframe=False
-            ),
-            title_text="Global SDG Performance",
-            title_x=0.5,
-            title_font_size=18,
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=-0.2,
-                xanchor="center",
-                x=0.5
-            )
+            paper_bgcolor="#f9f9f9",
+            plot_bgcolor="#f9f9f9",
+            showlegend=False,
+            dragmode=False
         )
-
-        fig.update_traces(
-            marker_line_color='white',
-            marker_line_width=0.5
-        )
-
         return fig
 
+    # Layout: Instructions, Map, Legend
     header_cols = st.columns([1.5, 4, 1.5])
 
     with header_cols[0]:
@@ -185,6 +177,11 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
                 unsafe_allow_html=True
             )
 
+        # Add country selection dropdown and current situation display
+        st.markdown("<div style='margin-top: 50px;'>", unsafe_allow_html=True)
+        selected_sdg_label = sdg_labels[st.session_state.selected_sdg_index]
+        st.markdown(f"### Trend for {selected_sdg_label}")
+
         selected_country = st.selectbox("Select a country:", options=color_data["Country"].unique(), key="country_dropdown")
 
         if selected_country:
@@ -202,6 +199,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
                         </div>
                     """, unsafe_allow_html=True)
 
+            # Fetch and display trend
             trend_column = trend_columns[st.session_state.selected_sdg_index]
             if trend_column in color_data.columns:
                 trend_data = color_data[color_data["Country"] == selected_country]
@@ -215,9 +213,12 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
                         </div>
                     """, unsafe_allow_html=True)
 
+        # Add Proceed button under the Trend display
+        st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
         if st.button("Click 2x to proceed to Indicator-Dashboard", key="new_dashboard_button"):
             st.session_state.new_dashboard = True
 
+    # SDG selection section
     st.write("---")
     cols = st.columns(len(sdg_labels))
 
@@ -229,3 +230,83 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
             image_path = os.path.join("assets", f"{i + 1}.png")
             if os.path.exists(image_path):
                 st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
+
+# Indicator Dashboard
+if st.session_state.new_dashboard:
+    # Load the Goal 7 data only once
+    @st.cache_data
+    def load_goal7_data():
+        data_path = 'Data/Goal7.xlsx'
+        data = pd.read_excel(data_path, engine='openpyxl')
+        return data
+
+    goal7_data = load_goal7_data()
+
+    # Debug: Check missing values per column
+    st.write("Missing values per column in the dataset:")
+    st.write(goal7_data.isnull().sum())
+    # Preprocess the dataset
+    goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()  # Remove leading/trailing spaces
+
+    # Handle missing values only for essential columns
+    goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])  # Removed 'Location'
+
+    # Sidebar for indicator and country selection
+    st.sidebar.header("Select Indicator")
+    indicators = sorted(goal7_data["Indicator"].unique())  # Sort indicators for better usability
+    selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators)
+
+    st.sidebar.header("Select Countries")
+    countries = sorted(goal7_data["GeoAreaName"].unique())  # Sort countries for better usability
+    selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
+
+    # Add Generate button to control graph updates
+    generate = st.sidebar.button("Generate Graph")
+
+    # Generate the graph only when the button is clicked
+    if generate:
+        # Filter data for the selected indicator and countries
+        filtered_data = goal7_data[
+            (goal7_data["Indicator"] == selected_indicator) &
+            (goal7_data["GeoAreaName"].isin(selected_countries))
+        ]
+
+        # Ensure regions (ALLAREA, URBAN, RURAL) are properly displayed
+        allarea_data = filtered_data[filtered_data["Location"] == "ALLAREA"]
+        urban_data = filtered_data[filtered_data["Location"] == "URBAN"]
+        rural_data = filtered_data[filtered_data["Location"] == "RURAL"]
+
+        st.title("Indicator Dashboard")
+        st.markdown(f"### Indicator: {selected_indicator}")
+
+        if not filtered_data.empty:
+            # Create the line chart with better performance and distinct country colors
+            fig = px.line(
+                filtered_data,
+                x="TimePeriod",
+                y="Value",
+                color="GeoAreaName",  # Different colors for countries
+                line_dash="Location",  # Differentiates ALLAREA, URBAN, and RURAL
+                labels={
+                    "TimePeriod": "Year",
+                    "Value": "Indicator Value",
+                    "Location": "Region"
+                },
+                title=f"Trends for {selected_indicator}",
+                color_discrete_sequence=px.colors.qualitative.Set1  # Distinct colors
+            )
+            fig.update_layout(
+                xaxis_title="Year",
+                yaxis_title="Indicator Value",
+                legend_title="Country / Region",
+                template="plotly_white"
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.write("No data available for the selected indicator and countries.")
+    else:
+        st.write("Click 'Generate Graph' to display the trends.")
+0 commit comments
+Comments
+0
+ (0)
