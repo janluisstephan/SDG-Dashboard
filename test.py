@@ -3,6 +3,10 @@ import pandas as pd
 import plotly.express as px
 import os
 
+import streamlit as st
+import json
+import os
+
 st.set_page_config(layout="wide")
 
 # Speicherort der Antworten
@@ -11,33 +15,23 @@ DATA_FILE = "lib.py"
 # Funktion zum Laden der Antworten
 def load_answers():
     if os.path.exists(DATA_FILE):
-        # Lese Daten aus lib.py (als CSV-Daten gespeichert)
-        return pd.read_csv(DATA_FILE)
+        with open(DATA_FILE, "r") as file:
+            try:
+                return json.load(file)
+            except json.JSONDecodeError:
+                return []  # Leere Liste, falls die Datei leer oder ungültig ist
     else:
-        # Erstelle leeres DataFrame, falls Datei nicht existiert
-        return pd.DataFrame(columns=["reliability_score", "sdg_knowledge_score"])
+        return []  # Leere Liste, wenn die Datei nicht existiert
 
 # Funktion zum Speichern der Antworten
 def save_answer(reliability, knowledge):
     answers = load_answers()
-    new_entry = {"reliability_score": reliability, "sdg_knowledge_score": knowledge}
-    # Füge neue Antworten hinzu
-    answers = pd.concat([answers, pd.DataFrame([new_entry])], ignore_index=True)
-    # Speichere Antworten in lib.py (als CSV)
-    answers.to_csv(DATA_FILE, index=False)
+    answers.append({"reliability_score": reliability, "sdg_knowledge_score": knowledge})
+    with open(DATA_FILE, "w") as file:
+        json.dump(answers, file, indent=4)
 
 # Lade gespeicherte Daten, falls vorhanden
 answers = load_answers()
-
-# Load data with caching
-@st.cache_data
-def load_data():
-    data_path = 'Data/SDR2024-data.xlsx'
-    sdg_data = pd.read_excel(data_path, sheet_name='Full Database', engine='openpyxl')
-    color_data = pd.read_excel(data_path, sheet_name='Overview', engine='openpyxl')
-    return sdg_data, color_data
-
-sdg_data, color_data = load_data()
 
 # Initialize session state
 if "proceed" not in st.session_state:
@@ -128,12 +122,14 @@ if not st.session_state.proceed:
 if st.session_state.proceed:
     st.title("Review Your Answers")
     st.write("Here are your previously submitted answers:")
-    st.dataframe(answers)
+    st.json(answers)  # Zeigt die gespeicherten Antworten als JSON an
 
-    # Optionally, allow users to re-enter answers or proceed to the next step
-    if st.button("Clear Answers"):
-        os.remove(DATA_FILE)
+    # Optionally, allow users to clear all answers
+    if st.button("Clear All Answers"):
+        if os.path.exists(DATA_FILE):
+            os.remove(DATA_FILE)
         st.experimental_rerun()
+
 
 # SDG dashboard
 if st.session_state.proceed and not st.session_state.new_dashboard:
