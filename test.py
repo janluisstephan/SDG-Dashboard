@@ -347,12 +347,12 @@ elif st.session_state.new_dashboard:
         # Funktion zum Laden des Brazil Germany Comparison-Datasets
         @st.cache_data
         def load_brazil_germany_comparison_data():
-            data_path = 'Data/Brazil Germany Comparison .xlsx'
+            data_path = '/mnt/data/Brazil Germany Comparison .xlsx'  # Der Pfad zum hochgeladenen Dataset
             if os.path.exists(data_path):
                 data = pd.read_excel(data_path, engine="openpyxl")
                 return data
             else:
-                st.error(f"Dataset {data_path} not found in the 'Data' folder.")
+                st.error(f"Dataset {data_path} not found.")
                 return None
 
         brazil_germany_data = load_brazil_germany_comparison_data()
@@ -388,6 +388,7 @@ elif st.session_state.new_dashboard:
 
         else:
             st.warning("No data available for Brazil Germany Comparison.")
+
 
     elif dashboard_choice == "Indicator Dashboard":
         @st.cache_data
