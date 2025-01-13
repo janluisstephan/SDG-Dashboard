@@ -694,10 +694,3 @@ elif st.session_state.new_dashboard:
             st.warning("Please select at least one country for the comparison.")
     
 
-            
-         # Add the "Click 2x to proceed" button in the sidebar
-        with st.sidebar:
-            st.write("---")
-            if st.button("Click 2x to proceed", key="proceed_to_results_electricity"):
-                st.session_state.results_shown = True
-                st.experimental_rerun()
