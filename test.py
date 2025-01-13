@@ -516,8 +516,8 @@ elif st.session_state.new_dashboard:
                         fig_overview = px.area(
                             overview_data,
                             x="TimePeriod",
-                            y="Value",
-                            color="GeoAreaName",
+                            y="Total Financial Flows (in Units)",
+                            color="Countries",
                             title="Overall Financial Flow Trends (7.a.1)",
                             labels={"TimePeriod": "Year", "Value": "Total Financial Flows (in Units)"},
                         )
