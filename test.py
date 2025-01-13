@@ -298,128 +298,104 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
 
 # Check if the results page should be displayed
 if "results_shown" in st.session_state and st.session_state.results_shown:
-    # RESULTS PAGE
     st.title("Results")
-    st.markdown("### Here are the responses you've provided:")
-    for idx, answer in enumerate(answers):
-        st.write(f"**Response {idx + 1}:**")
-        st.write(f"- Reliability Score: {answer['reliability_score']}")
-        st.write(f"- SDG Knowledge Score: {answer['sdg_knowledge_score']}")
-
-    # Add a button to return to the main dashboard
-    if st.button("Click 2x to return to Dashboard"):
-        st.session_state.results_shown = False
-        st.session_state.new_dashboard = True
-        st.experimental_rerun()
-
-elif st.session_state.new_dashboard:
+    # Add content for the results page
+else:
     # INDICATOR DASHBOARD
-    st.sidebar.header("Dashboard Selection")
-    dashboard_choice = st.sidebar.radio(
-        "Choose a dashboard:",
-        options=["Indicator Dashboard", "Electricity Loss Comparison"],
-        index=0  # Default to Indicator Dashboard
-    )
+    @st.cache_data
+    def load_goal7_data():
+        data_path = 'Data/Goal7.xlsx'
+        data = pd.read_excel(data_path, engine='openpyxl')
+        return data
 
-    if dashboard_choice == "Indicator Dashboard":
-        @st.cache_data
-        def load_goal7_data():
-            data_path = 'Data/Goal7.xlsx'
-            data = pd.read_excel(data_path, engine='openpyxl')
-            return data
+    goal7_data = load_goal7_data()
+    goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()
+    goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])
 
-        goal7_data = load_goal7_data()
-        goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()
-        goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])
+    # Sidebar for selecting indicators and countries
+    st.sidebar.header("Select Indicator and Countries")
+    indicators = sorted(goal7_data["Indicator"].unique())
+    selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators)
+    countries = sorted(goal7_data["GeoAreaName"].unique())
+    selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil", "Germany"])
 
-        # Sidebar for selecting indicators and countries
-        st.sidebar.header("Select Indicator and Countries")
-        indicators = sorted(goal7_data["Indicator"].unique())
-        selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators)
-        countries = sorted(goal7_data["GeoAreaName"].unique())
-        selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil", "Germany"])
+    # SDG Indicator Descriptions
+    indicator_descriptions = {
+        "7.1.1": "Access to electricity is the percentage of population with access to electricity. Electrification data are collected from industry, national surveys, and international sources.",
+        "7.1.2": "The proportion of population with primary reliance on clean fuels and technology is calculated as the number of people using clean fuels and technologies for cooking, heating, and lighting divided by the total population reporting any cooking, heating, or lighting.",
+        "7.2.1": "Renewable energy consumption is the share of renewables energy in total final energy consumption.",
+        "7.3.1": "Energy intensity level of primary energy is the ratio between energy supply and gross domestic product measured at purchasing power parity.",
+        "7.a.1": "Financial flows for clean energy research and development and renewable energy production.",
+        "7.b.1": "The indicator is defined as the installed capacity of power plants that generate electricity from renewable energy sources divided by the total population of a country."
+    }
 
-        # SDG Indicator Descriptions
-        indicator_descriptions = {
-            "7.1.1": "Access to electricity is the percentage of population with access to electricity. Electrification data are collected from industry, national surveys, and international sources.",
-            "7.1.2": "The proportion of population with primary reliance on clean fuels and technology is calculated as the number of people using clean fuels and technologies for cooking, heating and lighting divided by total population reporting that any cooking, heating or lighting, expressed as percentage.",
-            "7.2.1": "Renewable energy consumption is the share of renewables energy in total final energy consumption.",
-            "7.3.1": "Energy intensity level of primary energy is the ratio between energy supply and gross domestic product measured at purchasing power parity.",
-            "7.a.1": "Financial flows for the purpose of clean energy research and development and renewable energy production.",
-            "7.b.1": "The indicator is defined as the installed capacity of power plants that generate electricity from renewable energy sources divided by the total population of a country."
-        }
+    # Generate indicator graph
+    if st.sidebar.button("Generate Indicator Graph"):
+        filtered_data = goal7_data[
+            (goal7_data["Indicator"] == selected_indicator) &
+            (goal7_data["GeoAreaName"].isin(selected_countries))
+        ]
 
-        # Generate indicator graph
-        if st.sidebar.button("Generate Indicator Graph"):
-            filtered_data = goal7_data[
-                (goal7_data["Indicator"] == selected_indicator) &
-                (goal7_data["GeoAreaName"].isin(selected_countries))
-            ]
+        st.title("Indicator Dashboard")
 
-            st.title("Indicator Dashboard")
+        # Add the Indicator name and information button
+        info_button = f"""
+        <style>
+            .tooltip {{
+                position: relative;
+                display: inline-block;
+            }}
 
-            # Add the Indicator name and information button
-            info_button = f"""
-            <style>
-                .tooltip {{
-                    position: relative;
-                    display: inline-block;
-                }}
+            .tooltip .tooltiptext {{
+                visibility: hidden;
+                background-color: #f9f9f9;
+                color: #000;
+                text-align: left;
+                border-radius: 6px;
+                padding: 10px;
+                position: absolute;
+                z-index: 1;
+                bottom: 125%; /* Position above the text */
+                left: 50%;
+                transform: translateX(-50%);
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                white-space: normal; /* Allow multi-line text */
+                max-width: 300px; /* Limit width */
+                font-size: 16px; /* Increase font size */
+                line-height: 1.5; /* Improve readability */
+            }}
 
-                .tooltip .tooltiptext {{
-                    visibility: hidden;
-                    background-color: #f9f9f9;
-                    color: #000;
-                    text-align: left;
-                    border-radius: 6px;
-                    padding: 8px;
-                    position: absolute;
-                    z-index: 1;
-                    bottom: 125%; /* Position above the text */
-                    left: 50%;
-                    transform: translateX(-50%);
-                    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-                    white-space: nowrap;
-                    width: auto; /* Adjust width automatically to fit text */
-                }}
-
-                .tooltip:hover .tooltiptext {{
-                    visibility: visible;
-                }}
-            </style>
-            <div style="display: flex; align-items: center;">
-                <h3 style="margin-right: 10px;">Indicator: {selected_indicator}</h3>
-                <div class="tooltip">
-                    <span style="cursor: pointer; font-size: 18px; color: #007bff;">ℹ️</span>
-                    <span class="tooltiptext">{indicator_descriptions.get(selected_indicator, "No description available.")}</span>
-                </div>
+            .tooltip:hover .tooltiptext {{
+                visibility: visible;
+            }}
+        </style>
+        <div style="display: flex; align-items: center;">
+            <h3 style="margin-right: 10px;">Indicator: {selected_indicator}</h3>
+            <div class="tooltip">
+                <span style="cursor: pointer; font-size: 22px; color: #007bff;">ℹ️</span>
+                <span class="tooltiptext">{indicator_descriptions.get(selected_indicator, "No description available.")}</span>
             </div>
-            """
-            st.markdown(info_button, unsafe_allow_html=True)
+        </div>
+        """
+        st.markdown(info_button, unsafe_allow_html=True)
 
-            # Display the graph
-            if not filtered_data.empty:
-                fig = px.line(
-                    filtered_data,
-                    x="TimePeriod",
-                    y="Value",
-                    color="GeoAreaName",
-                    labels={"TimePeriod": "Year", "Value": "Indicator Value", "GeoAreaName": "Country"},
-                    title=f"Trends for {selected_indicator}",
-                    color_discrete_sequence=px.colors.qualitative.Set1
-                )
-                fig.update_layout(
-                    xaxis_title="Year",
-                    yaxis_title="Indicator Value",
-                    legend_title="Country",
-                    template="plotly_white"
-                )
-                st.plotly_chart(fig, use_container_width=True)
-            else:
-                st.write("No data available for the selected indicator and countries.")
-
-        # Button to proceed to results
-        st.sidebar.write("---")
-        if st.sidebar.button("Click 2x to proceed", key="proceed_to_results_button"):
-            st.session_state.results_shown = True  # Switch to results page
-            st.experimental_rerun()
+        # Display the graph
+        if not filtered_data.empty:
+            fig = px.line(
+                filtered_data,
+                x="TimePeriod",
+                y="Value",
+                color="GeoAreaName",
+                labels={"TimePeriod": "Year", "Value": "Indicator Value", "GeoAreaName": "Country"},
+                title=f"Trends for {selected_indicator}",
+                color_discrete_sequence=px.colors.qualitative.Set1
+            )
+            fig.update_layout(
+                xaxis_title="Year",
+                yaxis_title="Indicator Value",
+                legend_title="Country",
+                template="plotly_white"
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.write("No data available for the selected indicator and countries.")
