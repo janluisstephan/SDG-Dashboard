@@ -430,7 +430,7 @@ elif st.session_state.new_dashboard:
             st.title("Indicator Dashboard")
             if not filtered_data.empty:
                 if selected_indicator == "7.1.1":
-                    st.markdown("### Indicator 7.1.1: Proportion of population with access to electricity, by urban/rural (%). Electrification data are collected from industry, national surveys and international sources")
+                    st.markdown("### Indicator 7.1.1: Proportion of population with access to electricity, by urban/rural (%)")
                     filtered_data["Value"] = filtered_data["Value"].interpolate(method="linear")
 
                     fig = px.line(
@@ -445,9 +445,10 @@ elif st.session_state.new_dashboard:
                     )
                     fig.update_layout(template="plotly_white")
                     st.plotly_chart(fig, use_container_width=True)
+                    st.markdown("Access to electricity is the percentage of population with access to electricity. Electrification data are collected from industry, national surveys and international sources.")
 
                 elif selected_indicator == "7.1.2":
-                    st.markdown("### Indicator 7.1.2: Proportion of population with primary reliance on clean fuels and technology (%).")
+                    st.markdown("### Indicator 7.1.2: Proportion of population with primary reliance on clean fuels and technology (%)")
                     filtered_data["Value"] = filtered_data["Value"].interpolate(method="linear")
 
                     # Handle error bounds gracefully without warning
@@ -466,11 +467,12 @@ elif st.session_state.new_dashboard:
                         error_y=error_y,
                         error_y_minus=error_y_minus,
                         labels={"TimePeriod": "Year", "Value": "Reliance Percentage"},
-                        title="This indicator is calculated as the number of people using clean fuels and technologies for cooking, heating and lighting divided by total population reporting that any cooking, heating or lighting, expressed as percentage. “Clean” is defined by the emission rate targets and specific fuel recommendations (WHO guidelines)",
+                        title="Reliance on Clean Fuels (by Location and Country)",
                         markers=True
                     )
                     fig.update_layout(template="plotly_white")
                     st.plotly_chart(fig, use_container_width=True)
+                    st.markdown("The proportion of population with primary reliance on clean fuels and technology is calculated as the number of people using clean fuels and technologies for cooking, heating and lighting divided by total population reporting that any cooking, heating or lighting, expressed as percentage.")
 
                 elif selected_indicator == "7.2.1":
                     st.markdown("### Indicator 7.2.1: Renewable energy share in the total final energy consumption (%)")
@@ -487,6 +489,7 @@ elif st.session_state.new_dashboard:
                     )
                     fig.update_layout(template="plotly_white")
                     st.plotly_chart(fig, use_container_width=True)
+                    st.markdown("Renewable energy consumption is the share of renewables energy in total final energy consumption.")
 
                 elif selected_indicator == "7.3.1":
                     st.markdown("### Indicator 7.3.1: Energy intensity level of primary energy (megajoules per constant 2017 purchasing power parity GDP)")
@@ -501,6 +504,7 @@ elif st.session_state.new_dashboard:
                     )
                     fig.update_layout(template="plotly_white")
                     st.plotly_chart(fig, use_container_width=True)
+                    st.markdown("Energy intensity level of primary energy is the ratio between energy supply and gross domestic product measured at purchasing power parity.")
 
                 elif selected_indicator == "7.a.1" or selected_indicator == "7.b.1":
                     st.markdown(f"### Indicator {selected_indicator}: Financial flows and renewable energy production")
@@ -520,6 +524,7 @@ elif st.session_state.new_dashboard:
                             )
                             fig.update_layout(template="plotly_white")
                             st.plotly_chart(fig, use_container_width=True)
+                        st.markdown("Financial flows include official loans, grants, and equity investments for clean energy research and development.")
                     else:
                         st.error("The column 'Type of renewable technology' is missing in the data.")
 
