@@ -339,78 +339,11 @@ elif st.session_state.new_dashboard:
     st.sidebar.header("Dashboard Selection")
     dashboard_choice = st.sidebar.radio(
         "Choose a dashboard:",
-        options=["Indicator Dashboard", "Electricity Loss Comparison", "Brazil Germany Comparison"],  # Neuer Punkt hinzugefügt
+        options=["Indicator Dashboard", "Electricity Loss Comparison", "Brazil Germany Comparison"],
         index=0
     )
 
-    if dashboard_choice == "Brazil Germany Comparison":
-        # Funktion zum Laden des Brazil Germany Comparison-Datasets
-        @st.cache_data
-        def load_brazil_germany_comparison_data():
-            data_path = 'Data/Brazil Germany Comparison .xlsx'  # Der Pfad zum Dataset im Data-Ordner
-            if os.path.exists(data_path):
-                data = pd.read_excel(data_path, engine="openpyxl")
-                return data
-            else:
-                st.error(f"Dataset {data_path} not found.")
-                return None
-
-        brazil_germany_data = load_brazil_germany_comparison_data()
-
-        if brazil_germany_data is not None:
-            st.title("Comparison of Per Capita Energy Expenditure Between Brazil and Germany")
-            # Entferne die Anzeige der Tabelle
-            # st.dataframe(brazil_germany_data)
-
-            # Nehmen wir an, die relevanten Spalten für die Prozentzahlen sind Spalten 3 und 4
-            # Diese Spalten enthalten die Prozentzahlen für Brasilien und Deutschland
-            data_to_plot = brazil_germany_data.iloc[0:10, [3, 4]]  # Die ersten 10 Zeilen, Spalten 3 und 4 (Prozentzahlen)
-
-            # Die Daten in Prozent umwandeln (multiplizieren mit 100)
-            data_to_plot = data_to_plot * 100
-
-            # Die Spaltennamen ändern, um klarzustellen, was sie repräsentieren
-            data_to_plot.columns = ['Brazil', 'Germany']
-
-            # Erstellen des Balkendiagramms
-            fig = px.bar(
-                data_to_plot,
-                x=data_to_plot.index,  # Einkommensgruppen korrekt anzeigen (0-10%, 10-20%, ...)
-                y=data_to_plot.columns,
-                title="Brazil vs Germany Comparison (Percentage of Income Spent on Electricity)",
-                labels={"x": "Income Percentile Group", "y": "Percentage of income p.p. spent on electricity (%)"},
-                barmode='group',
-                height=400
-            )
-
-            fig.update_layout(
-                template="plotly_white",
-                xaxis_title="Income Percentile Group",
-                yaxis_title="Percentage of Income",
-                yaxis=dict(
-                    tickmode="array",
-                    tickvals=[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],  # Y-Achse mit Werten von 0 bis 100
-                    ticktext=["0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"]
-                ),
-                xaxis=dict(
-                    tickvals=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],  # 0 bis 9 für die Einkommensgruppen
-                    ticktext=["0-10%", "10-20%", "20-30%", "30-40%", "40-50%", "50-60%", "60-70%", "70-80%", "80-90%", "90-100%"]
-                )
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-            # Text unter dem Graphen hinzufügen
-            st.markdown("""
-            The graph shows income percentiles, which divide the population into equal 10% groups based on income levels. 
-            It compares the percentage of income spent on electricity in Brazil and Germany for each percentile group.
-            """)
-
-        else:
-            st.warning("No data available for Brazil Germany Comparison.")
-
-
-
-    elif dashboard_choice == "Indicator Dashboard":
+    if dashboard_choice == "Indicator Dashboard":
         @st.cache_data
         def load_goal7_data():
             data_path = 'Data/Goal7.xlsx'
@@ -437,7 +370,7 @@ elif st.session_state.new_dashboard:
             st.title("Indicator Dashboard")
             if not filtered_data.empty:
                 if selected_indicator == "7.1.1":
-                    st.markdown("### Indicator 7.1.1: Proportion of population with access to electricity, by urban/rural (%). Electrification data are collected from industry, national surveys and international sources")
+                    st.markdown("### Indicator 7.1.1: Proportion of population with access to electricity, by urban/rural (%)")
                     filtered_data["Value"] = filtered_data["Value"].interpolate(method="linear")
 
                     fig = px.line(
@@ -452,9 +385,10 @@ elif st.session_state.new_dashboard:
                     )
                     fig.update_layout(template="plotly_white")
                     st.plotly_chart(fig, use_container_width=True)
+                    st.markdown("Access to electricity is the percentage of population with access to electricity. Electrification data are collected from industry, national surveys and international sources.")
 
                 elif selected_indicator == "7.1.2":
-                    st.markdown("### Indicator 7.1.2: Proportion of population with primary reliance on clean fuels and technology (%).")
+                    st.markdown("### Indicator 7.1.2: Proportion of population with primary reliance on clean fuels and technology (%)")
                     filtered_data["Value"] = filtered_data["Value"].interpolate(method="linear")
 
                     # Handle error bounds gracefully without warning
@@ -473,11 +407,12 @@ elif st.session_state.new_dashboard:
                         error_y=error_y,
                         error_y_minus=error_y_minus,
                         labels={"TimePeriod": "Year", "Value": "Reliance Percentage"},
-                        title="This indicator is calculated as the number of people using clean fuels and technologies for cooking, heating and lighting divided by total population reporting that any cooking, heating or lighting, expressed as percentage. “Clean” is defined by the emission rate targets and specific fuel recommendations (WHO guidelines)",
+                        title="Reliance on Clean Fuels (by Location and Country)",
                         markers=True
                     )
                     fig.update_layout(template="plotly_white")
                     st.plotly_chart(fig, use_container_width=True)
+                    st.markdown("The proportion of population with primary reliance on clean fuels and technology is calculated as the number of people using clean fuels and technologies for cooking, heating and lighting divided by total population reporting that any cooking, heating or lighting, expressed as percentage.")
 
                 elif selected_indicator == "7.2.1":
                     st.markdown("### Indicator 7.2.1: Renewable energy share in the total final energy consumption (%)")
@@ -494,6 +429,7 @@ elif st.session_state.new_dashboard:
                     )
                     fig.update_layout(template="plotly_white")
                     st.plotly_chart(fig, use_container_width=True)
+                    st.markdown("Renewable energy consumption is the share of renewables energy in total final energy consumption.")
 
                 elif selected_indicator == "7.3.1":
                     st.markdown("### Indicator 7.3.1: Energy intensity level of primary energy (megajoules per constant 2017 purchasing power parity GDP)")
@@ -508,6 +444,7 @@ elif st.session_state.new_dashboard:
                     )
                     fig.update_layout(template="plotly_white")
                     st.plotly_chart(fig, use_container_width=True)
+                    st.markdown("Energy intensity level of primary energy is the ratio between energy supply and gross domestic product measured at purchasing power parity.")
 
                 elif selected_indicator == "7.a.1" or selected_indicator == "7.b.1":
                     st.markdown(f"### Indicator {selected_indicator}: Financial flows and renewable energy production")
@@ -527,11 +464,13 @@ elif st.session_state.new_dashboard:
                             )
                             fig.update_layout(template="plotly_white")
                             st.plotly_chart(fig, use_container_width=True)
+                        st.markdown("Financial flows include official loans, grants, and equity investments for clean energy research and development.")
                     else:
                         st.error("The column 'Type of renewable technology' is missing in the data.")
 
             else:
                 st.write("No data available for the selected indicator and countries.")
+
 
         # Button to proceed to results
         st.sidebar.write("---")
