@@ -383,10 +383,24 @@ elif st.session_state.new_dashboard:
                         y="Value",
                         color="GeoAreaName",
                         line_dash="Location",
-                        error_y="UpperBou",
-                        error_y_minus="LowerBou",
+                        error_y=filtered_data["UpperBou"] - filtered_data["Value"],
+                        error_y_minus=filtered_data["Value"] - filtered_data["LowerBou"],
                         labels={"TimePeriod": "Year", "Value": "Reliance Percentage"},
                         title="Reliance on Clean Fuels (by Location and Country)",
+                        markers=True
+                    )
+                    fig.update_layout(template="plotly_white")
+                    st.plotly_chart(fig, use_container_width=True)
+
+                elif selected_indicator == "7.2.1":
+                    st.markdown("### Indicator 7.2.1: Renewable energy share in the total final energy consumption (%)")
+                    fig = px.line(
+                        filtered_data,
+                        x="TimePeriod",
+                        y="Value",
+                        color="GeoAreaName",
+                        title="Renewable Energy Share",
+                        labels={"TimePeriod": "Year", "Value": "Renewable Energy Share (%)"},
                         markers=True
                     )
                     fig.update_layout(template="plotly_white")
@@ -407,10 +421,11 @@ elif st.session_state.new_dashboard:
                     st.plotly_chart(fig, use_container_width=True)
 
                 elif selected_indicator == "7.a.1" or selected_indicator == "7.b.1":
-                    st.markdown(f"### Indicator {selected_indicator}: International financial flows to developing countries in support of clean energy research and development and renewable energy production, including in hybrid systems (millions of constant 2021 United States dollars)")
-                    if "Type of renewable technology" in filtered_data.columns:
-                        for technology in filtered_data["Type of renewable technology"].unique():
-                            tech_data = filtered_data[filtered_data["Type of renewable technology"] == technology]
+                    st.markdown(f"### Indicator {selected_indicator}: Trends in Renewable Technology")
+                    renewable_col = "Type of renewable technology"  # Adjust the column name if needed
+                    if renewable_col in filtered_data.columns:
+                        for technology in filtered_data[renewable_col].unique():
+                            tech_data = filtered_data[filtered_data[renewable_col] == technology]
                             tech_data = tech_data.sort_values("TimePeriod").reset_index(drop=True)
 
                             fig = px.bar(
@@ -425,7 +440,7 @@ elif st.session_state.new_dashboard:
                             fig.update_layout(template="plotly_white")
                             st.plotly_chart(fig, use_container_width=True)
                     else:
-                        st.error("The column 'Type of re' is missing in the data.")
+                        st.error(f"The column '{renewable_col}' is missing in the data.")
 
             else:
                 st.write("No data available for the selected indicator and countries.")
