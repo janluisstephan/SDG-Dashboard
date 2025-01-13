@@ -357,7 +357,7 @@ elif st.session_state.new_dashboard:
             st.title("Indicator Dashboard")
             if not filtered_data.empty:
                 if selected_indicator == "7.1.1":
-                    st.markdown("### Indicator 7.1.1: Access to Electricity")
+                    st.markdown("### Indicator 7.1.1: Proportion of population with access to electricity, by urban/rural (%)")
                     filtered_data["Value"] = filtered_data["Value"].interpolate(method="linear")
 
                     fig = px.line(
@@ -374,7 +374,7 @@ elif st.session_state.new_dashboard:
                     st.plotly_chart(fig, use_container_width=True)
 
                 elif selected_indicator == "7.1.2":
-                    st.markdown("### Indicator 7.1.2: Reliance on Clean Fuels and Technology")
+                    st.markdown("### Indicator 7.1.2: Proportion of population with primary reliance on clean fuels and technology (%)")
                     filtered_data["Value"] = filtered_data["Value"].interpolate(method="linear")
 
                     fig = px.line(
@@ -409,8 +409,8 @@ elif st.session_state.new_dashboard:
                 elif selected_indicator == "7.a.1" or selected_indicator == "7.b.1":
                     st.markdown(f"### Indicator {selected_indicator}: Financial Flows or Installed Capacity")
                     if "Type of re" in filtered_data.columns:
-                        for technology in filtered_data["Type of re"].unique():
-                            tech_data = filtered_data[filtered_data["Type of re"] == technology]
+                        for technology in filtered_data["Type of renewable technology"].unique():
+                            tech_data = filtered_data[filtered_data["Type of renewable technology"] == technology]
                             tech_data = tech_data.sort_values("TimePeriod").reset_index(drop=True)
 
                             fig = px.bar(
