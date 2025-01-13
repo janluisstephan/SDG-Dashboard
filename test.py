@@ -369,7 +369,7 @@ elif st.session_state.new_dashboard:
             st.title("Indicator Dashboard")
             if not filtered_data.empty:
                 if selected_indicator == "7.1.1":
-                    st.markdown("### Indicator 7.1.1: Proportion of population with access to electricity, by urban/rural (%)")
+                    st.markdown("### Indicator 7.1.1: Proportion of population with access to electricity, by urban/rural (%). Electrification data are collected from industry, national surveys and international sources")
                     filtered_data["Value"] = filtered_data["Value"].interpolate(method="linear")
 
                     fig = px.line(
