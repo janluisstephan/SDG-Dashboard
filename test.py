@@ -343,7 +343,7 @@ elif st.session_state.new_dashboard:
         index=0
     )
 
-    elif dashboard_choice == "Brazil Germany Comparison":
+    if dashboard_choice == "Brazil Germany Comparison":
     # Funktion zum Laden des Brazil Germany Comparison-Datasets
     @st.cache_data
     def load_brazil_germany_comparison_data():
