@@ -326,7 +326,13 @@ if "results_shown" in st.session_state and st.session_state.results_shown:
         st.write(f"**Response {idx + 1}:**")
         st.write(f"- Reliability Score: {answer['reliability_score']}")
         st.write(f"- SDG Knowledge Score: {answer['sdg_knowledge_score']}")
-
+        
+     # Add a button to return to the main dashboard
+        if st.button("Click 2x to return to Dashboard"):
+            st.session_state.results_shown = False
+            st.session_state.new_dashboard = True
+            st.experimental_rerun()
+        
     # Add a button to return to the main dashboard
     if st.button("Click 2x to return to Dashboard"):
         st.session_state.results_shown = False
