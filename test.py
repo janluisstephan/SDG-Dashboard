@@ -408,7 +408,7 @@ elif st.session_state.new_dashboard:
         st.sidebar.header("Select Countries for Electricity Loss")
         countries = sorted(elecloss2_data["Country Name"].dropna().unique())
         selected_countries = st.sidebar.multiselect(
-            "Choose up to two countries to compare:",
+            "Choose several countries to compare:",
             options=countries,
             default=["Brazil", "Germany", "World"]
         )
