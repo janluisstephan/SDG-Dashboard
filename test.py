@@ -393,7 +393,7 @@ elif st.session_state.new_dashboard:
                     st.plotly_chart(fig, use_container_width=True)
 
                 elif selected_indicator == "7.3.1":
-                    st.markdown("### Indicator 7.3.1: Energy Intensity Level")
+                    st.markdown("### Indicator 7.3.1: Energy intensity level of primary energy (megajoules per constant 2017 purchasing power parity GDP)")
                     fig = px.line(
                         filtered_data,
                         x="TimePeriod",
@@ -407,7 +407,7 @@ elif st.session_state.new_dashboard:
                     st.plotly_chart(fig, use_container_width=True)
 
                 elif selected_indicator == "7.a.1" or selected_indicator == "7.b.1":
-                    st.markdown(f"### Indicator {selected_indicator}: Financial Flows or Installed Capacity")
+                    st.markdown(f"### Indicator {selected_indicator}: International financial flows to developing countries in support of clean energy research and development and renewable energy production, including in hybrid systems (millions of constant 2021 United States dollars)")
                     if "Type of renewable technology" in filtered_data.columns:
                         for technology in filtered_data["Type of renewable technology"].unique():
                             tech_data = filtered_data[filtered_data["Type of renewable technology"] == technology]
