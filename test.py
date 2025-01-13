@@ -391,6 +391,12 @@ elif st.session_state.new_dashboard:
             )
             st.plotly_chart(fig, use_container_width=True)
 
+            # Text unter dem Graphen hinzufügen
+            st.markdown("""
+            The graph shows income percentiles, which divide the population into equal 10% groups based on income levels. 
+            It compares the percentage of income spent on electricity in Brazil and Germany for each percentile group.
+            """)
+
         else:
             st.warning("No data available for Brazil Germany Comparison.")
 
