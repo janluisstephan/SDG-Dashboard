@@ -347,7 +347,6 @@ elif st.session_state.new_dashboard:
         indicator_explanations = {
             "7.1.1": "Access to electricity is the percentage of population with access to electricity. Electrification data are collected from industry, national surveys and international sources.",
             "7.1.2": "The proportion of population with primary reliance on clean fuels and technology is calculated as the number of people using clean fuels and technologies for cooking, heating and lighting divided by total population reporting that any cooking, heating or lighting, expressed as percentage.",
-            "7.2.1": "Renewable energy consumption is the share of renewables energy in total final energy consumption.",
             "7.3.1": "Energy intensity level of primary energy is the ratio between energy supply and gross domestic product measured at purchasing power parity.",
             "7.a.1": "Financial flows, defined as all official loans, grants and equity investments received by countries from foreign governments and multilateral agencies, for the purpose of clean energy research and development and renewable energy production.",
             "7.b.1": "The indicator is defined as the installed capacity of power plants that generate electricity from renewable energy sources divided by the total population of a country."
@@ -362,7 +361,7 @@ elif st.session_state.new_dashboard:
 
         if st.sidebar.button("Generate Indicator Graph"):
             filtered_data = goal7_data[
-                (goal7_data["Indicator"] == selected_indicator) &
+                (goal7_data["Indicator"] == selected_indicator) & 
                 (goal7_data["GeoAreaName"].isin(selected_countries))
             ]
 
@@ -372,22 +371,52 @@ elif st.session_state.new_dashboard:
             st.markdown(f"### {selected_indicator}: {explanation}")
 
             if not filtered_data.empty:
-                fig = px.line(
-                    filtered_data,
-                    x="TimePeriod",
-                    y="Value",
-                    color="GeoAreaName",
-                    labels={"TimePeriod": "Year", "Value": "Indicator Value", "GeoAreaName": "Country"},
-                    title=f"Trends for {selected_indicator}",
-                    color_discrete_sequence=px.colors.qualitative.Set1
-                )
-                fig.update_layout(
-                    xaxis_title="Year",
-                    yaxis_title="Indicator Value",
-                    legend_title="Country",
-                    template="plotly_white"
-                )
-                st.plotly_chart(fig, use_container_width=True)
+                # Handle indicators based on their specific requirements
+                if selected_indicator == "7.1.1":
+                    # Create separate charts for each area type
+                    areas = filtered_data['R'].unique()
+                    for area in areas:
+                        area_data = filtered_data[filtered_data['R'] == area]
+                        area_data = area_data.sort_values("J")  # Sort by year
+                        # Fill missing values
+                        area_data['Value'] = area_data['Value'].interpolate(method='linear', limit_direction='both')
+                        st.subheader(f"{area} Area")
+                        fig = px.line(area_data, x="J", y="I", title=f"{area} Trends")
+                        st.plotly_chart(fig, use_container_width=True)
+
+                elif selected_indicator == "7.1.2":
+                    # Use upper and lower bounds in the graph
+                    areas = filtered_data['R'].unique()
+                    for area in areas:
+                        area_data = filtered_data[filtered_data['R'] == area]
+                        area_data = area_data.sort_values("J")  # Sort by year
+                        area_data['Value'] = area_data['Value'].interpolate(method='linear', limit_direction='both')
+                        fig = px.line(
+                            area_data,
+                            x="J",
+                            y="I",
+                            error_y="L",
+                            error_y_minus="M",
+                            title=f"{area} Trends with Bounds"
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+
+                elif selected_indicator == "7.3.1":
+                    # Single value per year
+                    filtered_data = filtered_data.sort_values("J")  # Sort by year
+                    filtered_data['Value'] = filtered_data['Value'].interpolate(method='linear', limit_direction='both')
+                    fig = px.line(filtered_data, x="J", y="I", title=f"Trends for 7.3.1")
+                    st.plotly_chart(fig, use_container_width=True)
+
+                elif selected_indicator in ["7.a.1", "7.b.1"]:
+                    # Group by technology and plot multiple lines for each type
+                    tech_types = filtered_data['U'].unique()
+                    for tech in tech_types:
+                        tech_data = filtered_data[filtered_data['U'] == tech]
+                        tech_data = tech_data.sort_values("J")
+                        tech_data['Value'] = tech_data['Value'].interpolate(method='linear', limit_direction='both')
+                        fig = px.line(tech_data, x="J", y="I", title=f"Trends for {tech}")
+                        st.plotly_chart(fig, use_container_width=True)
             else:
                 st.write("No data available for the selected indicator and countries.")
 
