@@ -506,27 +506,78 @@ elif st.session_state.new_dashboard:
                     st.plotly_chart(fig, use_container_width=True)
                     st.markdown("Energy intensity level of primary energy is the ratio between energy supply and gross domestic product measured at purchasing power parity.")
 
-                elif selected_indicator == "7.a.1" or selected_indicator == "7.b.1":
-                    st.markdown(f"### Indicator {selected_indicator}: Financial flows and renewable energy production")
+                elif selected_indicator == "7.a.1":
+                    st.markdown("### Indicator 7.a.1: Financial flows to developing countries in support of clean energy research and development")
+                    st.markdown("Financial flows include official loans, grants, and equity investments received by countries from foreign governments and multilateral agencies, for the purpose of clean energy research and development and renewable energy production.")
+                
+                    # Efficient visualization of overall trends for 7.a.1
                     if "Type of renewable technology" in filtered_data.columns:
+                        overview_data = filtered_data.groupby(["TimePeriod", "GeoAreaName"])["Value"].sum().reset_index()
+                        fig_overview = px.area(
+                            overview_data,
+                            x="TimePeriod",
+                            y="Value",
+                            color="GeoAreaName",
+                            title="Overall Financial Flow Trends (7.a.1)",
+                            labels={"TimePeriod": "Year", "Value": "Total Financial Flows (in Units)"},
+                        )
+                        fig_overview.update_layout(template="plotly_white")
+                        st.plotly_chart(fig_overview, use_container_width=True)
+                
                         for technology in filtered_data["Type of renewable technology"].unique():
                             tech_data = filtered_data[filtered_data["Type of renewable technology"] == technology]
                             tech_data = tech_data.sort_values("TimePeriod").reset_index(drop=True)
-
+                
                             fig = px.bar(
                                 tech_data,
                                 x="TimePeriod",
                                 y="Value",
                                 color="GeoAreaName",
                                 barmode="group",
-                                title=f"{technology} Trends ({selected_indicator})",
+                                title=f"{technology} Trends (7.a.1)",
                                 labels={"TimePeriod": "Year", "Value": "Value (in Units)"}
                             )
                             fig.update_layout(template="plotly_white")
                             st.plotly_chart(fig, use_container_width=True)
-                        st.markdown("Financial flows include official loans, grants, and equity investments for clean energy research and development.")
                     else:
                         st.error("The column 'Type of renewable technology' is missing in the data.")
+                
+                elif selected_indicator == "7.b.1":
+                    st.markdown("### Indicator 7.b.1: Installed renewable electricity-generating capacity (watts per capita)")
+                    st.markdown("The indicator is defined as the installed capacity of power plants that generate electricity from renewable energy sources divided by the total population of a country.")
+                
+                    # Efficient visualization of overall trends for 7.b.1
+                    if "Type of renewable technology" in filtered_data.columns:
+                        overview_data = filtered_data.groupby(["TimePeriod", "GeoAreaName"])["Value"].sum().reset_index()
+                        fig_overview = px.area(
+                            overview_data,
+                            x="TimePeriod",
+                            y="Value",
+                            color="GeoAreaName",
+                            title="Overall Installed Capacity Trends (7.b.1)",
+                            labels={"TimePeriod": "Year", "Value": "Installed Capacity (in Watts per Capita)"},
+                        )
+                        fig_overview.update_layout(template="plotly_white")
+                        st.plotly_chart(fig_overview, use_container_width=True)
+                
+                        for technology in filtered_data["Type of renewable technology"].unique():
+                            tech_data = filtered_data[filtered_data["Type of renewable technology"] == technology]
+                            tech_data = tech_data.sort_values("TimePeriod").reset_index(drop=True)
+                
+                            fig = px.bar(
+                                tech_data,
+                                x="TimePeriod",
+                                y="Value",
+                                color="GeoAreaName",
+                                barmode="group",
+                                title=f"{technology} Trends (7.b.1)",
+                                labels={"TimePeriod": "Year", "Value": "Value (in Units)"}
+                            )
+                            fig.update_layout(template="plotly_white")
+                            st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        st.error("The column 'Type of renewable technology' is missing in the data.")
+
 
             else:
                 st.write("No data available for the selected indicator and countries.")
