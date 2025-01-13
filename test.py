@@ -347,7 +347,7 @@ elif st.session_state.new_dashboard:
         # Funktion zum Laden des Brazil Germany Comparison-Datasets
         @st.cache_data
         def load_brazil_germany_comparison_data():
-            data_path = 'Data/Brazil Germany Comparison .xlsx'  # Der Pfad zum hochgeladenen Dataset
+            data_path = 'Data/Brazil Germany Comparison .xlsx'  # Der Pfad zum Dataset im Data-Ordner
             if os.path.exists(data_path):
                 data = pd.read_excel(data_path, engine="openpyxl")
                 return data
@@ -362,35 +362,38 @@ elif st.session_state.new_dashboard:
             # Entferne die Anzeige der Tabelle
             # st.dataframe(brazil_germany_data)
 
-            # Nehmen wir an, die Spalten für "Brazil" und "Germany" sind die gewünschten
-            data_to_plot = brazil_germany_data.iloc[1:11, [2, 3]]  # Zeilen 2 bis 11, Spalten "Brazil" und "Germany"
+            # Nehmen wir an, die relevanten Spalten für die Prozentzahlen sind Spalten 3 und 4
+            # Diese Spalten enthalten die Prozentzahlen für Brasilien und Deutschland
+            data_to_plot = brazil_germany_data.iloc[0:10, [3, 4]]  # Die ersten 10 Zeilen, Spalten 3 und 4 (Prozentzahlen)
 
-            # Umwandeln der Daten in Prozent
-            data_to_plot = data_to_plot.apply(lambda x: x * 100)
-
-            # Spaltennamen für die Anzeige ändern
+            # Die Spaltennamen ändern, um klarzustellen, was sie repräsentieren
             data_to_plot.columns = ['Brazil', 'Germany']
 
             # Erstellen des Balkendiagramms
             fig = px.bar(
                 data_to_plot,
-                x=data_to_plot.index + 2,  # Starten bei Jahr 2
+                x=data_to_plot.index + 1,  # Starten bei 1 für die Einkommensgruppen
                 y=data_to_plot.columns,
                 title="Brazil vs Germany Comparison (Percentage of Income Spent on Electricity)",
-                labels={"x": "Year", "y": "Percentage (%)"},
+                labels={"x": "Income Percentile Group", "y": "Percentage (%)"},
                 barmode='group',
                 height=400
             )
 
             fig.update_layout(
                 template="plotly_white",
-                xaxis_title="Year",
-                yaxis_title="Percentage (%)"
+                xaxis_title="Income Percentile Group",
+                yaxis_title="Percentage (%)",
+                xaxis=dict(
+                    tickvals=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],  # 0 bis 9 für die Einkommensgruppen
+                    ticktext=["0-10%", "10-20%", "20-30%", "30-40%", "40-50%", "50-60%", "60-70%", "70-80%", "80-90%", "90-100%"]
+                )
             )
             st.plotly_chart(fig, use_container_width=True)
 
         else:
             st.warning("No data available for Brazil Germany Comparison.")
+
 
 
 
