@@ -366,6 +366,9 @@ elif st.session_state.new_dashboard:
             # Diese Spalten enthalten die Prozentzahlen für Brasilien und Deutschland
             data_to_plot = brazil_germany_data.iloc[0:10, [3, 4]]  # Die ersten 10 Zeilen, Spalten 3 und 4 (Prozentzahlen)
 
+            # Die Daten in Prozent umwandeln (multiplizieren mit 100)
+            data_to_plot = data_to_plot * 100
+
             # Die Spaltennamen ändern, um klarzustellen, was sie repräsentieren
             data_to_plot.columns = ['Brazil', 'Germany']
 
@@ -384,6 +387,11 @@ elif st.session_state.new_dashboard:
                 template="plotly_white",
                 xaxis_title="Income Percentile Group",
                 yaxis_title="Percentage (%)",
+                yaxis=dict(
+                    tickmode="array",
+                    tickvals=[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],  # Y-Achse mit Werten von 0 bis 100
+                    ticktext=["0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"]
+                ),
                 xaxis=dict(
                     tickvals=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],  # 0 bis 9 für die Einkommensgruppen
                     ticktext=["0-10%", "10-20%", "20-30%", "30-40%", "40-50%", "50-60%", "60-70%", "70-80%", "80-90%", "90-100%"]
@@ -394,11 +402,12 @@ elif st.session_state.new_dashboard:
             # Text unter dem Graphen hinzufügen
             st.markdown("""
             The graph shows income percentiles, which divide the population into equal 10% groups based on income levels. 
-            It compares the percentage of income spent on electricity in Brazil and Germany for each person per month.
+            It compares the percentage of income spent on electricity in Brazil and Germany for each percentile group.
             """)
 
         else:
             st.warning("No data available for Brazil Germany Comparison.")
+
 
 
     elif dashboard_choice == "Indicator Dashboard":
