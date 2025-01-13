@@ -680,7 +680,7 @@ elif st.session_state.new_dashboard:
             # Add image under the graph
             image_path = "assets/brazil.jpg"  # Path to the image in your GitHub assets folder
             if os.path.exists(image_path):
-                st.image(image_path, caption="Energy Grid in Favelas", use_column_width=True)
+                st.image(image_path, caption="Energy Grid in Favelas", use_container_width=True)
                 st.markdown(
                     """
                     <p style="text-align: center; font-size: 14px; margin-top: 10px;">
