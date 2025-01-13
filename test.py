@@ -132,5 +132,22 @@ if not st.session_state.proceed:
         st.session_state.proceed = True
         st.session_state.reliability_score = reliability_score
         st.session_state.sdg_knowledge_score = sdg_knowledge_score
+        st.experimental_rerun()
 
-# The rest of the code remains unchanged, following the same structure and logic as your original code.
+# SDG dashboard page
+if st.session_state.proceed and not st.session_state.new_dashboard:
+    if color_data is not None:
+        st.title("SDG Dashboard")
+        st.write("Welcome to the SDG Dashboard. Explore the data and trends for Sustainable Development Goals.")
+    else:
+        st.error("SDG data is not available.")
+
+    # Placeholder for more SDG Dashboard content
+    if st.button("Proceed to Next Dashboard", key="next_dashboard_button"):
+        st.session_state.new_dashboard = True
+        st.experimental_rerun()
+
+# Second dashboard
+if st.session_state.new_dashboard:
+    st.title("Indicator Dashboard")
+    st.write("This is the second dashboard where you can explore indicators in more detail.")
