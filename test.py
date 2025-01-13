@@ -383,28 +383,10 @@ elif st.session_state.new_dashboard:
                 st.write("No data available for the selected indicator and countries.")
 
         # Button to proceed to results
-        # Button to proceed to results
         st.sidebar.write("---")
-        if "results_shown" not in st.session_state:
-            st.session_state.results_shown = False
-
-        if st.sidebar.button("Click to proceed", key="proceed_to_results_button"):
-            st.session_state.results_shown = True  # Update session state
-            # No need for immediate rerun; let the app display the correct page in the next rerun
-
-# Display results if the "results_shown" state is True
-if st.session_state.results_shown:
-    st.title("Results")
-    st.markdown("### Here are the responses you've provided:")
-    for idx, answer in enumerate(answers):
-        st.write(f"**Response {idx + 1}:**")
-        st.write(f"- Reliability Score: {answer['reliability_score']}")
-        st.write(f"- SDG Knowledge Score: {answer['sdg_knowledge_score']}")
-    
-    # Button to return to dashboard
-    if st.button("Return to Dashboard"):
-        st.session_state.results_shown = False
-
+        if st.sidebar.button("Click 2x to proceed", key="proceed_to_results_button"):
+            st.session_state.results_shown = True  # Switch to results page
+            st.experimental_rerun()
 
     elif dashboard_choice == "Electricity Loss Comparison":
         @st.cache_data
