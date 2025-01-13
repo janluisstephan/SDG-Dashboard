@@ -398,12 +398,13 @@ elif st.session_state.new_dashboard:
         else:
             st.warning("No data available for Brazil Germany Comparison.")
             
-        # Add the "Click 2x to proceed" button
-        if st.button("Click 2x to proceed", key="proceed_to_results_brazil_germany"):
-            st.session_state.results_shown = True
-            st.experimental_rerun()
-
-
+            # Add the "Click 2x to proceed" button in the sidebar
+        with st.sidebar:
+            st.write("---")
+            if st.button("Click 2x to proceed", key="proceed_to_results_brazil_germany"):
+                st.session_state.results_shown = True
+                st.experimental_rerun()
+                
     elif dashboard_choice == "Indicator Dashboard":
         @st.cache_data
         def load_goal7_data():
@@ -579,10 +580,12 @@ elif st.session_state.new_dashboard:
                     else:
                         st.error("The column 'Type of renewable technology' is missing in the data.")
                         
-                # Add the "Click 2x to proceed" button
-                if st.button("Click 2x to proceed", key="proceed_to_results_indicator"):
-                    st.session_state.results_shown = True
-                    st.experimental_rerun()
+                       # Add the "Click 2x to proceed" button in the sidebar
+                with st.sidebar:
+                    st.write("---")
+                    if st.button("Click 2x to proceed", key="proceed_to_results_indicator"):
+                        st.session_state.results_shown = True
+                        st.experimental_rerun()
 
             else:
                 st.write("No data available for the selected indicator and countries.")
@@ -633,7 +636,9 @@ elif st.session_state.new_dashboard:
         elif not selected_countries:
             st.warning("Please select at least one country for the comparison.")
             
-        # Add the "Click 2x to proceed" button
-        if st.button("Click 2x to proceed", key="proceed_to_results_indicator"):
-            st.session_state.results_shown = True
-            st.experimental_rerun()
+         # Add the "Click 2x to proceed" button in the sidebar
+        with st.sidebar:
+            st.write("---")
+            if st.button("Click 2x to proceed", key="proceed_to_results_electricity"):
+                st.session_state.results_shown = True
+                st.experimental_rerun()
