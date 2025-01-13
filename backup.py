@@ -203,7 +203,19 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
             paper_bgcolor="#f9f9f9",
             plot_bgcolor="#f9f9f9",
             showlegend=False,
-            dragmode=False
+            dragmode=False,
+            annotations=[
+                dict(
+                    x=0.98,  # Adjust x-coordinate for placement (right bottom)
+                    y=0.02,  # Adjust y-coordinate for placement (bottom)
+                    xref="paper",
+                    yref="paper",
+                    text="Status: 2024",  # The note text
+                    showarrow=False,
+                    font=dict(size=12, color="black"),
+                    align="right"
+                )
+            ]
         )
         return fig
 
