@@ -640,62 +640,63 @@ elif st.session_state.new_dashboard:
             st.session_state.results_shown = True  # Switch to results page
             st.experimental_rerun()
 
-        elif dashboard_choice == "Electricity Loss Comparison":
-            @st.cache_data
-            def load_elecloss2_data():
-                data_path = 'Data/elecloss2.csv'
-                data = pd.read_csv(data_path, skiprows=4)
-                return data
-        
-            elecloss2_data = load_elecloss2_data()
-            st.sidebar.header("Select Countries for Electricity Loss")
-            countries = sorted(elecloss2_data["Country Name"].dropna().unique())
-            selected_countries = st.sidebar.multiselect(
-                "Choose up to two countries to compare:",
-                options=countries,
-                default=["Brazil", "Germany"]
+elif dashboard_choice == "Electricity Loss Comparison":
+    @st.cache_data
+    def load_elecloss2_data():
+        data_path = 'Data/elecloss2.csv'
+        data = pd.read_csv(data_path, skiprows=4)
+        return data
+
+    elecloss2_data = load_elecloss2_data()
+    st.sidebar.header("Select Countries for Electricity Loss")
+    countries = sorted(elecloss2_data["Country Name"].dropna().unique())
+    selected_countries = st.sidebar.multiselect(
+        "Choose up to two countries to compare:",
+        options=countries,
+        default=["Brazil", "Germany"]
+    )
+
+    if st.sidebar.button("Generate Comparison"):
+        filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
+        melted_data = filtered_data.melt(
+            id_vars=["Country Name"],
+            var_name="Year",
+            value_name="Electricity Loss (%)"
+        )
+        melted_data = melted_data[melted_data["Year"].str.isdigit()]
+        melted_data["Year"] = melted_data["Year"].astype(int)
+
+        fig = px.line(
+            melted_data,
+            x="Year",
+            y="Electricity Loss (%)",
+            color="Country Name",
+            labels={"Year": "Year", "Electricity Loss (%)": "Electricity Loss (%)", "Country Name": "Country"},
+            title="Electric Power Transmission and Distribution Loss Comparison"
+        )
+        fig.update_layout(template="plotly_white")
+        st.plotly_chart(fig, use_container_width=True)
+
+        # Add image under the graph
+        image_path = "assets/brazil.jpg"  # Path to the image in your GitHub assets folder
+        if os.path.exists(image_path):
+            st.image(image_path, caption="Energy Grid in Favelas", use_column_width=True)
+            st.markdown(
+                """
+                <p style="text-align: center; font-size: 14px; margin-top: 10px;">
+                <a href="https://rioonwatch.org/?p=63431" target="_blank" style="text-decoration: none; color: #3498db;">
+                Learn more about the energy grid in favelas here.
+                </a>
+                </p>
+                """,
+                unsafe_allow_html=True
             )
-        
-            if st.sidebar.button("Generate Comparison"):
-                filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
-                melted_data = filtered_data.melt(
-                    id_vars=["Country Name"],
-                    var_name="Year",
-                    value_name="Electricity Loss (%)"
-                )
-                melted_data = melted_data[melted_data["Year"].str.isdigit()]
-                melted_data["Year"] = melted_data["Year"].astype(int)
-        
-                fig = px.line(
-                    melted_data,
-                    x="Year",
-                    y="Electricity Loss (%)",
-                    color="Country Name",
-                    labels={"Year": "Year", "Electricity Loss (%)": "Electricity Loss (%)", "Country Name": "Country"},
-                    title="Electric Power Transmission and Distribution Loss Comparison"
-                )
-                fig.update_layout(template="plotly_white")
-                st.plotly_chart(fig, use_container_width=True)
-        
-                # Add image under the graph
-                image_path = "assets/brazil.jpg"  # Path to the image in your GitHub assets folder
-                if os.path.exists(image_path):
-                    st.image(image_path, caption="Energy Grid in Favelas", use_column_width=True)
-                    st.markdown(
-                        """
-                        <p style="text-align: center; font-size: 14px; margin-top: 10px;">
-                        <a href="https://rioonwatch.org/?p=63431" target="_blank" style="text-decoration: none; color: #3498db;">
-                        Learn more about the energy grid in favelas here.
-                        </a>
-                        </p>
-                        """,
-                        unsafe_allow_html=True
-                    )
-                else:
-                    st.warning("The image could not be loaded. Please ensure the file 'brazil.jpg' exists in the 'assets' directory.")
-        
-            elif not selected_countries:
-                st.warning("Please select at least one country for the comparison.")
+        else:
+            st.warning("The image could not be loaded. Please ensure the file 'brazil.jpg' exists in the 'assets' directory.")
+
+    elif not selected_countries:
+        st.warning("Please select at least one country for the comparison.")
+
 
             
          # Add the "Click 2x to proceed" button in the sidebar
