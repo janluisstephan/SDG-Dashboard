@@ -383,14 +383,15 @@ elif st.session_state.new_dashboard:
                     padding: 10px;
                     position: absolute;
                     z-index: 1;
-                    bottom: 125%;
+                    bottom: 125%; /* Position above the text */
                     left: 50%;
                     transform: translateX(-50%);
                     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-                    white-space: normal;
-                    max-width: 300px;
-                    font-size: 16px;
-                    line-height: 1.5;
+                    white-space: normal; /* Allow multi-line text */
+                    max-width: 400px; /* Increased width for longer text */
+                    font-size: 16px; /* Adjust font size */
+                    line-height: 1.5; /* Better line spacing */
+                    word-wrap: break-word; /* Ensure long words break properly */
                 }}
 
                 .tooltip:hover .tooltiptext {{
@@ -433,48 +434,3 @@ elif st.session_state.new_dashboard:
         if st.sidebar.button("Click 2x to proceed", key="proceed_to_results_button"):
             st.session_state.results_shown = True
             st.experimental_rerun()
-
-    elif dashboard_choice == "Electricity Loss Comparison":
-        @st.cache_data
-        def load_elecloss2_data():
-            data_path = 'Data/elecloss2.csv'
-            data = pd.read_csv(data_path, skiprows=4)
-            return data
-
-        elecloss2_data = load_elecloss2_data()
-        st.sidebar.header("Select Countries for Electricity Loss")
-        countries = sorted(elecloss2_data["Country Name"].dropna().unique())
-        selected_countries = st.sidebar.multiselect(
-            "Choose up to two countries to compare:", 
-            options=countries, 
-            default=["Brazil"]
-        )
-
-        if st.sidebar.button("Generate Comparison"):
-            filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
-            melted_data = filtered_data.melt(
-                id_vars=["Country Name"],
-                var_name="Year",
-                value_name="Electricity Loss (%)"
-            )
-            melted_data = melted_data[melted_data["Year"].str.isdigit()]
-            melted_data["Year"] = melted_data["Year"].astype(int)
-
-            fig = px.line(
-                melted_data,
-                x="Year",
-                y="Electricity Loss (%)",
-                color="Country Name",
-                labels={"Year": "Year", "Electricity Loss (%)": "Electricity Loss (%)", "Country Name": "Country"},
-                title="Electric Power Transmission and Distribution Loss Comparison"
-            )
-            fig.update_layout(
-                xaxis_title="Year",
-                yaxis_title="Electricity Loss (%)",
-                legend_title="Country",
-                template="plotly_white"
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-        elif not selected_countries:
-            st.warning("Please select at least one country for the comparison.")
