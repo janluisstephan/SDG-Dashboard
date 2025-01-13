@@ -322,14 +322,12 @@ if "results_shown" in st.session_state and st.session_state.results_shown:
         st.experimental_rerun()
 
 elif st.session_state.new_dashboard:
-    
     # INDICATOR DASHBOARD
-    # Sidebar selection to switch between dashboards
     st.sidebar.header("Dashboard Selection")
     dashboard_choice = st.sidebar.radio(
         "Choose a dashboard:",
         options=["Indicator Dashboard", "Electricity Loss Comparison"],
-        index=0  # Default to Indicator Dashboard
+        index=0
     )
 
     if dashboard_choice == "Indicator Dashboard":
@@ -343,15 +341,6 @@ elif st.session_state.new_dashboard:
         goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()
         goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])
 
-        # Indicator explanations
-        indicator_explanations = {
-            "7.1.1": "Access to electricity is the percentage of population with access to electricity. Electrification data are collected from industry, national surveys and international sources.",
-            "7.1.2": "The proportion of population with primary reliance on clean fuels and technology is calculated as the number of people using clean fuels and technologies for cooking, heating and lighting divided by total population reporting that any cooking, heating or lighting, expressed as percentage.",
-            "7.3.1": "Energy intensity level of primary energy is the ratio between energy supply and gross domestic product measured at purchasing power parity.",
-            "7.a.1": "Financial flows, defined as all official loans, grants and equity investments received by countries from foreign governments and multilateral agencies, for the purpose of clean energy research and development and renewable energy production.",
-            "7.b.1": "The indicator is defined as the installed capacity of power plants that generate electricity from renewable energy sources divided by the total population of a country."
-        }
-
         # Sidebar for selecting indicators and countries
         st.sidebar.header("Select Indicator and Countries")
         indicators = sorted(goal7_data["Indicator"].unique())
@@ -361,64 +350,135 @@ elif st.session_state.new_dashboard:
 
         if st.sidebar.button("Generate Indicator Graph"):
             filtered_data = goal7_data[
-                (goal7_data["Indicator"] == selected_indicator) & 
+                (goal7_data["Indicator"] == selected_indicator) &
                 (goal7_data["GeoAreaName"].isin(selected_countries))
             ]
 
             st.title("Indicator Dashboard")
-            # Display explanation of the selected indicator
-            explanation = indicator_explanations.get(selected_indicator, "Explanation not available.")
-            st.markdown(f"### {selected_indicator}: {explanation}")
-
             if not filtered_data.empty:
-                # Handle indicators based on their specific requirements
                 if selected_indicator == "7.1.1":
-                    # Create separate charts for each area type
-                    areas = filtered_data['R'].unique()
-                    for area in areas:
-                        area_data = filtered_data[filtered_data['R'] == area]
-                        area_data = area_data.sort_values("J")  # Sort by year
-                        # Fill missing values
-                        area_data['Value'] = area_data['Value'].interpolate(method='linear', limit_direction='both')
-                        st.subheader(f"{area} Area")
-                        fig = px.line(area_data, x="J", y="I", title=f"{area} Trends")
+                    st.markdown("### Indicator 7.1.1: Access to Electricity")
+                    for location in filtered_data["Location"].unique():
+                        location_data = filtered_data[filtered_data["Location"] == location]
+                        location_data = location_data.sort_values("TimePeriod").reset_index(drop=True)
+
+                        # Fill missing values with the average of surrounding values
+                        location_data["Value"] = location_data["Value"].interpolate(method="linear")
+
+                        fig = px.line(
+                            location_data,
+                            x="TimePeriod",
+                            y="Value",
+                            title=f"Access to Electricity ({location})",
+                            labels={"TimePeriod": "Year", "Value": "Access Percentage"},
+                            markers=True
+                        )
+                        fig.update_layout(template="plotly_white")
                         st.plotly_chart(fig, use_container_width=True)
 
                 elif selected_indicator == "7.1.2":
-                    # Use upper and lower bounds in the graph
-                    areas = filtered_data['R'].unique()
-                    for area in areas:
-                        area_data = filtered_data[filtered_data['R'] == area]
-                        area_data = area_data.sort_values("J")  # Sort by year
-                        area_data['Value'] = area_data['Value'].interpolate(method='linear', limit_direction='both')
+                    st.markdown("### Indicator 7.1.2: Reliance on Clean Fuels and Technology")
+                    for location in filtered_data["Location"].unique():
+                        location_data = filtered_data[filtered_data["Location"] == location]
+                        location_data = location_data.sort_values("TimePeriod").reset_index(drop=True)
+
+                        # Fill missing values with the average of surrounding values
+                        location_data["Value"] = location_data["Value"].interpolate(method="linear")
+
                         fig = px.line(
-                            area_data,
-                            x="J",
-                            y="I",
-                            error_y="L",
-                            error_y_minus="M",
-                            title=f"{area} Trends with Bounds"
+                            location_data,
+                            x="TimePeriod",
+                            y="Value",
+                            title=f"Reliance on Clean Fuels ({location})",
+                            labels={"TimePeriod": "Year", "Value": "Reliance Percentage"},
+                            error_y="UpperBou",
+                            error_y_minus="LowerBou",
+                            markers=True
                         )
+                        fig.update_layout(template="plotly_white")
                         st.plotly_chart(fig, use_container_width=True)
 
                 elif selected_indicator == "7.3.1":
-                    # Single value per year
-                    filtered_data = filtered_data.sort_values("J")  # Sort by year
-                    filtered_data['Value'] = filtered_data['Value'].interpolate(method='linear', limit_direction='both')
-                    fig = px.line(filtered_data, x="J", y="I", title=f"Trends for 7.3.1")
+                    st.markdown("### Indicator 7.3.1: Energy Intensity Level")
+                    fig = px.line(
+                        filtered_data,
+                        x="TimePeriod",
+                        y="Value",
+                        color="GeoAreaName",
+                        title="Energy Intensity Level (Primary Energy)",
+                        labels={"TimePeriod": "Year", "Value": "Energy Intensity"},
+                        markers=True
+                    )
+                    fig.update_layout(template="plotly_white")
                     st.plotly_chart(fig, use_container_width=True)
 
-                elif selected_indicator in ["7.a.1", "7.b.1"]:
-                    # Group by technology and plot multiple lines for each type
-                    tech_types = filtered_data['U'].unique()
-                    for tech in tech_types:
-                        tech_data = filtered_data[filtered_data['U'] == tech]
-                        tech_data = tech_data.sort_values("J")
-                        tech_data['Value'] = tech_data['Value'].interpolate(method='linear', limit_direction='both')
-                        fig = px.line(tech_data, x="J", y="I", title=f"Trends for {tech}")
+                elif selected_indicator == "7.a.1" or selected_indicator == "7.b.1":
+                    st.markdown(f"### Indicator {selected_indicator}: Financial Flows or Installed Capacity")
+                    for technology in filtered_data["Type of re"].unique():
+                        tech_data = filtered_data[filtered_data["Type of re"] == technology]
+                        tech_data = tech_data.sort_values("TimePeriod").reset_index(drop=True)
+
+                        fig = px.bar(
+                            tech_data,
+                            x="TimePeriod",
+                            y="Value",
+                            color="GeoAreaName",
+                            barmode="group",
+                            title=f"{technology} Trends ({selected_indicator})",
+                            labels={"TimePeriod": "Year", "Value": "Value (in Units)"}
+                        )
+                        fig.update_layout(template="plotly_white")
                         st.plotly_chart(fig, use_container_width=True)
+
             else:
                 st.write("No data available for the selected indicator and countries.")
+
+        # Button to proceed to results
+        st.sidebar.write("---")
+        if st.sidebar.button("Click 2x to proceed", key="proceed_to_results_button"):
+            st.session_state.results_shown = True  # Switch to results page
+            st.experimental_rerun()
+
+    elif dashboard_choice == "Electricity Loss Comparison":
+        @st.cache_data
+        def load_elecloss2_data():
+            data_path = 'Data/elecloss2.csv'
+            data = pd.read_csv(data_path, skiprows=4)
+            return data
+
+        elecloss2_data = load_elecloss2_data()
+        st.sidebar.header("Select Countries for Electricity Loss")
+        countries = sorted(elecloss2_data["Country Name"].dropna().unique())
+        selected_countries = st.sidebar.multiselect(
+            "Choose up to two countries to compare:",
+            options=countries,
+            default=["Brazil", "Germany"]
+        )
+
+        if st.sidebar.button("Generate Comparison"):
+            filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
+            melted_data = filtered_data.melt(
+                id_vars=["Country Name"],
+                var_name="Year",
+                value_name="Electricity Loss (%)"
+            )
+            melted_data = melted_data[melted_data["Year"].str.isdigit()]
+            melted_data["Year"] = melted_data["Year"].astype(int)
+
+            fig = px.line(
+                melted_data,
+                x="Year",
+                y="Electricity Loss (%)",
+                color="Country Name",
+                labels={"Year": "Year", "Electricity Loss (%)": "Electricity Loss (%)", "Country Name": "Country"},
+                title="Electric Power Transmission and Distribution Loss Comparison"
+            )
+            fig.update_layout(template="plotly_white")
+            st.plotly_chart(fig, use_container_width=True)
+
+        elif not selected_countries:
+            st.warning("Please select at least one country for the comparison.")
+
 
         # Button to proceed to results
         st.sidebar.write("---")
