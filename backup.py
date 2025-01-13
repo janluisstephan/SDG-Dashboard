@@ -54,6 +54,10 @@ if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 if "new_dashboard" not in st.session_state:
     st.session_state.new_dashboard = False
+if "results_shown" not in st.session_state:
+    st.session_state.results_shown = False
+if "last_page" not in st.session_state:
+    st.session_state.last_page = None
 
 # Leading question section
 if not st.session_state.proceed:
@@ -145,7 +149,6 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
     else:
         st.error("SDG data is not available.")
 
-
     # SDG labels
     sdg_labels = [
         "No Poverty", "Zero Hunger", "Good Health and Well-being", "Quality Education",
@@ -213,6 +216,12 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
         1. Select an SDG by clicking the button above its icon below the map.
         2. View the map to see the global performance for the selected SDG.
         3. Use the dropdown under the legend to select a country and view its trend.
+        """)
+        
+        # Add the Tip for the user
+        st.markdown("## Tip")
+        st.write("""
+        Have a look at Brazil's performance at the SDG 7. Did you expect that?
         """)
 
         st.markdown("## Bias")
