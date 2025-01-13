@@ -296,10 +296,6 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
             if os.path.exists(image_path):
                 st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
 
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-
 # Check if the results page should be displayed
 if "results_shown" in st.session_state and st.session_state.results_shown:
     # RESULTS PAGE
@@ -383,15 +379,16 @@ elif st.session_state.new_dashboard:
                     padding: 10px;
                     position: absolute;
                     z-index: 1;
-                    bottom: 125%; /* Position above the text */
+                    bottom: 100%; /* Position above the icon */
                     left: 50%;
                     transform: translateX(-50%);
                     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-                    white-space: normal; /* Allow multi-line text */
-                    max-width: 400px; /* Increased width for longer text */
-                    font-size: 16px; /* Adjust font size */
-                    line-height: 1.5; /* Better line spacing */
+                    white-space: normal;
+                    max-width: 450px; /* Increased width for longer text */
+                    font-size: 16px;
+                    line-height: 1.5;
                     word-wrap: break-word; /* Ensure long words break properly */
+                    overflow-wrap: break-word; /* Support for legacy browsers */
                 }}
 
                 .tooltip:hover .tooltiptext {{
