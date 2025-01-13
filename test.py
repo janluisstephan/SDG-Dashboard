@@ -54,6 +54,10 @@ if "selected_country" not in st.session_state:
     st.session_state.selected_country = None
 if "new_dashboard" not in st.session_state:
     st.session_state.new_dashboard = False
+if "results_shown" not in st.session_state:
+    st.session_state.results_shown = False
+if "last_page" not in st.session_state:
+    st.session_state.last_page = None
 
 # Leading question section
 if not st.session_state.proceed:
