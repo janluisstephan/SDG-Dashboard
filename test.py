@@ -314,14 +314,14 @@ if "results_shown" in st.session_state and st.session_state.results_shown:
 
 elif st.session_state.new_dashboard:
     
-# INDICATOR DASHBOARD
-# Sidebar selection to switch between dashboards
-st.sidebar.header("Dashboard Selection")  # Top-level code
-dashboard_choice = st.sidebar.radio(  # Top-level code
-    "Choose a dashboard:",
-    options=["Indicator Dashboard", "Electricity Loss Comparison"],
-    index=0  # Default to Indicator Dashboard
-)
+    # INDICATOR DASHBOARD
+    # Sidebar selection to switch between dashboards
+    st.sidebar.header("Dashboard Selection")  # Top-level code
+    dashboard_choice = st.sidebar.radio(  # Top-level code
+        "Choose a dashboard:",
+        options=["Indicator Dashboard", "Electricity Loss Comparison"],
+        index=0  # Default to Indicator Dashboard
+    )
 
 if dashboard_choice == "Indicator Dashboard":
     @st.cache_data
