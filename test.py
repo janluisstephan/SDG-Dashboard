@@ -332,32 +332,42 @@ if "results_shown" in st.session_state and st.session_state.results_shown:
     st.markdown(
         """
         <h1 style="text-align: center; color: #2c3e50; margin-top: 50px;">Reflection on SDG Composition</h1>
-        <p style="text-align: center; font-size: 16px; color: #7f8c8d;">How has your perception of the SDG composition changed after exploring the dashboard?</p>
+        <p style="text-align: center; font-size: 16px; color: #7f8c8d;">After exploring the SDG dashboard, reflect on the following questions:</p>
         """,
         unsafe_allow_html=True,
     )
 
-    # Open-ended text input for user reflection
-    perception_change = st.text_area(
-        label="Please describe how your perception of the SDG composition has changed:",
-        placeholder="Write your reflection here...",
-        help="You can write about any changes in your understanding, thoughts, or critiques regarding SDG composition."
+    # Reflective Question 1: How has your perception of SDGs changed?
+    st.markdown("#### 1. How has your perception of the SDGs changed after using this dashboard?")
+    perception_slider = st.slider(
+        label="Select the extent of change in your perception:",
+        min_value=0,
+        max_value=10,
+        value=5,
+        step=1,
+        help="0 means your perception hasn't changed at all, 10 means your perception has completely changed."
     )
 
-    # Second reflective question
-    st.markdown(
-        """
-        <h1 style="text-align: center; color: #2c3e50; margin-top: 30px;">Would you argue the same way as you did in the beginning?</h1>
-        <p style="text-align: center; font-size: 16px; color: #7f8c8d;">Let us know if you feel differently about the reliability of SDGs now.</p>
-        """,
-        unsafe_allow_html=True,
+    # Reflective Question 2: How do you feel about the reliability of SDGs now?
+    st.markdown("#### 2. How reliable do you now find SDG scores in measuring progress?")
+    reliability_slider = st.slider(
+        label="Rate the reliability again (0 = not reliable at all, 10 = very reliable):",
+        min_value=0,
+        max_value=10,
+        value=5,
+        step=1,
+        help="Rate how reliable you feel SDG scores are after exploring the dashboard."
     )
 
-    # Yes/No question with a selectbox
-    argue_same_way = st.selectbox(
-        label="Would you argue the same way as you did in the beginning?",
-        options=["Yes", "No", "Not sure"],
-        help="Select 'Yes' if your opinion hasn't changed, 'No' if it has, or 'Not sure' if you are undecided."
+    # Reflective Question 3: How likely are you to use SDG scores in arguments?
+    st.markdown("#### 3. How likely are you to use SDG scores to argue about progress in sustainable development?")
+    likelihood_slider = st.slider(
+        label="Rate your likelihood (0 = very unlikely, 10 = very likely):",
+        min_value=0,
+        max_value=10,
+        value=5,
+        step=1,
+        help="Rate how likely you are to reference SDG scores in discussions or arguments about sustainability."
     )
 
     # Add a button to return to the main dashboard
