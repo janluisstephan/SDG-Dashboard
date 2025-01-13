@@ -372,7 +372,7 @@ elif st.session_state.new_dashboard:
             # Erstellen des Balkendiagramms
             fig = px.bar(
                 data_to_plot,
-                x=data_to_plot.index + 1,  # Starten bei 1 für die Einkommensgruppen
+                x=data_to_plot.index,  # Einkommensgruppen korrekt anzeigen (0-10%, 10-20%, ...)
                 y=data_to_plot.columns,
                 title="Brazil vs Germany Comparison (Percentage of Income Spent on Electricity)",
                 labels={"x": "Income Percentile Group", "y": "Percentage (%)"},
@@ -399,6 +399,7 @@ elif st.session_state.new_dashboard:
 
         else:
             st.warning("No data available for Brazil Germany Comparison.")
+
 
 
 
