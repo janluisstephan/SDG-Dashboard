@@ -377,33 +377,41 @@ elif st.session_state.new_dashboard:
                     st.markdown("### Indicator 7.1.2: Proportion of population with primary reliance on clean fuels and technology (%)")
                     filtered_data["Value"] = filtered_data["Value"].interpolate(method="linear")
 
-                    # Check if the required columns exist
+                    # Handle error bounds gracefully without warning
+                    error_y = None
+                    error_y_minus = None
                     if "UpperBou" in filtered_data.columns and "LowerBou" in filtered_data.columns:
-                        fig = px.line(
-                            filtered_data,
-                            x="TimePeriod",
-                            y="Value",
-                            color="GeoAreaName",
-                            line_dash="Location",
-                            error_y=filtered_data["UpperBou"] - filtered_data["Value"],
-                            error_y_minus=filtered_data["Value"] - filtered_data["LowerBou"],
-                            labels={"TimePeriod": "Year", "Value": "Reliance Percentage"},
-                            title="Reliance on Clean Fuels (by Location and Country)",
-                            markers=True
-                        )
-                    else:
-                        st.warning("The 'UpperBou' or 'LowerBou' columns are missing. Plotting without error bounds.")
-                        fig = px.line(
-                            filtered_data,
-                            x="TimePeriod",
-                            y="Value",
-                            color="GeoAreaName",
-                            line_dash="Location",
-                            labels={"TimePeriod": "Year", "Value": "Reliance Percentage"},
-                            title="Reliance on Clean Fuels (by Location and Country)",
-                            markers=True
-                        )
+                        error_y = filtered_data["UpperBou"] - filtered_data["Value"]
+                        error_y_minus = filtered_data["Value"] - filtered_data["LowerBou"]
 
+                    fig = px.line(
+                        filtered_data,
+                        x="TimePeriod",
+                        y="Value",
+                        color="GeoAreaName",
+                        line_dash="Location",
+                        error_y=error_y,
+                        error_y_minus=error_y_minus,
+                        labels={"TimePeriod": "Year", "Value": "Reliance Percentage"},
+                        title="Reliance on Clean Fuels (by Location and Country)",
+                        markers=True
+                    )
+                    fig.update_layout(template="plotly_white")
+                    st.plotly_chart(fig, use_container_width=True)
+
+                elif selected_indicator == "7.2.1":
+                    st.markdown("### Indicator 7.2.1: Renewable energy share in the total final energy consumption (%)")
+                    filtered_data["Value"] = filtered_data["Value"].interpolate(method="linear")
+
+                    fig = px.line(
+                        filtered_data,
+                        x="TimePeriod",
+                        y="Value",
+                        color="GeoAreaName",
+                        title="Renewable Energy Share",
+                        labels={"TimePeriod": "Year", "Value": "Renewable Energy Share (%)"},
+                        markers=True
+                    )
                     fig.update_layout(template="plotly_white")
                     st.plotly_chart(fig, use_container_width=True)
 
@@ -444,6 +452,7 @@ elif st.session_state.new_dashboard:
 
             else:
                 st.write("No data available for the selected indicator and countries.")
+
 
 
         # Button to proceed to results
