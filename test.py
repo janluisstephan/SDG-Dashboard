@@ -347,7 +347,7 @@ elif st.session_state.new_dashboard:
         # Funktion zum Laden des Brazil Germany Comparison-Datasets
         @st.cache_data
         def load_brazil_germany_comparison_data():
-            data_path = 'Data/Brazil Germany Comparison .xlsx'  # Der Pfad zum hochgeladenen Dataset
+            data_path = '/mnt/data/Brazil Germany Comparison .xlsx'  # Der Pfad zum hochgeladenen Dataset
             if os.path.exists(data_path):
                 data = pd.read_excel(data_path, engine="openpyxl")
                 return data
@@ -359,35 +359,39 @@ elif st.session_state.new_dashboard:
 
         if brazil_germany_data is not None:
             st.title("Brazil vs Germany Comparison")
-            st.dataframe(brazil_germany_data)  # Zeigt das geladene Dataset als Tabelle an
+            # Entferne die Anzeige der Tabelle
+            # st.dataframe(brazil_germany_data)
 
-            # Nehmen wir an, die Spalten D und E sind die gewünschten Spalten
-            # Und dass sie mit den Indexen 3 (D) und 4 (E) referenziert werden
-            # Außerdem filtern wir für den Zeitraum von Jahr 2 bis Jahr 11
-            data_to_plot = brazil_germany_data.iloc[1:11, [3, 4]]  # Zeilen 2 bis 11, Spalten D und E
+            # Nehmen wir an, die Spalten für "Brazil" und "Germany" sind die gewünschten
+            data_to_plot = brazil_germany_data.iloc[1:11, [2, 3]]  # Zeilen 2 bis 11, Spalten "Brazil" und "Germany"
 
-            # Die Daten in Prozent umwandeln
+            # Umwandeln der Daten in Prozent
             data_to_plot = data_to_plot.apply(lambda x: x * 100)
 
-            # Spaltennamen ändern für die Anzeige
+            # Spaltennamen für die Anzeige ändern
             data_to_plot.columns = ['Brazil', 'Germany']
 
-            # Erstellen eines Balkendiagramms
+            # Erstellen des Balkendiagramms
             fig = px.bar(
                 data_to_plot,
-                x=data_to_plot.index + 2,  # Starten bei 2 für die Jahre
+                x=data_to_plot.index + 2,  # Starten bei Jahr 2
                 y=data_to_plot.columns,
-                title="Brazil vs Germany Comparison (Percentage)",
+                title="Brazil vs Germany Comparison (Percentage of Income Spent on Electricity)",
                 labels={"x": "Year", "y": "Percentage (%)"},
                 barmode='group',
                 height=400
             )
 
-            fig.update_layout(template="plotly_white")
+            fig.update_layout(
+                template="plotly_white",
+                xaxis_title="Year",
+                yaxis_title="Percentage (%)"
+            )
             st.plotly_chart(fig, use_container_width=True)
 
         else:
             st.warning("No data available for Brazil Germany Comparison.")
+
 
 
     elif dashboard_choice == "Indicator Dashboard":
