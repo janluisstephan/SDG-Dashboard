@@ -368,7 +368,6 @@ elif st.session_state.new_dashboard:
 
                 .tooltip .tooltiptext {{
                     visibility: hidden;
-                    width: 600px;
                     background-color: #f9f9f9;
                     color: #000;
                     text-align: left;
@@ -378,8 +377,10 @@ elif st.session_state.new_dashboard:
                     z-index: 1;
                     bottom: 125%; /* Position above the text */
                     left: 50%;
-                    margin-left: -150px;
+                    transform: translateX(-50%);
                     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                    white-space: nowrap;
+                    width: auto; /* Adjust width automatically to fit text */
                 }}
 
                 .tooltip:hover .tooltiptext {{
@@ -389,7 +390,7 @@ elif st.session_state.new_dashboard:
             <div style="display: flex; align-items: center;">
                 <h3 style="margin-right: 10px;">Indicator: {selected_indicator}</h3>
                 <div class="tooltip">
-                    <span style="cursor: pointer;">ℹ️</span>
+                    <span style="cursor: pointer; font-size: 18px; color: #007bff;">ℹ️</span>
                     <span class="tooltiptext">{indicator_descriptions.get(selected_indicator, "No description available.")}</span>
                 </div>
             </div>
