@@ -358,7 +358,7 @@ elif st.session_state.new_dashboard:
         brazil_germany_data = load_brazil_germany_comparison_data()
 
         if brazil_germany_data is not None:
-            st.title("Brazil vs Germany Comparison")
+            st.title("Comparison of Per Capita Energy Expenditure Between Brazil and Germany")
             # Entferne die Anzeige der Tabelle
             # st.dataframe(brazil_germany_data)
 
@@ -378,7 +378,7 @@ elif st.session_state.new_dashboard:
                 x=data_to_plot.index,  # Einkommensgruppen korrekt anzeigen (0-10%, 10-20%, ...)
                 y=data_to_plot.columns,
                 title="Brazil vs Germany Comparison (Percentage of Income Spent on Electricity)",
-                labels={"x": "Income Percentile Group", "y": "Percentage (%)"},
+                labels={"x": "Income Percentile Group", "y": "Percentage of income p.p. spent on electricity (%)"},
                 barmode='group',
                 height=400
             )
