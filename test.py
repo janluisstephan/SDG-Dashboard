@@ -347,7 +347,7 @@ elif st.session_state.new_dashboard:
         # Funktion zum Laden des Brazil Germany Comparison-Datasets
         @st.cache_data
         def load_brazil_germany_comparison_data():
-            data_path = 'Data/Brazil Germany Comparison.xlsx'
+            data_path = 'Data/Brazil Germany Comparison .xlsx'
             if os.path.exists(data_path):
                 data = pd.read_excel(data_path, engine="openpyxl")
                 return data
