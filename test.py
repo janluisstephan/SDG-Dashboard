@@ -339,11 +339,44 @@ elif st.session_state.new_dashboard:
     st.sidebar.header("Dashboard Selection")
     dashboard_choice = st.sidebar.radio(
         "Choose a dashboard:",
-        options=["Indicator Dashboard", "Electricity Loss Comparison"],
+        options=["Indicator Dashboard", "Electricity Loss Comparison", "Brazil Germany Comparison"],  # Neuer Punkt hinzugefügt
         index=0
     )
 
-    if dashboard_choice == "Indicator Dashboard":
+    if dashboard_choice == "Brazil Germany Comparison":
+        # Funktion zum Laden des Brazil Germany Comparison-Datasets
+        @st.cache_data
+        def load_brazil_germany_comparison_data():
+            data_path = 'Data/Brazil Germany Comparison.xlsx'
+            if os.path.exists(data_path):
+                data = pd.read_excel(data_path, engine="openpyxl")
+                return data
+            else:
+                st.error(f"Dataset {data_path} not found in the 'Data' folder.")
+                return None
+
+        brazil_germany_data = load_brazil_germany_comparison_data()
+
+        if brazil_germany_data is not None:
+            st.title("Brazil vs Germany Comparison")
+            st.dataframe(brazil_germany_data)  # Zeigt das geladene Dataset als Tabelle an
+
+            # Beispiel für die Darstellung eines Graphen basierend auf den Daten (nehmen wir an, es gibt eine "Year"- und "Value"-Spalte)
+            fig = px.line(
+                brazil_germany_data,
+                x="Year",  # Beispiel-Spalte: "Year"
+                y="Value",  # Beispiel-Spalte: "Value"
+                color="Country",  # Beispiel-Spalte: "Country" für Farbkodierung
+                labels={"Year": "Year", "Value": "Value (%)", "Country": "Country"},
+                title="Brazil vs Germany Comparison",
+                markers=True
+            )
+            fig.update_layout(template="plotly_white")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("No data available for Brazil Germany Comparison.")
+
+    elif dashboard_choice == "Indicator Dashboard":
         @st.cache_data
         def load_goal7_data():
             data_path = 'Data/Goal7.xlsx'
@@ -387,7 +420,7 @@ elif st.session_state.new_dashboard:
                     st.plotly_chart(fig, use_container_width=True)
 
                 elif selected_indicator == "7.1.2":
-                    st.markdown("### Indicator 7.1.2: Proportion of population with primary reliance on clean fuels and technology (%). This indicator is calculated as the number of people using clean fuels and technologies for cooking, heating and lighting divided by total population reporting that any cooking, heating or lighting, expressed as percentage. “Clean” is defined by the emission rate targets and specific fuel recommendations (WHO guidelines)")
+                    st.markdown("### Indicator 7.1.2: Proportion of population with primary reliance on clean fuels and technology (%).")
                     filtered_data["Value"] = filtered_data["Value"].interpolate(method="linear")
 
                     # Handle error bounds gracefully without warning
@@ -406,7 +439,7 @@ elif st.session_state.new_dashboard:
                         error_y=error_y,
                         error_y_minus=error_y_minus,
                         labels={"TimePeriod": "Year", "Value": "Reliance Percentage"},
-                        title="Reliance on Clean Fuels (by Location and Country)",
+                        title="This indicator is calculated as the number of people using clean fuels and technologies for cooking, heating and lighting divided by total population reporting that any cooking, heating or lighting, expressed as percentage. “Clean” is defined by the emission rate targets and specific fuel recommendations (WHO guidelines)",
                         markers=True
                     )
                     fig.update_layout(template="plotly_white")
@@ -509,104 +542,6 @@ elif st.session_state.new_dashboard:
                 title="Electric Power Transmission and Distribution Loss Comparison"
             )
             fig.update_layout(template="plotly_white")
-            st.plotly_chart(fig, use_container_width=True)
-
-        elif not selected_countries:
-            st.warning("Please select at least one country for the comparison.")
-
-        # Button to proceed to results
-        st.sidebar.write("---")
-        if st.sidebar.button("Click 2x to proceed", key="proceed_to_results_button"):
-            st.session_state.results_shown = True  # Switch to results page
-            st.experimental_rerun()
-
-    elif dashboard_choice == "Electricity Loss Comparison":
-        @st.cache_data
-        def load_elecloss2_data():
-            data_path = 'Data/elecloss2.csv'
-            data = pd.read_csv(data_path, skiprows=4)
-            return data
-
-        elecloss2_data = load_elecloss2_data()
-        st.sidebar.header("Select Countries for Electricity Loss")
-        countries = sorted(elecloss2_data["Country Name"].dropna().unique())
-        selected_countries = st.sidebar.multiselect(
-            "Choose up to two countries to compare:",
-            options=countries,
-            default=["Brazil", "Germany"]
-        )
-
-        if st.sidebar.button("Generate Comparison"):
-            filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
-            melted_data = filtered_data.melt(
-                id_vars=["Country Name"],
-                var_name="Year",
-                value_name="Electricity Loss (%)"
-            )
-            melted_data = melted_data[melted_data["Year"].str.isdigit()]
-            melted_data["Year"] = melted_data["Year"].astype(int)
-
-            fig = px.line(
-                melted_data,
-                x="Year",
-                y="Electricity Loss (%)",
-                color="Country Name",
-                labels={"Year": "Year", "Electricity Loss (%)": "Electricity Loss (%)", "Country Name": "Country"},
-                title="Electric Power Transmission and Distribution Loss Comparison"
-            )
-            fig.update_layout(template="plotly_white")
-            st.plotly_chart(fig, use_container_width=True)
-
-        elif not selected_countries:
-            st.warning("Please select at least one country for the comparison.")
-
-
-        # Button to proceed to results
-        st.sidebar.write("---")
-        if st.sidebar.button("Click 2x to proceed", key="proceed_to_results_button"):
-            st.session_state.results_shown = True  # Switch to results page
-            st.experimental_rerun()
-
-    elif dashboard_choice == "Electricity Loss Comparison":
-        @st.cache_data
-        def load_elecloss2_data():
-            data_path = 'Data/elecloss2.csv'
-            data = pd.read_csv(data_path, skiprows=4)
-            return data
-
-        elecloss2_data = load_elecloss2_data()
-        st.sidebar.header("Select Countries for Electricity Loss")
-        countries = sorted(elecloss2_data["Country Name"].dropna().unique())
-        selected_countries = st.sidebar.multiselect(
-            "Choose several countries to compare:",
-            options=countries,
-            default=["Brazil", "Germany", "World"]
-        )
-
-        if st.sidebar.button("Generate Comparison"):
-            filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
-            melted_data = filtered_data.melt(
-                id_vars=["Country Name"],
-                var_name="Year",
-                value_name="Electricity Loss (%)"
-            )
-            melted_data = melted_data[melted_data["Year"].str.isdigit()]
-            melted_data["Year"] = melted_data["Year"].astype(int)
-
-            fig = px.line(
-                melted_data,
-                x="Year",
-                y="Electricity Loss (%)",
-                color="Country Name",
-                labels={"Year": "Year", "Electricity Loss (%)": "Electricity Loss (%)", "Country Name": "Country"},
-                title="Electric Power Transmission and Distribution Loss Comparison"
-            )
-            fig.update_layout(
-                xaxis_title="Year",
-                yaxis_title="Electricity Loss (%)",
-                legend_title="Country",
-                template="plotly_white"
-            )
             st.plotly_chart(fig, use_container_width=True)
 
         elif not selected_countries:
