@@ -335,6 +335,16 @@ elif st.session_state.new_dashboard:
         goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()
         goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])
 
+        # Indicator explanations
+        indicator_explanations = {
+            "7.1.1": "Access to electricity is the percentage of population with access to electricity. Electrification data are collected from industry, national surveys and international sources.",
+            "7.1.2": "The proportion of population with primary reliance on clean fuels and technology is calculated as the number of people using clean fuels and technologies for cooking, heating and lighting divided by total population reporting that any cooking, heating or lighting, expressed as percentage.",
+            "7.2.1": "Renewable energy consumption is the share of renewables energy in total final energy consumption.",
+            "7.3.1": "Energy intensity level of primary energy is the ratio between energy supply and gross domestic product measured at purchasing power parity.",
+            "7.a.1": "Financial flows, defined as all official loans, grants and equity investments received by countries from foreign governments and multilateral agencies, for the purpose of clean energy research and development and renewable energy production.",
+            "7.b.1": "The indicator is defined as the installed capacity of power plants that generate electricity from renewable energy sources divided by the total population of a country."
+        }
+
         # Sidebar for selecting indicators and countries
         st.sidebar.header("Select Indicator and Countries")
         indicators = sorted(goal7_data["Indicator"].unique())
@@ -349,7 +359,10 @@ elif st.session_state.new_dashboard:
             ]
 
             st.title("Indicator Dashboard")
-            st.markdown(f"### Indicator: {selected_indicator}")
+            # Display explanation of the selected indicator
+            explanation = indicator_explanations.get(selected_indicator, "Explanation not available.")
+            st.markdown(f"### {selected_indicator}: {explanation}")
+
             if not filtered_data.empty:
                 fig = px.line(
                     filtered_data,
