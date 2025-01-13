@@ -206,7 +206,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
             dragmode=False,
             annotations=[
                 dict(
-                    x=0.95,  # Adjust x-coordinate for placement (right bottom)
+                    x=0.94,  # Adjust x-coordinate for placement (right bottom)
                     y=0.001,  # Adjust y-coordinate for placement (bottom)
                     xref="paper",
                     yref="paper",
