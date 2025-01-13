@@ -296,9 +296,25 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
             if os.path.exists(image_path):
                 st.image(image_path, use_container_width=False, width=130 if i == 6 else 90)
 
-# Indicator Dashboard
-# Indicator Dashboard
-if st.session_state.new_dashboard:
+# Check if the results page should be displayed
+if "results_shown" in st.session_state and st.session_state.results_shown:
+    # RESULTS PAGE
+    st.title("Results")
+    st.markdown("### Here are the responses you've provided:")
+    for idx, answer in enumerate(answers):
+        st.write(f"**Response {idx + 1}:**")
+        st.write(f"- Reliability Score: {answer['reliability_score']}")
+        st.write(f"- SDG Knowledge Score: {answer['sdg_knowledge_score']}")
+
+    # Add a button to return to the main dashboard
+    if st.button("Click 2x to return to Dashboard"):
+        st.session_state.results_shown = False
+        st.session_state.new_dashboard = True
+        st.experimental_rerun()
+
+elif st.session_state.new_dashboard:
+    
+    # INDICATOR DASHBOARD
     # Sidebar selection to switch between dashboards
     st.sidebar.header("Dashboard Selection")
     dashboard_choice = st.sidebar.radio(
@@ -307,9 +323,7 @@ if st.session_state.new_dashboard:
         index=0  # Default to Indicator Dashboard
     )
 
-    # Indicator Dashboard
     if dashboard_choice == "Indicator Dashboard":
-        # Load the Goal 7 data only once
         @st.cache_data
         def load_goal7_data():
             data_path = 'Data/Goal7.xlsx'
@@ -317,44 +331,36 @@ if st.session_state.new_dashboard:
             return data
 
         goal7_data = load_goal7_data()
-
-        # Preprocess the dataset
         goal7_data["Indicator"] = goal7_data["Indicator"].str.strip()
         goal7_data = goal7_data.dropna(subset=['Indicator', 'GeoAreaName', 'Value', 'TimePeriod'])
 
-        # Create a mapping of indicator numbers to their descriptive names
-        indicator_names = {
-            "7.1.1": "Proportion of population with access to electricity, by urban/rural (%)",
-            "7.1.2": "Proportion of population with primary reliance on clean fuels and technology (%)",
-            "7.2.1": "Renewable energy share in the total final energy consumption (%)",
-            "7.3.1": "Energy intensity level of primary energy (megajoules per constant 2017 purchasing power parity GDP)",
-            "7.a.1": "International financial flows to developing countries in support of clean energy research and development and renewable energy production, including in hybrid systems (millions of constant 2021 United States dollars)",
-            "7.b.1": "Installed renewable electricity-generating capacity (watts per capita)"
+        # Indicator explanations
+        indicator_explanations = {
+            "7.1.1": "Access to electricity is the percentage of population with access to electricity. Electrification data are collected from industry, national surveys and international sources.",
+            "7.1.2": "The proportion of population with primary reliance on clean fuels and technology is calculated as the number of people using clean fuels and technologies for cooking, heating and lighting divided by total population reporting that any cooking, heating or lighting, expressed as percentage.",
+            "7.2.1": "Renewable energy consumption is the share of renewables energy in total final energy consumption.",
+            "7.3.1": "Energy intensity level of primary energy is the ratio between energy supply and gross domestic product measured at purchasing power parity.",
+            "7.a.1": "Financial flows, defined as all official loans, grants and equity investments received by countries from foreign governments and multilateral agencies, for the purpose of clean energy research and development and renewable energy production.",
+            "7.b.1": "The indicator is defined as the installed capacity of power plants that generate electricity from renewable energy sources divided by the total population of a country."
         }
 
-        # Sidebar for indicator and country selection
+        # Sidebar for selecting indicators and countries
         st.sidebar.header("Select Indicator and Countries")
         indicators = sorted(goal7_data["Indicator"].unique())
-        selected_indicator = st.sidebar.selectbox(
-            "Choose an indicator:",
-            options=indicators,
-            format_func=lambda x: indicator_names.get(x, x)  # Show descriptive names, fallback to number if not mapped
-        )
-
+        selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators)
         countries = sorted(goal7_data["GeoAreaName"].unique())
-        selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
+        selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil", "Germany"])
 
-        generate_indicator_graph = st.sidebar.button("Generate Indicator Graph")
-
-        if generate_indicator_graph:
-            # Filter data for the selected indicator and countries
+        if st.sidebar.button("Generate Indicator Graph"):
             filtered_data = goal7_data[
                 (goal7_data["Indicator"] == selected_indicator) &
                 (goal7_data["GeoAreaName"].isin(selected_countries))
             ]
 
             st.title("Indicator Dashboard")
-            st.markdown(f"### Indicator: {indicator_names.get(selected_indicator, selected_indicator)}")
+            # Display explanation of the selected indicator
+            explanation = indicator_explanations.get(selected_indicator, "Explanation not available.")
+            st.markdown(f"### {selected_indicator}: {explanation}")
 
             if not filtered_data.empty:
                 fig = px.line(
@@ -362,12 +368,8 @@ if st.session_state.new_dashboard:
                     x="TimePeriod",
                     y="Value",
                     color="GeoAreaName",
-                    labels={
-                        "TimePeriod": "Year",
-                        "Value": "Indicator Value",
-                        "GeoAreaName": "Country"
-                    },
-                    title=f"Trends for {indicator_names.get(selected_indicator, selected_indicator)}",
+                    labels={"TimePeriod": "Year", "Value": "Indicator Value", "GeoAreaName": "Country"},
+                    title=f"Trends for {selected_indicator}",
                     color_discrete_sequence=px.colors.qualitative.Set1
                 )
                 fig.update_layout(
@@ -380,9 +382,13 @@ if st.session_state.new_dashboard:
             else:
                 st.write("No data available for the selected indicator and countries.")
 
-    # Electricity Loss Comparison
+        # Button to proceed to results
+        st.sidebar.write("---")
+        if st.sidebar.button("Click 2x to proceed", key="proceed_to_results_button"):
+            st.session_state.results_shown = True  # Switch to results page
+            st.experimental_rerun()
+
     elif dashboard_choice == "Electricity Loss Comparison":
-        # Load the elecloss2.csv dataset
         @st.cache_data
         def load_elecloss2_data():
             data_path = 'Data/elecloss2.csv'
@@ -390,27 +396,21 @@ if st.session_state.new_dashboard:
             return data
 
         elecloss2_data = load_elecloss2_data()
-
         st.sidebar.header("Select Countries for Electricity Loss")
         countries = sorted(elecloss2_data["Country Name"].dropna().unique())
         selected_countries = st.sidebar.multiselect(
             "Choose up to two countries to compare:",
             options=countries,
-            default=["Brazil"]
+            default=["Brazil", "Germany", "World"]
         )
 
-        generate_comparison = st.sidebar.button("Generate Comparison")
-
-        if generate_comparison and selected_countries:
-            # Filter data for the selected countries
+        if st.sidebar.button("Generate Comparison"):
             filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
-
             melted_data = filtered_data.melt(
-                id_vars=["Country Name"], 
-                var_name="Year", 
+                id_vars=["Country Name"],
+                var_name="Year",
                 value_name="Electricity Loss (%)"
             )
-
             melted_data = melted_data[melted_data["Year"].str.isdigit()]
             melted_data["Year"] = melted_data["Year"].astype(int)
 
@@ -419,11 +419,7 @@ if st.session_state.new_dashboard:
                 x="Year",
                 y="Electricity Loss (%)",
                 color="Country Name",
-                labels={
-                    "Year": "Year",
-                    "Electricity Loss (%)": "Electricity Loss (%)",
-                    "Country Name": "Country"
-                },
+                labels={"Year": "Year", "Electricity Loss (%)": "Electricity Loss (%)", "Country Name": "Country"},
                 title="Electric Power Transmission and Distribution Loss Comparison"
             )
             fig.update_layout(
@@ -433,5 +429,6 @@ if st.session_state.new_dashboard:
                 template="plotly_white"
             )
             st.plotly_chart(fig, use_container_width=True)
+
         elif not selected_countries:
             st.warning("Please select at least one country for the comparison.")
