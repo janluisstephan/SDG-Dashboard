@@ -326,7 +326,7 @@ if "results_shown" in st.session_state and st.session_state.results_shown:
         st.write(f"**Response {idx + 1}:**")
         st.write(f"- Reliability Score: {answer['reliability_score']}")
         st.write(f"- SDG Knowledge Score: {answer['sdg_knowledge_score']}")
-
+        
     # Add a button to return to the main dashboard
     if st.button("Click 2x to return to Dashboard"):
         st.session_state.results_shown = False
@@ -358,10 +358,8 @@ elif st.session_state.new_dashboard:
 
         if brazil_germany_data is not None:
             st.title("Comparison of Per Capita Energy Expenditure Between Brazil and Germany")
-
             data_to_plot = brazil_germany_data.iloc[0:10, [3, 4]]  
             data_to_plot = data_to_plot * 100
-
             data_to_plot.columns = ['Brazil', 'Germany']
 
             # Erstellen des Balkendiagramms
@@ -399,9 +397,14 @@ elif st.session_state.new_dashboard:
 
         else:
             st.warning("No data available for Brazil Germany Comparison.")
-
-
-
+            
+            # Add the "Click 2x to proceed" button in the sidebar
+        with st.sidebar:
+            st.write("---")
+            if st.button("Click 2x to proceed", key="proceed_to_results_brazil_germany"):
+                st.session_state.results_shown = True
+                st.experimental_rerun()
+                
     elif dashboard_choice == "Indicator Dashboard":
         @st.cache_data
         def load_goal7_data():
@@ -576,7 +579,13 @@ elif st.session_state.new_dashboard:
                             st.plotly_chart(fig, use_container_width=True)
                     else:
                         st.error("The column 'Type of renewable technology' is missing in the data.")
-
+                        
+                       # Add the "Click 2x to proceed" button in the sidebar
+                with st.sidebar:
+                    st.write("---")
+                    if st.button("Click 2x to proceed", key="proceed_to_results_indicator"):
+                        st.session_state.results_shown = True
+                        st.experimental_rerun()
 
             else:
                 st.write("No data available for the selected indicator and countries.")
@@ -626,3 +635,10 @@ elif st.session_state.new_dashboard:
 
         elif not selected_countries:
             st.warning("Please select at least one country for the comparison.")
+            
+         # Add the "Click 2x to proceed" button in the sidebar
+        with st.sidebar:
+            st.write("---")
+            if st.button("Click 2x to proceed", key="proceed_to_results_electricity"):
+                st.session_state.results_shown = True
+                st.experimental_rerun()
