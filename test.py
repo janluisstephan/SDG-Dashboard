@@ -358,45 +358,39 @@ elif st.session_state.new_dashboard:
             if not filtered_data.empty:
                 if selected_indicator == "7.1.1":
                     st.markdown("### Indicator 7.1.1: Access to Electricity")
-                    for location in filtered_data["Location"].unique():
-                        location_data = filtered_data[filtered_data["Location"] == location]
-                        location_data = location_data.sort_values("TimePeriod").reset_index(drop=True)
+                    filtered_data["Value"] = filtered_data["Value"].interpolate(method="linear")
 
-                        # Fill missing values with the average of surrounding values
-                        location_data["Value"] = location_data["Value"].interpolate(method="linear")
-
-                        fig = px.line(
-                            location_data,
-                            x="TimePeriod",
-                            y="Value",
-                            title=f"Access to Electricity ({location})",
-                            labels={"TimePeriod": "Year", "Value": "Access Percentage"},
-                            markers=True
-                        )
-                        fig.update_layout(template="plotly_white")
-                        st.plotly_chart(fig, use_container_width=True)
+                    fig = px.line(
+                        filtered_data,
+                        x="TimePeriod",
+                        y="Value",
+                        color="GeoAreaName",
+                        line_dash="Location",
+                        labels={"TimePeriod": "Year", "Value": "Access Percentage"},
+                        title="Access to Electricity (by Location and Country)",
+                        markers=True
+                    )
+                    fig.update_layout(template="plotly_white")
+                    st.plotly_chart(fig, use_container_width=True)
 
                 elif selected_indicator == "7.1.2":
                     st.markdown("### Indicator 7.1.2: Reliance on Clean Fuels and Technology")
-                    for location in filtered_data["Location"].unique():
-                        location_data = filtered_data[filtered_data["Location"] == location]
-                        location_data = location_data.sort_values("TimePeriod").reset_index(drop=True)
+                    filtered_data["Value"] = filtered_data["Value"].interpolate(method="linear")
 
-                        # Fill missing values with the average of surrounding values
-                        location_data["Value"] = location_data["Value"].interpolate(method="linear")
-
-                        fig = px.line(
-                            location_data,
-                            x="TimePeriod",
-                            y="Value",
-                            title=f"Reliance on Clean Fuels ({location})",
-                            labels={"TimePeriod": "Year", "Value": "Reliance Percentage"},
-                            error_y="UpperBou",
-                            error_y_minus="LowerBou",
-                            markers=True
-                        )
-                        fig.update_layout(template="plotly_white")
-                        st.plotly_chart(fig, use_container_width=True)
+                    fig = px.line(
+                        filtered_data,
+                        x="TimePeriod",
+                        y="Value",
+                        color="GeoAreaName",
+                        line_dash="Location",
+                        error_y="UpperBou",
+                        error_y_minus="LowerBou",
+                        labels={"TimePeriod": "Year", "Value": "Reliance Percentage"},
+                        title="Reliance on Clean Fuels (by Location and Country)",
+                        markers=True
+                    )
+                    fig.update_layout(template="plotly_white")
+                    st.plotly_chart(fig, use_container_width=True)
 
                 elif selected_indicator == "7.3.1":
                     st.markdown("### Indicator 7.3.1: Energy Intensity Level")
@@ -414,24 +408,73 @@ elif st.session_state.new_dashboard:
 
                 elif selected_indicator == "7.a.1" or selected_indicator == "7.b.1":
                     st.markdown(f"### Indicator {selected_indicator}: Financial Flows or Installed Capacity")
-                    for technology in filtered_data["Type of re"].unique():
-                        tech_data = filtered_data[filtered_data["Type of re"] == technology]
-                        tech_data = tech_data.sort_values("TimePeriod").reset_index(drop=True)
+                    if "Type of re" in filtered_data.columns:
+                        for technology in filtered_data["Type of re"].unique():
+                            tech_data = filtered_data[filtered_data["Type of re"] == technology]
+                            tech_data = tech_data.sort_values("TimePeriod").reset_index(drop=True)
 
-                        fig = px.bar(
-                            tech_data,
-                            x="TimePeriod",
-                            y="Value",
-                            color="GeoAreaName",
-                            barmode="group",
-                            title=f"{technology} Trends ({selected_indicator})",
-                            labels={"TimePeriod": "Year", "Value": "Value (in Units)"}
-                        )
-                        fig.update_layout(template="plotly_white")
-                        st.plotly_chart(fig, use_container_width=True)
+                            fig = px.bar(
+                                tech_data,
+                                x="TimePeriod",
+                                y="Value",
+                                color="GeoAreaName",
+                                barmode="group",
+                                title=f"{technology} Trends ({selected_indicator})",
+                                labels={"TimePeriod": "Year", "Value": "Value (in Units)"}
+                            )
+                            fig.update_layout(template="plotly_white")
+                            st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        st.error("The column 'Type of re' is missing in the data.")
 
             else:
                 st.write("No data available for the selected indicator and countries.")
+
+        # Button to proceed to results
+        st.sidebar.write("---")
+        if st.sidebar.button("Click 2x to proceed", key="proceed_to_results_button"):
+            st.session_state.results_shown = True  # Switch to results page
+            st.experimental_rerun()
+
+    elif dashboard_choice == "Electricity Loss Comparison":
+        @st.cache_data
+        def load_elecloss2_data():
+            data_path = 'Data/elecloss2.csv'
+            data = pd.read_csv(data_path, skiprows=4)
+            return data
+
+        elecloss2_data = load_elecloss2_data()
+        st.sidebar.header("Select Countries for Electricity Loss")
+        countries = sorted(elecloss2_data["Country Name"].dropna().unique())
+        selected_countries = st.sidebar.multiselect(
+            "Choose up to two countries to compare:",
+            options=countries,
+            default=["Brazil", "Germany"]
+        )
+
+        if st.sidebar.button("Generate Comparison"):
+            filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
+            melted_data = filtered_data.melt(
+                id_vars=["Country Name"],
+                var_name="Year",
+                value_name="Electricity Loss (%)"
+            )
+            melted_data = melted_data[melted_data["Year"].str.isdigit()]
+            melted_data["Year"] = melted_data["Year"].astype(int)
+
+            fig = px.line(
+                melted_data,
+                x="Year",
+                y="Electricity Loss (%)",
+                color="Country Name",
+                labels={"Year": "Year", "Electricity Loss (%)": "Electricity Loss (%)", "Country Name": "Country"},
+                title="Electric Power Transmission and Distribution Loss Comparison"
+            )
+            fig.update_layout(template="plotly_white")
+            st.plotly_chart(fig, use_container_width=True)
+
+        elif not selected_countries:
+            st.warning("Please select at least one country for the comparison.")
 
         # Button to proceed to results
         st.sidebar.write("---")
