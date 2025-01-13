@@ -408,7 +408,7 @@ elif st.session_state.new_dashboard:
 
                 elif selected_indicator == "7.a.1" or selected_indicator == "7.b.1":
                     st.markdown(f"### Indicator {selected_indicator}: Financial Flows or Installed Capacity")
-                    if "Type of re" in filtered_data.columns:
+                    if "Type of renewable technology" in filtered_data.columns:
                         for technology in filtered_data["Type of renewable technology"].unique():
                             tech_data = filtered_data[filtered_data["Type of renewable technology"] == technology]
                             tech_data = tech_data.sort_values("TimePeriod").reset_index(drop=True)
