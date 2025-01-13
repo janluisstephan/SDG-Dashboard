@@ -625,11 +625,11 @@ elif st.session_state.new_dashboard:
                         st.error("The column 'Type of renewable technology' is missing in the data.")
                         
                        # Add the "Click 2x to proceed" button in the sidebar
-                with st.sidebar:
-                    st.write("---")
-                    if st.button("Click 2x to proceed", key="proceed_to_results_indicator"):
-                        st.session_state.results_shown = True
-                        st.experimental_rerun()
+                    with st.sidebar:
+                        st.write("---")
+                        if st.button("Click 2x to proceed", key="proceed_to_results_indicator"):
+                            st.session_state.results_shown = True
+                            st.experimental_rerun()
 
             else:
                 st.write("No data available for the selected indicator and countries.")
