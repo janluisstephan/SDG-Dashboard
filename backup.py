@@ -634,12 +634,6 @@ elif st.session_state.new_dashboard:
             else:
                 st.write("No data available for the selected indicator and countries.")
 
-        # Button to proceed to results
-        st.sidebar.write("---")
-        if st.sidebar.button("Click 2x to proceed", key="proceed_to_results_button"):
-            st.session_state.results_shown = True  # Switch to results page
-            st.experimental_rerun()
-
     elif dashboard_choice == "Electricity Loss Comparison":
         @st.cache_data
         def load_elecloss2_data():
