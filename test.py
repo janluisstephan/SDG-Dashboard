@@ -420,7 +420,7 @@ elif st.session_state.new_dashboard:
             fig.update_layout(
                 template="plotly_white",
                 xaxis_title="Income Percentile Group",
-                yaxis_title="Percentage of Income",
+                yaxis_title="Percentage of Income Spent on Electricity",
                 yaxis=dict(
                     tickmode="array",
                     tickvals=[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],  # Y-Achse mit Werten von 0 bis 100
