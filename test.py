@@ -322,16 +322,50 @@ if "results_shown" in st.session_state and st.session_state.results_shown:
     # RESULTS PAGE
     st.title("Results")
     st.markdown("### Here are the responses you've provided:")
+    
     for idx, answer in enumerate(answers):
         st.write(f"**Response {idx + 1}:**")
         st.write(f"- Reliability Score: {answer['reliability_score']}")
         st.write(f"- SDG Knowledge Score: {answer['sdg_knowledge_score']}")
-        
+
+    # Add a reflective section for the user
+    st.markdown(
+        """
+        <h1 style="text-align: center; color: #2c3e50; margin-top: 50px;">Reflection on SDG Composition</h1>
+        <p style="text-align: center; font-size: 16px; color: #7f8c8d;">How has your perception of the SDG composition changed after exploring the dashboard?</p>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Open-ended text input for user reflection
+    perception_change = st.text_area(
+        label="Please describe how your perception of the SDG composition has changed:",
+        placeholder="Write your reflection here...",
+        help="You can write about any changes in your understanding, thoughts, or critiques regarding SDG composition."
+    )
+
+    # Second reflective question
+    st.markdown(
+        """
+        <h1 style="text-align: center; color: #2c3e50; margin-top: 30px;">Would you argue the same way as you did in the beginning?</h1>
+        <p style="text-align: center; font-size: 16px; color: #7f8c8d;">Let us know if you feel differently about the reliability of SDGs now.</p>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Yes/No question with a selectbox
+    argue_same_way = st.selectbox(
+        label="Would you argue the same way as you did in the beginning?",
+        options=["Yes", "No", "Not sure"],
+        help="Select 'Yes' if your opinion hasn't changed, 'No' if it has, or 'Not sure' if you are undecided."
+    )
+
     # Add a button to return to the main dashboard
     if st.button("Click 2x to return to Dashboard"):
         st.session_state.results_shown = False
         st.session_state.new_dashboard = True
         st.experimental_rerun()
+
 
 elif st.session_state.new_dashboard:
     # INDICATOR DASHBOARD
