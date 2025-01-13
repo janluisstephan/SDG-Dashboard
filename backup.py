@@ -322,16 +322,60 @@ if "results_shown" in st.session_state and st.session_state.results_shown:
     # RESULTS PAGE
     st.title("Results")
     st.markdown("### Here are the responses you've provided:")
+    
     for idx, answer in enumerate(answers):
         st.write(f"**Response {idx + 1}:**")
         st.write(f"- Reliability Score: {answer['reliability_score']}")
         st.write(f"- SDG Knowledge Score: {answer['sdg_knowledge_score']}")
-        
+
+    # Add a reflective section for the user
+    st.markdown(
+        """
+        <h1 style="text-align: center; color: #2c3e50; margin-top: 50px;">Reflection on SDG Composition</h1>
+        <p style="text-align: center; font-size: 16px; color: #7f8c8d;">After exploring the SDG dashboard, reflect on the following questions:</p>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Reflective Question 1: How has your perception of SDGs changed?
+    st.markdown("#### 1. How has your perception of the SDGs changed after using this dashboard?")
+    perception_slider = st.slider(
+        label="Select the extent of change in your perception:",
+        min_value=0,
+        max_value=10,
+        value=5,
+        step=1,
+        help="0 means your perception hasn't changed at all, 10 means your perception has completely changed."
+    )
+
+    # Reflective Question 2: How do you feel about the reliability of SDGs now?
+    st.markdown("#### 2. How reliable do you now find SDG scores in measuring progress?")
+    reliability_slider = st.slider(
+        label="Rate the reliability again (0 = not reliable at all, 10 = very reliable):",
+        min_value=0,
+        max_value=10,
+        value=5,
+        step=1,
+        help="Rate how reliable you feel SDG scores are after exploring the dashboard."
+    )
+
+    # Reflective Question 3: How likely are you to use SDG scores in arguments?
+    st.markdown("#### 3. How likely are you to use SDG scores to argue about progress in sustainable development?")
+    likelihood_slider = st.slider(
+        label="Rate your likelihood (0 = very unlikely, 10 = very likely):",
+        min_value=0,
+        max_value=10,
+        value=5,
+        step=1,
+        help="Rate how likely you are to reference SDG scores in discussions or arguments about sustainability."
+    )
+
     # Add a button to return to the main dashboard
     if st.button("Click 2x to return to Dashboard"):
         st.session_state.results_shown = False
         st.session_state.new_dashboard = True
         st.experimental_rerun()
+
 
 elif st.session_state.new_dashboard:
     # INDICATOR DASHBOARD
@@ -602,7 +646,7 @@ elif st.session_state.new_dashboard:
             data_path = 'Data/elecloss2.csv'
             data = pd.read_csv(data_path, skiprows=4)
             return data
-
+    
         elecloss2_data = load_elecloss2_data()
         st.sidebar.header("Select Countries for Electricity Loss")
         countries = sorted(elecloss2_data["Country Name"].dropna().unique())
@@ -611,7 +655,7 @@ elif st.session_state.new_dashboard:
             options=countries,
             default=["Brazil", "Germany"]
         )
-
+    
         if st.sidebar.button("Generate Comparison"):
             filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
             melted_data = filtered_data.melt(
@@ -621,7 +665,7 @@ elif st.session_state.new_dashboard:
             )
             melted_data = melted_data[melted_data["Year"].str.isdigit()]
             melted_data["Year"] = melted_data["Year"].astype(int)
-
+    
             fig = px.line(
                 melted_data,
                 x="Year",
@@ -632,9 +676,28 @@ elif st.session_state.new_dashboard:
             )
             fig.update_layout(template="plotly_white")
             st.plotly_chart(fig, use_container_width=True)
-
+    
+            # Add image under the graph
+            image_path = "assets/brazil.jpg"  # Path to the image in your GitHub assets folder
+            if os.path.exists(image_path):
+                st.image(image_path, caption="Energy Grid in Favelas", use_container_width=True)
+                st.markdown(
+                    """
+                    <p style="text-align: center; font-size: 14px; margin-top: 10px;">
+                    <a href="https://rioonwatch.org/?p=63431" target="_blank" style="text-decoration: none; color: #3498db;">
+                    Learn more about the energy grid in favelas here.
+                    </a>
+                    </p>
+                    """,
+                    unsafe_allow_html=True
+                )
+            else:
+                st.warning("The image could not be loaded. Please ensure the file 'brazil.jpg' exists in the 'assets' directory.")
+    
         elif not selected_countries:
             st.warning("Please select at least one country for the comparison.")
+    
+
             
          # Add the "Click 2x to proceed" button in the sidebar
         with st.sidebar:
