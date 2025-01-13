@@ -313,7 +313,9 @@ if "results_shown" in st.session_state and st.session_state.results_shown:
         st.experimental_rerun()
 
 elif st.session_state.new_dashboard:
+    
     # INDICATOR DASHBOARD
+    # Sidebar selection to switch between dashboards
     st.sidebar.header("Dashboard Selection")
     dashboard_choice = st.sidebar.radio(
         "Choose a dashboard:",
@@ -337,19 +339,8 @@ elif st.session_state.new_dashboard:
         indicators = sorted(goal7_data["Indicator"].unique())
         selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators)
         countries = sorted(goal7_data["GeoAreaName"].unique())
-        selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil", "Germany"])
+        selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
 
-        # SDG Indicator Descriptions
-        indicator_descriptions = {
-            "7.1.1": "Access to electricity is the percentage of population with access to electricity. Electrification data are collected from industry, national surveys, and international sources.",
-            "7.1.2": "The proportion of population with primary reliance on clean fuels and technology is calculated as the number of people using clean fuels and technologies for cooking, heating and lighting divided by total population reporting that any cooking, heating or lighting, expressed as percentage.",
-            "7.2.1": "Renewable energy consumption is the share of renewables energy in total final energy consumption.",
-            "7.3.1": "Energy intensity level of primary energy is the ratio between energy supply and gross domestic product measured at purchasing power parity.",
-            "7.a.1": "Financial flows for the purpose of clean energy research and development and renewable energy production.",
-            "7.b.1": "The indicator is defined as the installed capacity of power plants that generate electricity from renewable energy sources divided by the total population of a country."
-        }
-
-        # Generate indicator graph
         if st.sidebar.button("Generate Indicator Graph"):
             filtered_data = goal7_data[
                 (goal7_data["Indicator"] == selected_indicator) &
@@ -357,47 +348,7 @@ elif st.session_state.new_dashboard:
             ]
 
             st.title("Indicator Dashboard")
-
-            # Add the Indicator name and information button
-            info_button = f"""
-            <style>
-                .tooltip {{
-                    position: relative;
-                    display: inline-block;
-                }}
-
-                .tooltip .tooltiptext {{
-                    visibility: hidden;
-                    background-color: #f9f9f9;
-                    color: #000;
-                    text-align: left;
-                    border-radius: 6px;
-                    padding: 8px;
-                    position: absolute;
-                    z-index: 1;
-                    bottom: 125%; /* Position above the text */
-                    left: 50%;
-                    transform: translateX(-50%);
-                    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-                    white-space: nowrap;
-                    width: auto; /* Adjust width automatically to fit text */
-                }}
-
-                .tooltip:hover .tooltiptext {{
-                    visibility: visible;
-                }}
-            </style>
-            <div style="display: flex; align-items: center;">
-                <h3 style="margin-right: 10px;">Indicator: {selected_indicator}</h3>
-                <div class="tooltip">
-                    <span style="cursor: pointer; font-size: 18px; color: #007bff;">ℹ️</span>
-                    <span class="tooltiptext">{indicator_descriptions.get(selected_indicator, "No description available.")}</span>
-                </div>
-            </div>
-            """
-            st.markdown(info_button, unsafe_allow_html=True)
-
-            # Display the graph
+            st.markdown(f"### Indicator: {selected_indicator}")
             if not filtered_data.empty:
                 fig = px.line(
                     filtered_data,
@@ -423,3 +374,48 @@ elif st.session_state.new_dashboard:
         if st.sidebar.button("Click 2x to proceed", key="proceed_to_results_button"):
             st.session_state.results_shown = True  # Switch to results page
             st.experimental_rerun()
+
+    elif dashboard_choice == "Electricity Loss Comparison":
+        @st.cache_data
+        def load_elecloss2_data():
+            data_path = 'Data/elecloss2.csv'
+            data = pd.read_csv(data_path, skiprows=4)
+            return data
+
+        elecloss2_data = load_elecloss2_data()
+        st.sidebar.header("Select Countries for Electricity Loss")
+        countries = sorted(elecloss2_data["Country Name"].dropna().unique())
+        selected_countries = st.sidebar.multiselect(
+            "Choose up to two countries to compare:",
+            options=countries,
+            default=["Brazil"]
+        )
+
+        if st.sidebar.button("Generate Comparison"):
+            filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
+            melted_data = filtered_data.melt(
+                id_vars=["Country Name"],
+                var_name="Year",
+                value_name="Electricity Loss (%)"
+            )
+            melted_data = melted_data[melted_data["Year"].str.isdigit()]
+            melted_data["Year"] = melted_data["Year"].astype(int)
+
+            fig = px.line(
+                melted_data,
+                x="Year",
+                y="Electricity Loss (%)",
+                color="Country Name",
+                labels={"Year": "Year", "Electricity Loss (%)": "Electricity Loss (%)", "Country Name": "Country"},
+                title="Electric Power Transmission and Distribution Loss Comparison"
+            )
+            fig.update_layout(
+                xaxis_title="Year",
+                yaxis_title="Electricity Loss (%)",
+                legend_title="Country",
+                template="plotly_white"
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+        elif not selected_countries:
+            st.warning("Please select at least one country for the comparison.")
