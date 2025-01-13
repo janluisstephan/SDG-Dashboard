@@ -339,7 +339,7 @@ elif st.session_state.new_dashboard:
         indicators = sorted(goal7_data["Indicator"].unique())
         selected_indicator = st.sidebar.selectbox("Choose an indicator:", options=indicators)
         countries = sorted(goal7_data["GeoAreaName"].unique())
-        selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil"])
+        selected_countries = st.sidebar.multiselect("Choose countries to compare:", options=countries, default=["Brazil", "Germany"])
 
         if st.sidebar.button("Generate Indicator Graph"):
             filtered_data = goal7_data[
