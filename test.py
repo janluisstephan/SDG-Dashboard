@@ -386,7 +386,7 @@ elif st.session_state.new_dashboard:
                     st.plotly_chart(fig, use_container_width=True)
 
                 elif selected_indicator == "7.1.2":
-                    st.markdown("### Indicator 7.1.2: Proportion of population with primary reliance on clean fuels and technology (%). This indicator is calculated as the number of people using clean fuels and technologies for cooking, heating and lighting divided by total population reporting that any cooking, heating or lighting, expressed as percentage. “Clean” is defined by the emission rate targets and specific fuel recommendations (WHO guidelines)")
+                    st.markdown("### Indicator 7.1.2: Proportion of population with primary reliance on clean fuels and technology (%).")
                     filtered_data["Value"] = filtered_data["Value"].interpolate(method="linear")
 
                     # Handle error bounds gracefully without warning
@@ -405,7 +405,7 @@ elif st.session_state.new_dashboard:
                         error_y=error_y,
                         error_y_minus=error_y_minus,
                         labels={"TimePeriod": "Year", "Value": "Reliance Percentage"},
-                        title="Reliance on Clean Fuels (by Location and Country)",
+                        title="This indicator is calculated as the number of people using clean fuels and technologies for cooking, heating and lighting divided by total population reporting that any cooking, heating or lighting, expressed as percentage. “Clean” is defined by the emission rate targets and specific fuel recommendations (WHO guidelines)",
                         markers=True
                     )
                     fig.update_layout(template="plotly_white")
