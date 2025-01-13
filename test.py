@@ -359,17 +359,10 @@ elif st.session_state.new_dashboard:
 
         if brazil_germany_data is not None:
             st.title("Comparison of Per Capita Energy Expenditure Between Brazil and Germany")
-            # Entferne die Anzeige der Tabelle
-            # st.dataframe(brazil_germany_data)
 
-            # Nehmen wir an, die relevanten Spalten für die Prozentzahlen sind Spalten 3 und 4
-            # Diese Spalten enthalten die Prozentzahlen für Brasilien und Deutschland
-            data_to_plot = brazil_germany_data.iloc[0:10, [3, 4]]  # Die ersten 10 Zeilen, Spalten 3 und 4 (Prozentzahlen)
-
-            # Die Daten in Prozent umwandeln (multiplizieren mit 100)
+            data_to_plot = brazil_germany_data.iloc[0:10, [3, 4]]  
             data_to_plot = data_to_plot * 100
 
-            # Die Spaltennamen ändern, um klarzustellen, was sie repräsentieren
             data_to_plot.columns = ['Brazil', 'Germany']
 
             # Erstellen des Balkendiagramms
