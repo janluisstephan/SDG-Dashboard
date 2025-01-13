@@ -207,7 +207,7 @@ if st.session_state.proceed and not st.session_state.new_dashboard:
             annotations=[
                 dict(
                     x=0.98,  # Adjust x-coordinate for placement (right bottom)
-                    y=0.01,  # Adjust y-coordinate for placement (bottom)
+                    y=0.001,  # Adjust y-coordinate for placement (bottom)
                     xref="paper",
                     yref="paper",
                     text="Status: 2024",  # The note text
