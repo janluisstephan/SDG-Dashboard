@@ -316,9 +316,8 @@ elif st.session_state.new_dashboard:
     
 # INDICATOR DASHBOARD
 # Sidebar selection to switch between dashboards
-# Sidebar selection to switch between dashboards
 st.sidebar.header("Dashboard Selection")
-dashboard_choice = st.sidebar.radio(
+    dashboard_choice = st.sidebar.radio(
     "Choose a dashboard:",
     options=["Indicator Dashboard", "Electricity Loss Comparison"],
     index=0  # Default to Indicator Dashboard
