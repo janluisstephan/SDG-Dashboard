@@ -368,7 +368,7 @@ elif st.session_state.new_dashboard:
 
                 .tooltip .tooltiptext {{
                     visibility: hidden;
-                    width: 300px;
+                    width: 600px;
                     background-color: #f9f9f9;
                     color: #000;
                     text-align: left;
