@@ -648,7 +648,7 @@ elif st.session_state.new_dashboard:
         selected_countries = st.sidebar.multiselect(
             "Choose up to two countries to compare:",
             options=countries,
-            default=["Brazil", "Germany"]
+            default=["Brazil", "Germany", "World"]
         )
     
         if st.sidebar.button("Generate Comparison"):
