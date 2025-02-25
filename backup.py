@@ -382,7 +382,7 @@ elif st.session_state.new_dashboard:
     st.sidebar.header("Dashboard Selection")
     dashboard_choice = st.sidebar.radio(
         "Choose a dashboard:",
-        options=["Indicator Dashboard", "Electricity Loss Comparison", "Brazil Germany Comparison"],  # Neuer Punkt hinzugefügt
+        options=["Indicator Dashboard", "Electricity Loss Comparison", "Brazil Germany Comparison", "Data Availability"],
         index=0
     )
 
@@ -420,7 +420,7 @@ elif st.session_state.new_dashboard:
             fig.update_layout(
                 template="plotly_white",
                 xaxis_title="Income Percentile Group",
-                yaxis_title="Percentage of Income",
+                yaxis_title="Percentage of Income Spent on Electricity",
                 yaxis=dict(
                     tickmode="array",
                     tickvals=[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],  # Y-Achse mit Werten von 0 bis 100
@@ -648,7 +648,7 @@ elif st.session_state.new_dashboard:
         selected_countries = st.sidebar.multiselect(
             "Choose up to two countries to compare:",
             options=countries,
-            default=["Brazil", "Germany"]
+            default=["Brazil", "Germany", "World"]
         )
     
         if st.sidebar.button("Generate Comparison"):
@@ -672,8 +672,7 @@ elif st.session_state.new_dashboard:
             fig.update_layout(template="plotly_white")
             st.plotly_chart(fig, use_container_width=True)
     
-            # Add image under the graph
-            image_path = "assets/brazil.jpg"  # Path to the image in your GitHub assets folder
+            image_path = "assets/brazil.jpg"
             if os.path.exists(image_path):
                 st.image(image_path, caption="Energy Grid in Favelas", use_container_width=True)
                 st.markdown(
@@ -691,6 +690,42 @@ elif st.session_state.new_dashboard:
     
         elif not selected_countries:
             st.warning("Please select at least one country for the comparison.")
+    
+    elif dashboard_choice == "Data Availability":
+        st.title("Data Availability of UNO Member States")
+    
+        @st.cache_data
+        def load_data_availability():
+            return pd.read_csv('Data/sdg_data_availability.csv')
+    
+        data_availability = load_data_availability()
+    
+        if data_availability is not None:
+            median_availability = data_availability["Data Availability (%)"].median()
+            fig = px.bar(
+                data_availability,
+                x="Goal",
+                y="Data Availability (%)",
+                title="Data Availability for Sustainable Development Goals",
+                labels={"Goal": "SDG", "Data Availability (%)": "Data Availability (%)"},
+                text_auto='.2f',
+                color="Data Availability (%)",
+                color_continuous_scale='RdYlGn'
+            )
+            fig.add_hline(y=median_availability, line_dash="dot", line_color="blue", annotation_text="Median", annotation_position="bottom right")
+            fig.update_traces(textposition='outside')
+            fig.update_layout(template="plotly_white", yaxis=dict(range=[0, 100]))
+            st.plotly_chart(fig, use_container_width=True)
+    
+            st.markdown(f"""
+            **Data availability** indicates the percentage of 193 UNO Member States for which data exists for each Sustainable Development Goal.  
+            **Median Data Availability:** {median_availability:.2f}%
+            """)
+    
+        else:
+            st.warning("Data availability file not found.")
+
+
     
 
             
