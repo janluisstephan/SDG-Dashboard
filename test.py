@@ -650,35 +650,6 @@ elif st.session_state.new_dashboard:
             options=countries,
             default=["Brazil", "Germany", "World"]
         )
-
-    elif dashboard_choice == "Data Availability":
-    st.title("Data Availability of UNO Member States")
-
-    @st.cache_data
-    def load_data_availability():
-        return pd.read_csv('Data/sdg_data_availability.csv')
-
-    data_availability = load_data_availability()
-
-    if data_availability is not None:
-        fig = px.bar(
-            data_availability,
-            x="Goal",
-            y="Data Availability (%)",
-            title="Data Availability for Sustainable Development Goals",
-            labels={"Goal": "SDG", "Data Availability (%)": "Data Availability (%)"},
-            text_auto='.2f',
-        )
-        fig.update_traces(marker_color="#009FE3", textposition='outside')
-        fig.update_layout(template="plotly_white", yaxis=dict(range=[0, 100]))
-        st.plotly_chart(fig, use_container_width=True)
-
-        st.markdown("""
-        **Data availability** indicates the percentage of 193 UNO Member States for which data exists for each Sustainable Development Goal.
-        """)
-
-    else:
-        st.warning("Data availability file not found.")
     
         if st.sidebar.button("Generate Comparison"):
             filtered_data = elecloss2_data[elecloss2_data["Country Name"].isin(selected_countries)]
