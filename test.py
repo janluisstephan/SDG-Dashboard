@@ -635,7 +635,7 @@ elif st.session_state.new_dashboard:
             st.session_state.results_shown = True  # Switch to results page
             st.experimental_rerun()
 
-        elif dashboard_choice == "Electricity Loss Comparison":
+    elif dashboard_choice == "Electricity Loss Comparison":
         @st.cache_data
         def load_elecloss2_data():
             data_path = 'Data/elecloss2.csv'
@@ -719,6 +719,7 @@ elif st.session_state.new_dashboard:
     
         else:
             st.warning("Data availability file not found.")
+
 
     
 
