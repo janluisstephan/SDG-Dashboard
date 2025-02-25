@@ -726,9 +726,6 @@ elif st.session_state.new_dashboard:
             st.warning("Data availability file not found.")
 
 
-    
-
-            
          # Add the "Click 2x to proceed" button in the sidebar
         with st.sidebar:
             st.write("---")
