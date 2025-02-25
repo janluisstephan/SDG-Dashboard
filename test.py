@@ -382,7 +382,7 @@ elif st.session_state.new_dashboard:
     st.sidebar.header("Dashboard Selection")
     dashboard_choice = st.sidebar.radio(
         "Choose a dashboard:",
-        options=["Indicator Dashboard", "Electricity Loss Comparison", "Brazil Germany Comparison"],  # Neuer Punkt hinzugefügt
+        options=["Indicator Dashboard", "Electricity Loss Comparison", "Brazil Germany Comparison", "Data Availability"],
         index=0
     )
 
